@@ -66,6 +66,7 @@ def load(path: Path):
 class Manager:
     def __init__(self):
         self._current_directory = None
+        self._run_context = None
 
     def current_directory(self) -> Path:
         return self._current_directory
@@ -103,7 +104,12 @@ class Manager:
                 with stdout_to_(unique_dir / "log") if capture_logs else no_context():
                     ret = func(*args, **kwargs)
 
-                metadata = {"_time": {"start": _start, "end": now()}}
+                context = "manual" if self._run_context is None else self._run_context
+
+                metadata = {
+                    "_time": {"start": _start, "end": now()},
+                    "_context": context,
+                }
 
                 save(ret, "results.json")
                 save(metadata, "metadata.json")
@@ -154,23 +160,20 @@ class Experiment:
         )
 
     def matches_config(self, config: dict):
-        return matches(self.props, config)
+        return matches(self.props(), config)
 
-    @property
-    def props(self):
+    def props(self, meta=False):
         results = (
             self.result if isinstance(self.result, dict) else {"result": self.result}
         )
-        return dict(
-            id=self.id,
-            **self.config,
-            **results,
-            **self.metadata,
-        )
+        props = dict(id=self.id, **self.config, **results)
+        if meta:
+            props = {**props, **self.metadata}
 
-    @property
-    def row(self):
-        return flatten(self.props)
+        return props
+
+    def row(self, meta=False):
+        return flatten(self.props(meta=meta))
 
 
 def all_experiments(root: Path) -> List[Experiment]:
@@ -190,7 +193,7 @@ def all_experiments(root: Path) -> List[Experiment]:
 
 
 def all_experiments_matching(
-    root: str, config_template: dict = None
+    root: str, config_template: dict = None, include_metadata: bool = False
 ) -> List[Experiment]:
 
     config_template = config_template or dict()
@@ -200,10 +203,10 @@ def all_experiments_matching(
         if exp.matches_config(config_template)
     ]
 
-    df = pd.DataFrame([exp.row for exp in experiments])
-    if "duration" not in df:
-        df["run_duration"] = df["_time.end"] - df["_time.start"]
-    to_drop = ["id", "_time.end", "_time.start"]
+    df = pd.DataFrame([exp.row(include_metadata) for exp in experiments])
+    # if "duration" not in df:
+    #     df["run_duration"] = df["_time.end"] - df["_time.start"]
+    to_drop = ["id"]  # , "_time.end", "_time.start"]
     df.drop(to_drop, axis=1, inplace=True)
 
     return (
@@ -215,3 +218,5 @@ def all_experiments_matching(
 _main_manager = Manager()
 experiment = _main_manager.experiment
 current_directory = _main_manager.current_directory
+set_context = lambda x: setattr(_main_manager, "_run_context", x)
+reset_context = lambda: setattr(_main_manager, "_run_context", None)

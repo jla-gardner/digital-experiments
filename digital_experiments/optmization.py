@@ -1,19 +1,20 @@
 from pathlib import Path
-from random import randint
 
+import numpy as np
 from skopt import Space, gp_minimize
-from skopt.sampler import Halton
+from skopt.sampler import Hammersly
 from skopt.space import Categorical, Integer, Real
 from skopt.utils import use_named_args
 
-from digital_experiments.core import all_experiments
+from digital_experiments.core import all_experiments, reset_context, set_context
 
 
-def optimize_step(experiment, loss, root, n_random_points, space):
+def optimize_step(experiment, loss, n_random_points, space, root=None):
+    root = root or experiment.__name__
 
     previous_experiments = all_experiments(Path(root))
     previous_config = [tuple(e.config.values()) for e in previous_experiments]
-    previous_results = [loss(e.results) for e in previous_experiments]
+    previous_results = [loss(e.result) for e in previous_experiments]
 
     _space = []
     for k, v in space.items():
@@ -33,9 +34,12 @@ def optimize_step(experiment, loss, root, n_random_points, space):
     random_search_phase = n_random_points > len(previous_config) + 1
 
     if random_search_phase:
-        print("Using Random Search")
-        _random_points = Halton().generate(__actual_space.dimensions, n_random_points)
-        point = _random_points[randint(len(previous_config), n_random_points - 1)]
+        set_context("random-search")
+        _random_points = Hammersly().generate(
+            __actual_space.dimensions, n_random_points
+        )
+        _random_points = [p for p in _random_points if tuple(p) not in previous_config]
+        point = _random_points[np.random.randint(0, len(_random_points))]
         gp_minimize(
             objective,
             _space,
@@ -45,7 +49,7 @@ def optimize_step(experiment, loss, root, n_random_points, space):
         )
 
     else:
-        print("Using Bayesian Optimization")
+        set_context("bayesian-optimization")
         gp_minimize(
             objective,
             _space,
@@ -54,3 +58,4 @@ def optimize_step(experiment, loss, root, n_random_points, space):
             n_calls=1,
             n_initial_points=0,
         )
+    reset_context()
