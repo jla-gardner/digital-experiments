@@ -1,0 +1,10 @@
+**/__pycache__
+*.gif
+.vscode/
+.isort.cfg
+**/.DS_Store
+
+**/experiments-demo/
+**/my_experiment 
+**/my-talkative-experiments
+**/linear_regression
