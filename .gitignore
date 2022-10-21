@@ -1,5 +1,4 @@
 **/__pycache__
-*.gif
 .vscode/
 .isort.cfg
 **/.DS_Store
