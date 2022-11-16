@@ -76,7 +76,9 @@ def track_trials(x, y, root, callback=None, **kwargs):
     df["colors"] = df["contexts"].map(_colours)
 
     def _plot(i):
-        plt.scatter(df[x][:i], df[y][:i], c=df.colors[:i], s=20, linewidths=0)
+        plt.scatter(
+            df[x][:i], df[y][:i], c=df.colors[:i], s=20, linewidths=0, alpha=0.5
+        )
         for c in _colours:
             plt.scatter([], [], c=_colours[c], label=c.replace("-", " ").title())
         plt.xlabel(x)
@@ -89,7 +91,7 @@ def track_trials(x, y, root, callback=None, **kwargs):
 
 
 def gif(plot_func, frames, name="mygif.gif", **kwargs):
-    with imageio.get_writer("mygif.gif", mode="I", **kwargs) as writer:
+    with imageio.get_writer(name, mode="I", **kwargs) as writer:
         for i in frames:
             plot_func(i)
 

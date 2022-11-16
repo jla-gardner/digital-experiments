@@ -2,9 +2,11 @@
 .vscode/
 .isort.cfg
 **/.DS_Store
+*.gif
 
 experiments-demo/
 my_experiment 
 my-talkative-experiments
 *linear_regression
 train_model
+train_ridge_model

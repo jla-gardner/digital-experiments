@@ -6,7 +6,7 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -77,7 +77,7 @@ class Manager:
         *,
         save_to: str = None,
         capture_logs: bool = True,
-        verbose: bool = True,
+        verbose: bool = False,
     ):
         info = print if verbose else do_nothing
 
@@ -194,7 +194,7 @@ def all_experiments(root: Path) -> List[Experiment]:
 
 def all_experiments_matching(
     root: str, config_template: dict = None, include_metadata: bool = False
-) -> List[Experiment]:
+) -> Tuple[pd.DataFrame, List[Experiment]]:
 
     config_template = config_template or dict()
     experiments = [
@@ -203,10 +203,12 @@ def all_experiments_matching(
         if exp.matches_config(config_template)
     ]
 
+    if not experiments:
+        return pd.DataFrame(), []
+
     df = pd.DataFrame([exp.row(include_metadata) for exp in experiments])
-    # if "duration" not in df:
-    #     df["run_duration"] = df["_time.end"] - df["_time.start"]
-    to_drop = ["id"]  # , "_time.end", "_time.start"]
+
+    to_drop = ["id"]
     df.drop(to_drop, axis=1, inplace=True)
 
     return (
