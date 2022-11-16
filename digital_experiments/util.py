@@ -12,6 +12,10 @@ def identity(x):
     return x
 
 
+def first(iterable):
+    return next(iter(iterable))
+
+
 def nothing(*args, **kwargs):
     pass
 
@@ -80,6 +84,36 @@ def flatten(_dict, seperator="."):
                 yield prefix + key, value
 
     return dict(_flatten(_dict))
+
+
+def unflatten(_dict, seperator="."):
+    """
+    unflatten a single level dict into a nested dict
+
+    e.g.
+    unflatten({"a": 1, "b.c": 2}) == {"a": 1, "b": {"c": 2}}
+    """
+
+    def _unflatten(_dict, prefix=""):
+        if not any(seperator in key for key in _dict.keys()):
+            return _dict
+        _new_dict = {}
+
+        for key, value in _dict.items():
+            if seperator not in key:
+                _new_dict[key] = value
+                continue
+
+            prefix, suffix = key.split(seperator, 1)
+            if prefix not in _new_dict:
+                _new_dict[prefix] = {}
+            _new_dict[prefix][suffix] = value
+
+        return {
+            k: unflatten(v) if isinstance(v, dict) else v for k, v in _new_dict.items()
+        }
+
+    return _unflatten(_dict)
 
 
 def get_passed_kwargs() -> Dict[str, str]:
