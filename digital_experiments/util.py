@@ -1,6 +1,8 @@
+import contextlib
 import inspect
 import sys
 from collections.abc import Mapping
+from datetime import datetime
 from typing import Any, Callable, Dict, Sequence, Union
 
 import numpy as np
@@ -132,3 +134,23 @@ def summarise(results: Sequence[Result], agg_fns: Sequence[Callable] = None) -> 
                 for agg_fn in agg_fns
             }
     return summary
+
+
+def copy_docstring_from(func):
+    def decorator(f):
+        f.__doc__ = func.__doc__
+        return f
+
+    return decorator
+
+
+def now():
+    return datetime.now().timestamp()
+
+
+def no_context():
+    return contextlib.nullcontext()
+
+
+def do_nothing(*args, **kwargs):
+    pass
