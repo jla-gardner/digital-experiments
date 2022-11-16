@@ -73,7 +73,14 @@ class JSONBackend(Backend):
                 metadata = json.loads((id / "metadata.json").read_text())
             else:
                 metadata = {}
-            experiments.append({"id": id.name, **config, **result, **metadata})
+            experiments.append(
+                {
+                    "id": id.name,
+                    "config": config,
+                    "results": result,
+                    "metadata": metadata,
+                }
+            )
 
         return pd.DataFrame([flatten(e) for e in experiments])
 
@@ -83,20 +90,12 @@ class CSVBackend(Backend):
         file = self.root / "results.csv"
         if not isinstance(result, dict):
             result = {"result": result}
-        entry = dict(id=id, **config, **result, **metadata)
+        entry = dict(id=id, config=config, results=result, metadata=metadata)
         entry = flatten(entry)
 
         if not file.exists():
             file.write_text(",".join(entry.keys()) + "\n")
-            (self.root / "headers.map").write_text(
-                pretty_json(
-                    {
-                        "config": list(flatten(config).keys()),
-                        "result": list(flatten(result).keys()),
-                        "metadata": list(flatten(metadata).keys()),
-                    }
-                )
-            )
+
         with open(file, "a") as f:
             f.write(",".join(map(str, entry.values())) + "\n")
 
@@ -106,10 +105,7 @@ class CSVBackend(Backend):
         if metadata:
             return df
 
-        key_map = json.loads((self.root / "headers.map").read_text())
-        config = key_map["config"]
-        result = key_map["result"]
-        return df[["id"] + config + result]
+        return df.filter(regex="^(?!metadata)")
 
 
 def get_backend(root: str, backend: str = None):

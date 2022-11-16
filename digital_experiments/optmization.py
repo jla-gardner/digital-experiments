@@ -33,16 +33,19 @@ def optimize_step_for(
     for k in config_overides:
         assert (
             k not in space
-        ), f"cannot override a parameter ({k}) that is being optimized over"
+        ), f"cannot override parameter ({k}) that is being optimized over"
 
-    _, previous_experiments = experiments_matching(root, config_overides)
+    df = experiments_matching(root, config=config_overides)
 
-    previous_arguments = [e.config for e in previous_experiments]
-    previous_outputs = [e.result for e in previous_experiments]
+    previous_arguments = df.filter(regex="config.*")
+    previous_arguments.columns = [c.replace("config.", "") for c in previous_arguments]
+
+    previous_outputs = df.filter(regex="results.*")
+    previous_outputs.columns = [c.replace("results.", "") for c in previous_outputs]
 
     optimize_step(
-        previous_arguments,
-        previous_outputs,
+        previous_arguments.to_dict(orient="records"),
+        previous_outputs.to_dict(orient="records"),
         space,
         objective=experiment,
         n_random_steps=n_random_points,
