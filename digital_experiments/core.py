@@ -1,6 +1,5 @@
 import functools
 import inspect
-import json
 import os
 import shutil
 from dataclasses import dataclass
@@ -9,7 +8,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import pandas as pd
 
-from digital_experiments.backends.json import NpEncoder
+from digital_experiments.backends import Backend, JSONBackend, pretty_json
 from digital_experiments.ids import random_id
 from digital_experiments.tee import stdout_to_
 from digital_experiments.util import (
@@ -31,19 +30,6 @@ def get_unique_folder(root: os.PathLike) -> Path:
             return folder
 
 
-def dump(thing, name, root):
-    path = root / name
-    with path.open("w", encoding="UTF-8") as target:
-        json.dump(thing, target, indent=4, cls=NpEncoder)
-
-
-def load(path: Path):
-    if path.suffix == ".json":
-        with path.open("r", encoding="UTF-8") as source:
-            return json.load(source)
-    return path.read_text()
-
-
 def update_root_folder(original_root: Path, code: str):
     original_code = original_root / "code.py"
     versions = sorted(original_root.glob("v-*"), key=lambda p: int(p.name[2:]))
@@ -63,7 +49,7 @@ def update_root_folder(original_root: Path, code: str):
             versions = [original_root / "v-1"]
 
     for version in versions:
-        if version / "code.py" == code:
+        if (version / "code.py").read_text() == code:
             return version
 
     new_version = original_root / f"v-{len(versions) + 1}"
@@ -74,11 +60,22 @@ def update_root_folder(original_root: Path, code: str):
 
 class Manager:
     def __init__(self):
-        self._current_directory = None
-        self._run_context = None
+        self._directories: List[Path] = []
+        self._contexts: List[str] = []
 
+    @property
     def current_directory(self) -> Path:
-        return self._current_directory
+        return self._directories[-1]
+
+    @property
+    def current_context(self) -> str:
+        return "manual" if not self._contexts else self._contexts[-1]
+
+    def set_context(self, context: str):
+        self._contexts.append(context)
+
+    def reset_context(self):
+        return self._contexts.pop()
 
     def experiment(
         self,
@@ -87,11 +84,11 @@ class Manager:
         save_to: str = None,
         capture_logs: bool = False,
         verbose: bool = False,
+        backend: str = "json",
     ):
         """
         hello, I need to add this docstring
         """
-
         info = print if verbose else do_nothing
 
         def decorator(func: Callable):
@@ -99,45 +96,39 @@ class Manager:
             code = inspect.getsource(func)
             folder = update_root_folder(root_folder, code)
             sig = inspect.signature(func)
+            backend = JSONBackend(folder)
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
 
-                unique_dir = get_unique_folder(folder)
-                self._current_directory = unique_dir
-                self._current_directory.mkdir(parents=True, exist_ok=False)
-
-                save = functools.partial(dump, root=unique_dir)
+                expmt_dir = get_unique_folder(folder)
+                expmt_dir.mkdir(parents=True, exist_ok=False)
 
                 config = sig.bind(*args, **kwargs)
                 config.apply_defaults()
                 config = config.arguments
 
-                info(f"Starting new experiment - {unique_dir.name}")
-                info(f"Arguments: {json.dumps(config, indent=4, cls=NpEncoder)}")
+                info(f"Starting new experiment - {expmt_dir.name}")
+                info(f"Arguments: {pretty_json(config)}")
 
                 _start = now()
+                self._directories.append(expmt_dir)
 
-                with stdout_to_(unique_dir / "log") if capture_logs else no_context():
+                with stdout_to_(expmt_dir / "log") if capture_logs else no_context():
                     ret = func(*args, **kwargs)
 
-                context = "manual" if self._run_context is None else self._run_context
+                self._directories.pop()
 
                 metadata = {
                     "_time": {"start": _start, "end": now()},
-                    "_context": context,
+                    "_context": self.current_context,
                 }
+                backend.save(expmt_dir.name, config, ret, metadata)
 
-                save(ret, "results.json")
-                save(metadata, "metadata.json")
-                save(config, "config.json")
+                if not any(expmt_dir.iterdir()):
+                    shutil.rmtree(expmt_dir)
 
-                info(f"Finished experiment - {unique_dir.name}", end="\n\n")
-                self._current_directory = None
-
-                if not any(unique_dir.iterdir()):
-                    shutil.rmtree(unique_dir)
-
+                info(f"Finished experiment - {expmt_dir.name}", end="\n\n")
                 return ret
 
             return wrapper
@@ -158,26 +149,26 @@ class Experiment:
     metadata: dict
 
     @classmethod
-    def from_folder(cls, folder: Path):
+    def from_folder(cls, folder: Path, backend: Backend):
         core_files = [
             folder / f for f in ("config.json", "results.json", "log", "metadata.json")
         ]
         artefacts = {
             f.name: f
-            for f in sorted(Path(folder).glob("*"))
+            for f in sorted(Path(folder).glob("*.*"))
             if f not in core_files and f.is_file()
         }
+        log = (folder / "log").read_text() if (folder / "log").exists() else None
 
-        meta = load(folder / "metadata.json")
-        log = load(folder / "log") if (folder / "log").exists() else None
+        config, result, metadata = backend.load(folder.name)
 
         return cls(
             id=folder.name,
-            config=load(folder / "config.json"),
-            result=load(folder / "results.json"),
+            config=config,
+            result=result,
             log=log,
             artefacts=artefacts,
-            metadata=meta,
+            metadata=metadata,
         )
 
     def matches_config(self, config: dict):
@@ -205,7 +196,7 @@ def all_experiments(root: Path) -> List[Experiment]:
     for folder in sorted(root.iterdir()):
         if folder.is_dir():
             try:
-                e = Experiment.from_folder(folder)
+                e = Experiment.from_folder(folder, JSONBackend(root))
                 results.append(e)
             except FileNotFoundError:
                 continue
@@ -259,12 +250,12 @@ def experiment(
 
 @copy_docstring_from(Manager.current_directory)
 def current_directory():
-    return __MANAGER.current_directory()
+    return __MANAGER.current_directory
 
 
 def set_context(context: str):
-    __MANAGER._run_context = context
+    __MANAGER.set_context(context)
 
 
 def reset_context():
-    __MANAGER._run_context = None
+    __MANAGER.reset_context()
