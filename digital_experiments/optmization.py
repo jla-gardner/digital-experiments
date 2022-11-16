@@ -6,11 +6,7 @@ from skopt.sampler import Hammersly
 from skopt.space import Categorical, Dimension, Integer, Real
 from skopt.utils import use_named_args
 
-from digital_experiments.core import (
-    all_experiments_matching,
-    reset_context,
-    set_context,
-)
+from digital_experiments.core import experiments_matching, reset_context, set_context
 from digital_experiments.util import matches
 
 Numeric = Union[int, float, np.number]
@@ -39,7 +35,7 @@ def optimize_step_for(
             k not in space
         ), f"cannot override a parameter ({k}) that is being optimized over"
 
-    _, previous_experiments = all_experiments_matching(root, config_overides)
+    _, previous_experiments = experiments_matching(root, config_overides)
 
     previous_arguments = [e.config for e in previous_experiments]
     previous_outputs = [e.result for e in previous_experiments]
