@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Tuple
 
 import pandas as pd
 
-from digital_experiments.backends import Backend, JSONBackend, pretty_json
+from digital_experiments.backends import Backend, get_backend, pretty_json
 from digital_experiments.ids import random_id
 from digital_experiments.tee import stdout_to_
 from digital_experiments.util import (
@@ -30,13 +30,14 @@ def get_unique_folder(root: os.PathLike) -> Path:
             return folder
 
 
-def update_root_folder(original_root: Path, code: str):
+def update_root_folder(original_root: Path, code: str, backend: str):
     original_code = original_root / "code.py"
     versions = sorted(original_root.glob("v-*"), key=lambda p: int(p.name[2:]))
 
     if not versions and not original_code.exists():
         original_root.mkdir(parents=True)
         original_code.write_text(code)
+        (original_root / ".backend").write_text(backend)
         return original_root
 
     if not versions:
@@ -55,6 +56,7 @@ def update_root_folder(original_root: Path, code: str):
     new_version = original_root / f"v-{len(versions) + 1}"
     new_version.mkdir()
     (new_version / "code.py").write_text(code)
+    (new_version / ".backend").write_text(backend)
     return new_version
 
 
@@ -94,9 +96,9 @@ class Manager:
         def decorator(func: Callable):
             root_folder = Path(save_to or func.__name__)
             code = inspect.getsource(func)
-            folder = update_root_folder(root_folder, code)
+            folder = update_root_folder(root_folder, code, backend)
             sig = inspect.signature(func)
-            backend = JSONBackend(folder)
+            _backend = get_backend(folder, backend)
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
@@ -123,7 +125,7 @@ class Manager:
                     "_time": {"start": _start, "end": now()},
                     "_context": self.current_context,
                 }
-                backend.save(expmt_dir.name, config, ret, metadata)
+                _backend.save(expmt_dir.name, config, ret, metadata)
 
                 if not any(expmt_dir.iterdir()):
                     shutil.rmtree(expmt_dir)
@@ -149,21 +151,18 @@ class Experiment:
     metadata: dict
 
     @classmethod
-    def from_folder(cls, folder: Path, backend: Backend):
-        core_files = [
-            folder / f for f in ("config.json", "results.json", "log", "metadata.json")
-        ]
+    def from_folder(cls, folder: Path, id: str, backend: Backend):
         artefacts = {
             f.name: f
-            for f in sorted(Path(folder).glob("*.*"))
-            if f not in core_files and f.is_file()
+            for f in sorted((folder / id).glob("*.*"))
+            if f not in backend.core_files(id) and f.is_file()
         }
         log = (folder / "log").read_text() if (folder / "log").exists() else None
 
-        config, result, metadata = backend.load(folder.name)
+        config, result, metadata = backend.load(id)
 
         return cls(
-            id=folder.name,
+            id=id,
             config=config,
             result=result,
             log=log,
@@ -188,20 +187,16 @@ class Experiment:
         return flatten(self.props(meta=meta))
 
 
-def all_experiments(root: Path) -> List[Experiment]:
+def all_experiments(root: Path, version="latest") -> List[Experiment]:
     if not root.exists():
         return []
 
-    results = []
-    for folder in sorted(root.iterdir()):
-        if folder.is_dir():
-            try:
-                e = Experiment.from_folder(folder, JSONBackend(root))
-                results.append(e)
-            except FileNotFoundError:
-                continue
+    backend = get_backend(root, (root / ".backend").read_text())
+    experiments = []
+    for id in backend.all_ids():
+        experiments.append(Experiment.from_folder(root, id, backend))
 
-    return results
+    return experiments
 
 
 def all_experiments_matching(
@@ -237,14 +232,16 @@ def experiment(
     _func=None,
     *,
     save_to: str = None,
-    capture_logs: bool = True,
+    capture_logs: bool = False,
     verbose: bool = False,
+    backend: str = "json",
 ):
     return __MANAGER.experiment(
         _func=_func,
         save_to=save_to,
         capture_logs=capture_logs,
         verbose=verbose,
+        backend=backend,
     )
 
 
