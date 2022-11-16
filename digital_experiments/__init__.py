@@ -1,7 +1,8 @@
 from digital_experiments.core import (
-    all_experiments_matching,
+    all_experiments,
     current_directory,
     experiment,
+    experiments_matching,
 )
 from digital_experiments.optmization import (
     Categorical,

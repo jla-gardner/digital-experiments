@@ -15,23 +15,17 @@ class Files:
 
 
 class Backend(ABC):
+    core_files = []
+
     def __init__(self, root: Path):
         self.root = root
-
-    @abstractmethod
-    def core_files(self, id: str) -> List[Path]:
-        pass
 
     @abstractmethod
     def save(self, id, config, result, metadata):
         pass
 
     @abstractmethod
-    def load(self, id):
-        pass
-
-    @abstractmethod
-    def all_ids(self):
+    def all_experiments(self) -> pd.DataFrame:
         pass
 
 
@@ -56,6 +50,8 @@ def pretty_json(thing):
 
 
 class JSONBackend(Backend):
+    core_files = ["config.json", "results.json", "metadata.json"]
+
     def save(self, id, config, result, metadata):
         root = self.root / id
         root.mkdir(parents=True, exist_ok=True)
@@ -64,24 +60,22 @@ class JSONBackend(Backend):
         (root / "results.json").write_text(pretty_json(result))
         (root / "metadata.json").write_text(pretty_json(metadata))
 
-    def load(self, id):
-        root = self.root / id
-        if not root.exists():
-            raise FileNotFoundError(f"Experiment {id} not found")
+    def all_experiments(self, metadata=False) -> pd.DataFrame:
+        experiments = []
+        for id in sorted(self.root.iterdir()):
+            if not id.is_dir():
+                continue
+            config = json.loads((id / "config.json").read_text())
+            result = json.loads((id / "results.json").read_text())
+            if not isinstance(result, dict):
+                result = {"result": result}
+            if metadata:
+                metadata = json.loads((id / "metadata.json").read_text())
+            else:
+                metadata = {}
+            experiments.append({"id": id.name, **config, **result, **metadata})
 
-        config = json.loads((root / "config.json").read_text())
-        result = json.loads((root / "results.json").read_text())
-        metadata = json.loads((root / "metadata.json").read_text())
-
-        return config, result, metadata
-
-    def all_ids(self):
-        return sorted(f.name for f in self.root.iterdir() if f.is_dir())
-
-    def core_files(self, id):
-        return [
-            self.root / id / f for f in ["config.json", "results.json", "metadata.json"]
-        ]
+        return pd.DataFrame([flatten(e) for e in experiments])
 
 
 class CSVBackend(Backend):
@@ -106,28 +100,25 @@ class CSVBackend(Backend):
         with open(file, "a") as f:
             f.write(",".join(map(str, entry.values())) + "\n")
 
-    def load(self, id):
-        key_map = json.loads((self.root / "headers.map").read_text())
+    def all_experiments(self, metadata=False):
 
         df = pd.read_csv(self.root / "results.csv")
-        entry = dict(df[df["id"] == id].iloc[0])
+        if metadata:
+            return df
 
-        config = {key: entry[key] for key in key_map["config"]}
-        result = {key: entry[key] for key in key_map["result"]}
-        if key_map["result"] == ["result"]:
-            result = result["result"]
-        metadata = {key: entry[key] for key in key_map["metadata"]}
-        return unflatten(config), unflatten(result), unflatten(metadata)
-
-    def all_ids(self):
-        lines = (self.root / "results.csv").read_text().splitlines()
-        return [line.split(",")[0] for line in lines[1:]]
-
-    def core_files(self, id):
-        return [self.root / "results.csv", self.root / "headers.map"]
+        key_map = json.loads((self.root / "headers.map").read_text())
+        config = key_map["config"]
+        result = key_map["result"]
+        return df[["id"] + config + result]
 
 
-def get_backend(root: str, backend: str = "json"):
+def get_backend(root: str, backend: str = None):
+    if backend is None:
+        if (Path(root) / Files.BACKEND).exists():
+            backend = (Path(root) / Files.BACKEND).read_text()
+        else:
+            backend = "json"
+
     if backend == "json":
         return JSONBackend(root)
     elif backend == "csv":

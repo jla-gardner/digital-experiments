@@ -3,12 +3,13 @@ import inspect
 import os
 import shutil
 from dataclasses import dataclass
+from glob import glob
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Tuple
 
 import pandas as pd
 
-from digital_experiments.backends import Backend, get_backend, pretty_json
+from digital_experiments.backends import Backend, Files, get_backend, pretty_json
 from digital_experiments.ids import random_id
 from digital_experiments.tee import stdout_to_
 from digital_experiments.util import (
@@ -141,87 +142,43 @@ class Manager:
             return decorator(_func)
 
 
-@dataclass
-class Experiment:
-    id: str
-    config: dict
-    result: Any
-    log: str
-    artefacts: Dict[str, Path]
-    metadata: dict
+def all_experiments(thing, version="latest", metadata=False) -> pd.DataFrame:
+    if callable(thing):
+        root = Path(thing.__name__)
+    else:
+        root = Path(thing)
 
-    @classmethod
-    def from_folder(cls, folder: Path, id: str, backend: Backend):
-        artefacts = {
-            f.name: f
-            for f in sorted((folder / id).glob("*.*"))
-            if f not in backend.core_files(id) and f.is_file()
-        }
-        log = (folder / "log").read_text() if (folder / "log").exists() else None
+    if Files.CODE not in [f.name for f in root.iterdir() if f.is_file()]:
+        if version == "latest":
+            versions = sorted(map(lambda p: int(p.name[2:]), root.glob("v-*")))
+            version = versions[-1]
 
-        config, result, metadata = backend.load(id)
+        root = root / f"v-{version}"
 
-        return cls(
-            id=id,
-            config=config,
-            result=result,
-            log=log,
-            artefacts=artefacts,
-            metadata=metadata,
-        )
-
-    def matches_config(self, config: dict):
-        return matches(self.props(), config)
-
-    def props(self, meta=False):
-        results = (
-            self.result if isinstance(self.result, dict) else {"result": self.result}
-        )
-        props = dict(id=self.id, **self.config, **results)
-        if meta:
-            props = {**props, **self.metadata}
-
-        return props
-
-    def row(self, meta=False):
-        return flatten(self.props(meta=meta))
+    backend = get_backend(root)
+    return backend.all_experiments(metadata)
 
 
-def all_experiments(root: Path, version="latest") -> List[Experiment]:
-    if not root.exists():
-        return []
+def experiments_matching(
+    root: str, template: dict = None, metadata: bool = False, **more_template
+) -> pd.DataFrame:
 
-    backend = get_backend(root, (root / ".backend").read_text())
-    experiments = []
-    for id in backend.all_ids():
-        experiments.append(Experiment.from_folder(root, id, backend))
+    df = all_experiments(root, metadata=metadata)
 
-    return experiments
-
-
-def all_experiments_matching(
-    root: str, config_template: dict = None, include_metadata: bool = False
-) -> Tuple[pd.DataFrame, List[Experiment]]:
-
-    config_template = config_template or dict()
-    experiments = [
-        exp
-        for exp in all_experiments(Path(root))
-        if exp.matches_config(config_template)
-    ]
-
-    if not experiments:
-        return pd.DataFrame(), []
-
-    df = pd.DataFrame([exp.row(include_metadata) for exp in experiments])
-
-    to_drop = ["id"]
-    df.drop(to_drop, axis=1, inplace=True)
-
-    return (
-        df.reset_index(drop=False).rename(columns={"index": "experiment_number"}),
-        experiments,
+    template = flatten({**(template or {}), **more_template})
+    return pd.DataFrame(
+        [row for _, row in df.iterrows() if matches(dict(row), template)]
     )
+
+
+def get_artefacts(root: str, id: str):
+    paths = [Path(p) for p in glob(f"{root}/**", recursive=True) if id in p]
+    root_dir = paths[0].parent
+    backend = get_backend(root_dir)
+
+    return {
+        p.name: p for p in paths if p.is_file() and p.name not in backend.core_files
+    }
 
 
 __MANAGER = Manager()
