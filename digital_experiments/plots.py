@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from IPython.display import HTML
 
-from .core import all_experiments_matching
+from .core import all_experiments
 
 
 def get_blocks(arr):
@@ -29,11 +29,12 @@ _colours = {
 
 
 def track_minimization(root, loss):
-    df, experiments = all_experiments_matching(root)
-    results = [loss(e.result) for e in experiments]
+    df = all_experiments(root, metadata=True)
+    outputs = df.filter(regex="results.*").to_dict(orient="records")
+    results = [loss(out) for out in outputs]
 
-    plt.plot(df.experiment_number + 1, results, "-k+", alpha=0.5)
-    contexts = [e.metadata["_context"] for e in experiments]
+    plt.plot(df.index + 1, results, "-k+", alpha=0.5)
+    contexts = df["metadata._context"].to_list()
     blocks = get_blocks(contexts)
     in_legend = {}
     for context, (start, end) in blocks:
@@ -55,7 +56,7 @@ def track_minimization(root, loss):
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3)
     plt.plot(
-        df.experiment_number + 1,
+        df.index + 1,
         pd.Series(results).cummin(),
         "-ok",
         markersize=4,
@@ -71,9 +72,8 @@ def legend_outside(ax):
 
 
 def track_trials(x, y, root, callback=None, **kwargs):
-    df, experiments = all_experiments_matching(root)
-    df["contexts"] = [e.metadata["_context"] for e in experiments]
-    df["colors"] = df["contexts"].map(_colours)
+    df = all_experiments(root, metadata=True)
+    df["colors"] = df["metadata._context"].map(_colours)
 
     def _plot(i):
         plt.scatter(
