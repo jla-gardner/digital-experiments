@@ -1,8 +1,11 @@
 import contextlib
+import functools
 import inspect
+import shutil
 import sys
 from collections.abc import Mapping
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Callable, Dict, Sequence, Union
 
 import numpy as np
@@ -188,3 +191,20 @@ def no_context():
 
 def do_nothing(*args, **kwargs):
     pass
+
+
+def move_tree(src: Path, dest: Path):
+    temp = Path("/tmp") / src.name
+    shutil.move(src, temp)
+    shutil.move(temp, dest)
+
+
+def time(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = now()
+        ret = func(*args, **kwargs)
+        end = now()
+        return {"start": start, "end": end, "duration": end - start}, ret
+
+    return wrapper

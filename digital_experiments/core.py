@@ -1,67 +1,121 @@
+import contextlib
 import functools
 import inspect
-import os
 import shutil
-from dataclasses import dataclass
-from glob import glob
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Union
 
-import pandas as pd
-
-from digital_experiments.backends import Backend, Files, get_backend, pretty_json
-from digital_experiments.ids import random_id
+from digital_experiments.backends import Backend, get_backend, pretty_json
+from digital_experiments.naming import new_experiment_id
 from digital_experiments.tee import stdout_to_
 from digital_experiments.util import (
     copy_docstring_from,
     do_nothing,
-    flatten,
-    matches,
+    move_tree,
     no_context,
-    now,
+    time,
 )
 
 
-def get_unique_folder(root: os.PathLike) -> Path:
-    """Return a unique folder in the given root folder."""
-    root = Path(root)
-    while True:
-        folder = root / random_id()
-        if not folder.exists():
-            return folder
+def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend):
+    """
+    setup the file system ready for an experiment
 
+    This takes care of:
+    - versioning the experiment
+    - creating the experiment directory
+    - copying the code to the experiment directory
+    - copying the backend to the experiment directory
 
-def update_root_folder(original_root: Path, code: str, backend: str):
-    original_code = original_root / "code.py"
-    versions = sorted(original_root.glob("v-*"), key=lambda p: int(p.name[2:]))
+    Usually, experiments are saved to the specified directory (default_root)
+    If a new version of the experiment is being run (i.e. the code has changed)
+    then sub directories named v-1, v-2, etc are created, and results are saved
+    to the latest version (or previous version if the code has been changed back)
+    """
 
-    if not versions and not original_code.exists():
-        original_root.mkdir(parents=True)
-        original_code.write_text(code)
-        (original_root / ".backend").write_text(backend)
-        return original_root
+    code = inspect.getsource(func)
+
+    def setup_dir(dir: Path):
+        """
+        the root folder for experiments needs to
+        - exist
+        - contain the code of the experiment in `code.py`
+        - contain the backend identifier in `.backend`
+        """
+        dir.mkdir(parents=True, exist_ok=False)
+        (dir / "code.py").write_text(code)
+        (dir / ".backend").write_text(backend.rep)
+        return dir
+
+    default_root = Path(save_to or func.__name__)
+
+    # the experiment has never been run before
+    if not default_root.exists():
+        return setup_dir(default_root)
+
+    # several versions of the experiment can exist
+    versions = list(default_root.glob("v-*"))
 
     if not versions:
-        if original_code.read_text() == code:
-            return original_root
+        # the experiment's code has not been changed
+        if (default_root / "code.py").read_text() == code:
+            return default_root
+        # the experiment's code has been changed for the first time:
+        # move all the old results to v-1, and setup v-2
         else:
-            temp = Path("/tmp") / original_root.name
-            shutil.move(original_root, temp)
-            shutil.move(temp, original_root / "v-1")
-            versions = [original_root / "v-1"]
+            move_tree(default_root, default_root / "v-1")
+            return setup_dir(default_root / "v-2")
 
     for version in versions:
+        # the experiment's code has reverted to a previous version
         if (version / "code.py").read_text() == code:
             return version
 
-    new_version = original_root / f"v-{len(versions) + 1}"
-    new_version.mkdir()
-    (new_version / "code.py").write_text(code)
-    (new_version / ".backend").write_text(backend)
-    return new_version
+    # the experiment's code has been changed again, create a new version
+    return setup_dir(default_root / f"v-{len(versions) + 1}")
 
 
-class Manager:
+def clean_up_exmpt(dir: Path):
+    # remove the experiment directory if empty (keeps file system looking clean)
+    if not any(dir.iterdir()):
+        shutil.rmtree(dir)
+
+
+def _do_experiment(
+    func,
+    args,
+    kwargs,
+    expmt_dir: Path,
+    backend: Backend,
+    info: Callable,
+    additional_metadata: Dict,
+):
+    """
+    do the experiment, and save the results
+    """
+    expmt_id = expmt_dir.name
+
+    # get the (complete) config used for the experiment
+    sig = inspect.signature(func)
+    config = sig.bind(*args, **kwargs)
+    config.apply_defaults()
+    config = config.arguments
+
+    info(f"Starting new experiment - {expmt_id}")
+    info(f"Arguments: {pretty_json(config)}")
+
+    # time the experiment
+    timing, ret = time(func)(*args, **kwargs)
+
+    # save the results
+    metadata = {"timing": timing, **additional_metadata}
+    backend.save(expmt_dir, config, ret, metadata)
+
+    info(f"Finished experiment - {expmt_id}", end="\n\n")
+    return ret
+
+
+class ExperimentManager:
     def __init__(self):
         self._directories: List[Path] = []
         self._contexts: List[str] = []
@@ -80,6 +134,13 @@ class Manager:
     def reset_context(self):
         return self._contexts.pop()
 
+    @contextlib.contextmanager
+    def _using_directory(self, directory: Path):
+        """Context manager for setting the current directory"""
+        self._directories.append(directory)
+        yield
+        self._directories.pop()
+
     def experiment(
         self,
         _func=None,
@@ -90,48 +151,39 @@ class Manager:
         backend: str = "json",
     ):
         """
-        hello, I need to add this docstring
+        decorator for running an experiment
+
+
         """
+
         info = print if verbose else do_nothing
+        backend: Backend = get_backend(backend)
 
         def decorator(func: Callable):
-            root_folder = Path(save_to or func.__name__)
-            code = inspect.getsource(func)
-            folder = update_root_folder(root_folder, code, backend)
-            sig = inspect.signature(func)
-            _backend = get_backend(folder, backend)
+            expmt_root_dir = exmpt_setup(func, save_to, backend)
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
-
-                expmt_dir = get_unique_folder(folder)
+                expmt_dir = expmt_root_dir / new_experiment_id()
                 expmt_dir.mkdir(parents=True, exist_ok=False)
 
-                config = sig.bind(*args, **kwargs)
-                config.apply_defaults()
-                config = config.arguments
+                metadata = {"context": self.current_context}
 
-                info(f"Starting new experiment - {expmt_dir.name}")
-                info(f"Arguments: {pretty_json(config)}")
+                optional_logging = (
+                    stdout_to_(expmt_dir / "log") if capture_logs else no_context()
+                )
+                with optional_logging, self._using_directory(expmt_dir):
+                    ret = _do_experiment(
+                        func,
+                        args,
+                        kwargs,
+                        expmt_dir,
+                        backend,
+                        info,
+                        metadata,
+                    )
 
-                _start = now()
-                self._directories.append(expmt_dir)
-
-                with stdout_to_(expmt_dir / "log") if capture_logs else no_context():
-                    ret = func(*args, **kwargs)
-
-                self._directories.pop()
-
-                metadata = {
-                    "_time": {"start": _start, "end": now()},
-                    "_context": self.current_context,
-                }
-                _backend.save(expmt_dir.name, config, ret, metadata)
-
-                if not any(expmt_dir.iterdir()):
-                    shutil.rmtree(expmt_dir)
-
-                info(f"Finished experiment - {expmt_dir.name}", end="\n\n")
+                clean_up_exmpt(expmt_dir)
                 return ret
 
             return wrapper
@@ -142,49 +194,10 @@ class Manager:
             return decorator(_func)
 
 
-def all_experiments(thing, version="latest", metadata=False) -> pd.DataFrame:
-    if callable(thing):
-        root = Path(thing.__name__)
-    else:
-        root = Path(thing)
-
-    if Files.CODE not in [f.name for f in root.iterdir() if f.is_file()]:
-        if version == "latest":
-            versions = sorted(map(lambda p: int(p.name[2:]), root.glob("v-*")))
-            version = versions[-1]
-
-        root = root / f"v-{version}"
-
-    backend = get_backend(root)
-    return backend.all_experiments(metadata)
+__MANAGER = ExperimentManager()
 
 
-def experiments_matching(
-    root: str, template: dict = None, metadata: bool = False, **more_template
-) -> pd.DataFrame:
-
-    df = all_experiments(root, metadata=metadata)
-
-    template = flatten({**(template or {}), **more_template})
-    return pd.DataFrame(
-        [row for _, row in df.iterrows() if matches(dict(row), template)]
-    )
-
-
-def get_artefacts(root: str, id: str):
-    paths = [Path(p) for p in glob(f"{root}/**", recursive=True) if id in p]
-    root_dir = paths[0].parent
-    backend = get_backend(root_dir)
-
-    return {
-        p.name: p for p in paths if p.is_file() and p.name not in backend.core_files
-    }
-
-
-__MANAGER = Manager()
-
-
-@copy_docstring_from(Manager.experiment)
+@copy_docstring_from(ExperimentManager.experiment)
 def experiment(
     _func=None,
     *,
@@ -202,7 +215,7 @@ def experiment(
     )
 
 
-@copy_docstring_from(Manager.current_directory)
+@copy_docstring_from(ExperimentManager.current_directory)
 def current_directory():
     return __MANAGER.current_directory
 
