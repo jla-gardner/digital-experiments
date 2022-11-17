@@ -5,7 +5,7 @@ import shutil
 from pathlib import Path
 from typing import Callable, Dict, List, Union
 
-from digital_experiments.backends import Backend, get_backend, pretty_json
+from digital_experiments.backends import Backend, Files, get_backend, id_for
 from digital_experiments.naming import new_experiment_id
 from digital_experiments.tee import stdout_to_
 from digital_experiments.util import (
@@ -13,6 +13,7 @@ from digital_experiments.util import (
     do_nothing,
     move_tree,
     no_context,
+    pretty_json,
     time,
 )
 
@@ -77,8 +78,8 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
         - contain the backend identifier in `.backend`
         """
         dir.mkdir(parents=True, exist_ok=False)
-        (dir / "code.py").write_text(code)
-        (dir / ".backend").write_text(backend.rep)
+        (dir / Files.CODE).write_text(code)
+        (dir / Files.BACKEND).write_text(id_for(backend))
         return dir
 
     default_root = Path(save_to or func.__name__)
@@ -92,7 +93,7 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
 
     if not versions:
         # the experiment's code has not been changed
-        if (default_root / "code.py").read_text() == code:
+        if (default_root / Files.CODE).read_text() == code:
             return default_root
         # the experiment's code has been changed for the first time:
         # move all the old results to v-1, and setup v-2
@@ -102,7 +103,7 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
 
     for version in versions:
         # the experiment's code has reverted to a previous version
-        if (version / "code.py").read_text() == code:
+        if (version / Files.CODE).read_text() == code:
             return version
 
     # the experiment's code has been changed again, create a new version

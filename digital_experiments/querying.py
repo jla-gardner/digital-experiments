@@ -1,4 +1,3 @@
-from collections import namedtuple
 from glob import glob
 from pathlib import Path
 from typing import Mapping
@@ -6,6 +5,7 @@ from typing import Mapping
 import pandas as pd
 
 from digital_experiments.backends import Files, backend_used_for
+from digital_experiments.experiment import Experiment
 from digital_experiments.util import flatten, unflatten
 
 
@@ -96,12 +96,6 @@ def matches_value(value, template_value):
     return value == template_value
 
 
-def _dict_to_experiment(d):
-    unflattened = unflatten(d)
-    Experiment = namedtuple("Experiment", unflattened.keys())
-    return Experiment(**unflattened)
-
-
-def experiments_from(df):
+def convert_to_experiments(df):
     experiment_dicts = df.to_dict(orient="records")
-    return [_dict_to_experiment(d) for d in experiment_dicts]
+    return [Experiment(**unflatten(d)) for d in experiment_dicts]

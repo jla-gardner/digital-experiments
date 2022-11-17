@@ -7,7 +7,7 @@ import pandas as pd
 from IPython.display import HTML
 
 from digital_experiments.optmization import SEARCH_MODE, Modes
-from digital_experiments.querying import all_experiments, experiments_from
+from digital_experiments.querying import all_experiments, convert_to_experiments
 
 
 def get_blocks(arr):
@@ -32,7 +32,7 @@ _colours = {
 def track_minimization(root, loss):
     df = all_experiments(root, metadata=True)
     df[f"metadata.{SEARCH_MODE}"].fillna(Modes.MANUAL, inplace=True)
-    experiments = experiments_from(df)
+    experiments = convert_to_experiments(df)
 
     results = [e.results for e in experiments]
     losses = [loss(out) for out in results]
@@ -80,7 +80,7 @@ def track_trials(x, y, root, callback=None, **kwargs):
     df = all_experiments(root, metadata=True)
     df[f"metadata.{SEARCH_MODE}"].fillna(Modes.MANUAL, inplace=True)
 
-    experiments = experiments_from(df)
+    experiments = convert_to_experiments(df)
     xs = [e.config[x] for e in experiments]
     ys = [e.config[y] for e in experiments]
     colours = df[f"metadata.{SEARCH_MODE}"].map(_colours)

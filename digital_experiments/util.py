@@ -1,12 +1,15 @@
 import contextlib
 import functools
 import inspect
+import json
 import shutil
 import sys
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+
+import numpy as np
 
 
 def identity(x):
@@ -131,3 +134,23 @@ def time(func):
         return {"start": start, "end": end}, ret
 
     return wrapper
+
+
+np_types = {
+    "bool_": bool,
+    "integer": int,
+    "floating": float,
+    "ndarray": list,
+}
+
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        for np_type in np_types:
+            if isinstance(obj, getattr(np, np_type)):
+                return np_types[np_type](obj)
+        return json.JSONEncoder.default(self, obj)
+
+
+def pretty_json(thing):
+    return json.dumps(thing, indent=4, cls=NpEncoder)
