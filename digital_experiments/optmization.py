@@ -6,52 +6,19 @@ from skopt.sampler import Hammersly
 from skopt.space import Categorical, Dimension, Integer, Real
 from skopt.utils import use_named_args
 
-from digital_experiments.core import reset_context, set_context
+from digital_experiments.core import additional_metadata
 from digital_experiments.querying import experiments_matching, matches
 
 Numeric = Union[int, float, np.number]
 
 
-def is_in(space):
-    def _in(a):
-        return lambda x: x in a
+class Modes:
+    MANUAL = "manual"
+    RANDOM = "random"
+    BAYESIAN = "bayesian-optimization"
 
-    return {k: _in(v) for k, v in space.items()}
 
-
-def optimize_step_for(
-    experiment: Callable,
-    space: Dict[str, Dimension],
-    n_random_points: int,
-    config_overides: Dict[str, Any] = None,
-    root: str = "",
-    loss_fn: Callable = None,
-):
-    root = root or experiment.__name__
-    config_overides = config_overides or {}
-
-    for k in config_overides:
-        assert (
-            k not in space
-        ), f"cannot override parameter ({k}) that is being optimized over"
-
-    df = experiments_matching(root, config=config_overides)
-
-    previous_arguments = df.filter(regex="config.*")
-    previous_arguments.columns = [c.replace("config.", "") for c in previous_arguments]
-
-    previous_outputs = df.filter(regex="results.*")
-    previous_outputs.columns = [c.replace("results.", "") for c in previous_outputs]
-
-    optimize_step(
-        previous_arguments.to_dict(orient="records"),
-        previous_outputs.to_dict(orient="records"),
-        space,
-        objective=experiment,
-        n_random_steps=n_random_points,
-        overrides=config_overides,
-        loss_fn=loss_fn,
-    )
+SEARCH_MODE = "search-mode"
 
 
 def optimize_step(
@@ -154,25 +121,65 @@ def optimize_step(
         point = _random_points[np.random.randint(0, len(_random_points))]
 
         # perform the random step
-        set_context("random-search")
-        gp_minimize(
-            _objective,
-            dimensions,
-            x0=point,
-            n_calls=1,
-            n_initial_points=0,
-        )
+        with additional_metadata({SEARCH_MODE: Modes.RANDOM}):
+            gp_minimize(
+                _objective,
+                dimensions,
+                x0=point,
+                n_calls=1,
+                n_initial_points=0,
+            )
 
     else:
         # perform a single step of bayesian optimization
-        set_context("bayesian-optimization")
-        gp_minimize(
-            _objective,
-            dimensions,
-            x0=x0,
-            y0=y0,
-            n_calls=1,
-            n_initial_points=0,
-        )
+        with additional_metadata({SEARCH_MODE: Modes.BAYESIAN}):
+            gp_minimize(
+                _objective,
+                dimensions,
+                x0=x0,
+                y0=y0,
+                n_calls=1,
+                n_initial_points=0,
+            )
 
-    reset_context()
+
+def is_in(space):
+    def _in(a):
+        return lambda x: x in a
+
+    return {k: _in(v) for k, v in space.items()}
+
+
+def optimize_step_for(
+    experiment: Callable,
+    space: Dict[str, Dimension],
+    n_random_points: int,
+    config_overides: Dict[str, Any] = None,
+    root: str = "",
+    loss_fn: Callable = None,
+):
+    root = root or experiment.__name__
+    config_overides = config_overides or {}
+
+    for k in config_overides:
+        assert (
+            k not in space
+        ), f"cannot override parameter ({k}) that is being optimized over"
+
+    df = experiments_matching(root, config=config_overides)
+
+    previous_arguments = df.filter(regex="config.*")
+    previous_arguments.columns = [c.replace("config.", "") for c in previous_arguments]
+
+    previous_outputs = df.filter(regex="results.*")
+    previous_outputs.columns = [c.replace("results.", "") for c in previous_outputs]
+
+    optimize_step(
+        previous_arguments.to_dict(orient="records"),
+        previous_outputs.to_dict(orient="records"),
+        space,
+        objective=experiment,
+        n_random_steps=n_random_points,
+        overrides=config_overides,
+        loss_fn=loss_fn,
+    )

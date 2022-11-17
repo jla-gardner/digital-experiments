@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from IPython.display import HTML
 
-from digital_experiments.querying import all_experiments
+from digital_experiments.optmization import SEARCH_MODE, Modes
+from digital_experiments.querying import all_experiments, experiments_from
 
 
 def get_blocks(arr):
@@ -22,20 +23,24 @@ def get_blocks(arr):
 
 
 _colours = {
-    "manual": "k",
-    "random-search": "b",
-    "bayesian-optimization": "r",
+    Modes.MANUAL: "k",
+    Modes.RANDOM: "b",
+    Modes.BAYESIAN: "r",
 }
 
 
 def track_minimization(root, loss):
     df = all_experiments(root, metadata=True)
-    outputs = df.filter(regex="results.*").to_dict(orient="records")
-    results = [loss(out) for out in outputs]
+    df[f"metadata.{SEARCH_MODE}"].fillna(Modes.MANUAL, inplace=True)
+    experiments = experiments_from(df)
 
-    plt.plot(df.index + 1, results, "-k+", alpha=0.5)
-    contexts = df["metadata.context"].to_list()
+    results = [e.results for e in experiments]
+    losses = [loss(out) for out in results]
+
+    plt.plot(df.index + 1, losses, "-k+", alpha=0.5)
+    contexts = [e.metadata.get(SEARCH_MODE, Modes.MANUAL) for e in experiments]
     blocks = get_blocks(contexts)
+
     in_legend = {}
     for context, (start, end) in blocks:
         if context not in in_legend:
@@ -52,12 +57,12 @@ def track_minimization(root, loss):
             color=_colours[context],
             linewidth=0,
         )
-    plt.xlim(0.5, len(results) + 0.5)
+    plt.xlim(0.5, len(losses) + 0.5)
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3)
     plt.plot(
         df.index + 1,
-        pd.Series(results).cummin(),
+        pd.Series(losses).cummin(),
         "-ok",
         markersize=4,
         label="Best So Far",
@@ -73,12 +78,15 @@ def legend_outside(ax):
 
 def track_trials(x, y, root, callback=None, **kwargs):
     df = all_experiments(root, metadata=True)
-    df["colors"] = df["metadata.context"].map(_colours)
+    df[f"metadata.{SEARCH_MODE}"].fillna(Modes.MANUAL, inplace=True)
+
+    experiments = experiments_from(df)
+    xs = [e.config[x] for e in experiments]
+    ys = [e.config[y] for e in experiments]
+    colours = df[f"metadata.{SEARCH_MODE}"].map(_colours)
 
     def _plot(i):
-        plt.scatter(
-            df[x][:i], df[y][:i], c=df.colors[:i], s=20, linewidths=0, alpha=0.5
-        )
+        plt.scatter(xs[:i], ys[:i], c=colours[:i], s=20, linewidths=0)
         for c in _colours:
             plt.scatter([], [], c=_colours[c], label=c.replace("-", " ").title())
         plt.xlabel(x)
