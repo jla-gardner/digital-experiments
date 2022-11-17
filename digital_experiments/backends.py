@@ -1,7 +1,7 @@
 import json
-from abc import ABC, abstractmethod
+from abc import ABC, abstractclassmethod, abstractmethod
 from pathlib import Path
-from typing import List
+from typing import Any, Callable, Dict, List, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -17,15 +17,23 @@ class Files:
 class Backend(ABC):
     core_files = []
 
-    def __init__(self, root: Path):
-        self.root = root
+    @property
+    @abstractclassmethod
+    def rep(cls) -> str:
+        pass
 
-    @abstractmethod
-    def save(self, id, config, result, metadata):
+    @abstractclassmethod
+    def save(
+        cls,
+        exmpt_dir: Path,
+        config: Dict[str, Any],
+        result: Union[Any, Dict[str, Any]],
+        metadata: Dict[str, Any],
+    ):
         pass
 
     @abstractmethod
-    def all_experiments(self) -> pd.DataFrame:
+    def all_experiments(self, root: Path, metadata: bool) -> pd.DataFrame:
         pass
 
 
@@ -51,18 +59,25 @@ def pretty_json(thing):
 
 class JSONBackend(Backend):
     core_files = ["config.json", "results.json", "metadata.json"]
+    rep = "json"
 
-    def save(self, id, config, result, metadata):
-        root = self.root / id
-        root.mkdir(parents=True, exist_ok=True)
+    @classmethod
+    def save(
+        cls,
+        exmpt_dir: Path,
+        config: Dict[str, Any],
+        result: Union[Any, Dict[str, Any]],
+        metadata: Dict[str, Any],
+    ):
+        exmpt_dir.mkdir(parents=True, exist_ok=True)
+        (exmpt_dir / "config.json").write_text(pretty_json(config))
+        (exmpt_dir / "results.json").write_text(pretty_json(result))
+        (exmpt_dir / "metadata.json").write_text(pretty_json(metadata))
 
-        (root / "config.json").write_text(pretty_json(config))
-        (root / "results.json").write_text(pretty_json(result))
-        (root / "metadata.json").write_text(pretty_json(metadata))
-
-    def all_experiments(self, metadata=False) -> pd.DataFrame:
+    @classmethod
+    def all_experiments(cls, root, metadata=False) -> pd.DataFrame:
         experiments = []
-        for id in sorted(self.root.iterdir()):
+        for id in sorted(root.iterdir()):
             if not id.is_dir():
                 continue
             config = json.loads((id / "config.json").read_text())
@@ -86,11 +101,22 @@ class JSONBackend(Backend):
 
 
 class CSVBackend(Backend):
-    def save(self, id, config, result, metadata):
-        file = self.root / "results.csv"
+    rep = "csv"
+
+    @classmethod
+    def save(
+        cls,
+        exmpt_dir: Path,
+        config: Dict[str, Any],
+        result: Union[Any, Dict[str, Any]],
+        metadata: Dict[str, Any],
+    ):
+        file = exmpt_dir.parent / "results.csv"
         if not isinstance(result, dict):
             result = {"result": result}
-        entry = dict(id=id, config=config, results=result, metadata=metadata)
+        entry = dict(
+            id=exmpt_dir.name, config=config, results=result, metadata=metadata
+        )
         entry = flatten(entry)
 
         if not file.exists():
@@ -99,25 +125,28 @@ class CSVBackend(Backend):
         with open(file, "a") as f:
             f.write(",".join(map(str, entry.values())) + "\n")
 
-    def all_experiments(self, metadata=False):
+    @classmethod
+    def all_experiments(cls, root, metadata=False) -> pd.DataFrame:
 
-        df = pd.read_csv(self.root / "results.csv")
+        df = pd.read_csv(root / "results.csv")
         if metadata:
             return df
 
         return df.filter(regex="^(?!metadata)")
 
 
-def get_backend(root: str, backend: str = None):
-    if backend is None:
-        if (Path(root) / Files.BACKEND).exists():
-            backend = (Path(root) / Files.BACKEND).read_text()
-        else:
-            backend = "json"
+__available_backends = {b.rep: b for b in [JSONBackend, CSVBackend]}
 
-    if backend == "json":
-        return JSONBackend(root)
-    elif backend == "csv":
-        return CSVBackend(root)
-    else:
-        raise ValueError(f"Unknown backend {backend}")
+
+def register_backend(backend: Backend):
+    __available_backends[backend.rep()] = backend
+
+
+def get_backend(backend_type: str) -> Backend:
+    if backend_type in __available_backends:
+        return __available_backends[backend_type]
+    raise ValueError(f"Unknown backend {backend_type}")
+
+
+def backend_used_for(root: Path):
+    return get_backend((root / Files.BACKEND).read_text())

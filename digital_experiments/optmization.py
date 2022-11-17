@@ -6,7 +6,8 @@ from skopt.sampler import Hammersly
 from skopt.space import Categorical, Dimension, Integer, Real
 from skopt.utils import use_named_args
 
-from digital_experiments.core import experiments_matching, reset_context, set_context
+from digital_experiments.core import reset_context, set_context
+from digital_experiments.querying import experiments_matching
 from digital_experiments.util import matches
 
 Numeric = Union[int, float, np.number]
