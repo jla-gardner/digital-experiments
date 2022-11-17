@@ -120,8 +120,10 @@ class ExperimentManager:
         self._directories: List[Path] = []
         self._metadata: List[Dict] = []
 
-    @property
     def current_directory(self) -> Path:
+        """
+        get the directory for the current experiment
+        """
         return self._directories[-1]
 
     @contextlib.contextmanager
@@ -130,6 +132,9 @@ class ExperimentManager:
         self._metadata.append(metadata)
         yield
         self._metadata.pop()
+
+    def _additional_metadata(self):
+        return self._metadata[-1] if self._metadata else {}
 
     @contextlib.contextmanager
     def _using_directory(self, directory: Path):
@@ -179,8 +184,6 @@ class ExperimentManager:
                 expmt_dir = expmt_root_dir / new_experiment_id()
                 expmt_dir.mkdir(parents=True, exist_ok=False)
 
-                metadata = self._metadata[-1] if self._metadata else {}
-
                 optional_logging = (
                     stdout_to_(expmt_dir / "log") if capture_logs else no_context()
                 )
@@ -192,7 +195,7 @@ class ExperimentManager:
                         expmt_dir,
                         backend,
                         info,
-                        metadata,
+                        self._additional_metadata(),
                     )
 
                 clean_up_exmpt(expmt_dir)
@@ -200,7 +203,7 @@ class ExperimentManager:
 
             return wrapper
 
-        if _func == None:  # called as @record(root=...)
+        if _func == None:  # called using kwargs, i.e. as @record(save_to=...)
             return decorator
         else:  # called as @record
             return decorator(_func)
@@ -229,7 +232,7 @@ def experiment(
 
 @copy_docstring_from(ExperimentManager.current_directory)
 def current_directory():
-    return __MANAGER.current_directory
+    return __MANAGER.current_directory()
 
 
 @copy_docstring_from(ExperimentManager.additional_metadata)

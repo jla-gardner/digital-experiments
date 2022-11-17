@@ -128,6 +128,6 @@ def time(func):
         start = now()
         ret = func(*args, **kwargs)
         end = now()
-        return {"start": start, "end": end, "duration": end - start}, ret
+        return {"start": start, "end": end}, ret
 
     return wrapper
