@@ -17,7 +17,41 @@ from digital_experiments.util import (
 )
 
 
-def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend):
+def do_experiment(
+    func: Callable,
+    args: List,
+    kwargs: Dict,
+    expmt_dir: Path,
+    backend: Backend,
+    info: Callable,
+    additional_metadata: Dict,
+):
+    """
+    do the experiment, and save the results
+    """
+    expmt_id = expmt_dir.name
+
+    # get the (complete) config used for the experiment
+    sig = inspect.signature(func)
+    config = sig.bind(*args, **kwargs)
+    config.apply_defaults()
+    config = config.arguments
+
+    info(f"Starting new experiment - {expmt_id}")
+    info(f"Arguments: {pretty_json(config)}")
+
+    # time the experiment
+    timing, ret = time(func)(*args, **kwargs)
+
+    # save the results
+    metadata = {"timing": timing, **additional_metadata}
+    backend.save(expmt_dir, config, ret, metadata)
+
+    info(f"Finished experiment - {expmt_id}", end="\n\n")
+    return ret
+
+
+def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> Path:
     """
     setup the file system ready for an experiment
 
@@ -35,7 +69,7 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend):
 
     code = inspect.getsource(func)
 
-    def setup_dir(dir: Path):
+    def setup_dir(dir: Path) -> Path:
         """
         the root folder for experiments needs to
         - exist
@@ -81,58 +115,21 @@ def clean_up_exmpt(dir: Path):
         shutil.rmtree(dir)
 
 
-def _do_experiment(
-    func,
-    args,
-    kwargs,
-    expmt_dir: Path,
-    backend: Backend,
-    info: Callable,
-    additional_metadata: Dict,
-):
-    """
-    do the experiment, and save the results
-    """
-    expmt_id = expmt_dir.name
-
-    # get the (complete) config used for the experiment
-    sig = inspect.signature(func)
-    config = sig.bind(*args, **kwargs)
-    config.apply_defaults()
-    config = config.arguments
-
-    info(f"Starting new experiment - {expmt_id}")
-    info(f"Arguments: {pretty_json(config)}")
-
-    # time the experiment
-    timing, ret = time(func)(*args, **kwargs)
-
-    # save the results
-    metadata = {"timing": timing, **additional_metadata}
-    backend.save(expmt_dir, config, ret, metadata)
-
-    info(f"Finished experiment - {expmt_id}", end="\n\n")
-    return ret
-
-
 class ExperimentManager:
     def __init__(self):
         self._directories: List[Path] = []
-        self._contexts: List[str] = []
+        self._metadata: List[Dict] = []
 
     @property
     def current_directory(self) -> Path:
         return self._directories[-1]
 
-    @property
-    def current_context(self) -> str:
-        return "manual" if not self._contexts else self._contexts[-1]
-
-    def set_context(self, context: str):
-        self._contexts.append(context)
-
-    def reset_context(self):
-        return self._contexts.pop()
+    @contextlib.contextmanager
+    def additional_metadata(self, metadata=None, **more_metadata):
+        metadata = {**metadata, **more_metadata} if metadata else more_metadata
+        self._metadata.append(metadata)
+        yield
+        self._metadata.pop()
 
     @contextlib.contextmanager
     def _using_directory(self, directory: Path):
@@ -173,20 +170,22 @@ class ExperimentManager:
         backend: Backend = get_backend(backend)
 
         def decorator(func: Callable):
+            # setup the file system ready for the experiment
             expmt_root_dir = exmpt_setup(func, save_to, backend)
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
+                # create a new experiment
                 expmt_dir = expmt_root_dir / new_experiment_id()
                 expmt_dir.mkdir(parents=True, exist_ok=False)
 
-                metadata = {"context": self.current_context}
+                metadata = self._metadata[-1] if self._metadata else {}
 
                 optional_logging = (
                     stdout_to_(expmt_dir / "log") if capture_logs else no_context()
                 )
                 with optional_logging, self._using_directory(expmt_dir):
-                    ret = _do_experiment(
+                    ret = do_experiment(
                         func,
                         args,
                         kwargs,
@@ -233,9 +232,6 @@ def current_directory():
     return __MANAGER.current_directory
 
 
-def set_context(context: str):
-    __MANAGER.set_context(context)
-
-
-def reset_context():
-    __MANAGER.reset_context()
+@copy_docstring_from(ExperimentManager.additional_metadata)
+def additional_metadata(metadata=None, **more_metadata):
+    return __MANAGER.additional_metadata(metadata, **more_metadata)
