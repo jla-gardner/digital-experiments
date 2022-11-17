@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from IPython.display import HTML
 
-from .core import all_experiments
+from digital_experiments.querying import all_experiments
 
 
 def get_blocks(arr):
@@ -34,7 +34,7 @@ def track_minimization(root, loss):
     results = [loss(out) for out in outputs]
 
     plt.plot(df.index + 1, results, "-k+", alpha=0.5)
-    contexts = df["metadata._context"].to_list()
+    contexts = df["metadata.context"].to_list()
     blocks = get_blocks(contexts)
     in_legend = {}
     for context, (start, end) in blocks:
@@ -73,7 +73,7 @@ def legend_outside(ax):
 
 def track_trials(x, y, root, callback=None, **kwargs):
     df = all_experiments(root, metadata=True)
-    df["colors"] = df["metadata._context"].map(_colours)
+    df["colors"] = df["metadata.context"].map(_colours)
 
     def _plot(i):
         plt.scatter(

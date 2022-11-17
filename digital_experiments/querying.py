@@ -1,10 +1,12 @@
+from collections import namedtuple
 from glob import glob
 from pathlib import Path
+from typing import Mapping
 
 import pandas as pd
 
-from digital_experiments.backends import Files, backend_used_for, get_backend
-from digital_experiments.util import flatten, matches
+from digital_experiments.backends import Files, backend_used_for
+from digital_experiments.util import flatten, unflatten
 
 
 def all_experiments(thing, version="latest", metadata=False) -> pd.DataFrame:
@@ -44,3 +46,62 @@ def get_artefacts(root: str, id: str):
     return {
         p.name: p for p in paths if p.is_file() and p.name not in backend.core_files
     }
+
+
+def matches(thing, template):
+    """
+    does thing conform to the passed (and optionally nested template?)
+
+    e.g.
+    matches({"a": 1, "b": 2}, template={"a": 1}) == True
+    matches({"a": 1, "b": 2}, template={"a": 1, "c": 3}) == False
+    matches({"a": 1, "b": 2}, template={"a": lambda x: x > 0}) == True
+    matches(
+        {"a": 1, "b": {"c": 2}},
+        template={"b": {"c": lambda x: x%2 == 0}}
+    ) == True
+    """
+
+    for key in set(thing.keys()).union(set(template.keys())):
+        if key not in template:
+            # template doesn't specify what to do with this key
+            continue
+        if key not in thing:
+            # thing doesn't have this required key: doesn't match
+            return False
+        if matches_value(thing[key], template[key]):
+            continue
+        else:
+            # value doesn't match
+            return False
+
+    return True
+
+
+def matches_value(value, template_value):
+    """
+    does value conform to the entry in template_value?
+
+    e.g.
+    matches_value(1, 1) == True
+    matches_value(1, 2) == False
+    matches_value(1, lambda x: x > 0) == True
+    matches_value({"a": 1}, {"a": 1}) == True # calls back into matches
+    """
+
+    if isinstance(value, Mapping):
+        return matches(value, template_value)
+    if callable(template_value):
+        return template_value(value)
+    return value == template_value
+
+
+def _dict_to_experiment(d):
+    unflattened = unflatten(d)
+    Experiment = namedtuple("Experiment", unflattened.keys())
+    return Experiment(**unflattened)
+
+
+def experiments_from(df):
+    experiment_dicts = df.to_dict(orient="records")
+    return [_dict_to_experiment(d) for d in experiment_dicts]
