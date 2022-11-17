@@ -112,18 +112,16 @@ class CSVBackend(Backend):
         metadata: Dict[str, Any],
     ):
         file = exmpt_dir.parent / "results.csv"
+        previous_experiments = pd.read_csv(file) if file.exists() else pd.DataFrame()
+
         if not isinstance(result, dict):
             result = {"result": result}
         entry = dict(
             id=exmpt_dir.name, config=config, results=result, metadata=metadata
         )
         entry = flatten(entry)
-
-        if not file.exists():
-            file.write_text(",".join(entry.keys()) + "\n")
-
-        with open(file, "a") as f:
-            f.write(",".join(map(str, entry.values())) + "\n")
+        df = pd.concat((previous_experiments, pd.DataFrame([entry])))
+        df.to_csv(file, index=False)
 
     @classmethod
     def all_experiments(cls, root, metadata=False) -> pd.DataFrame:
