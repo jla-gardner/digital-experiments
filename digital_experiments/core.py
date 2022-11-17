@@ -153,7 +153,20 @@ class ExperimentManager:
         """
         decorator for running an experiment
 
+        This decorator takes care of:
+        - recording the experiment's config
+        - recording the experiment's results
+        - recording other metadata (e.g. timing)
+        - recording the experiment's logs
+        - recording the experiment's code
+        - saving the above
 
+        Usage:
+        ```
+        @experiment
+        def my_experiment(a, b):
+            return a + b
+        ```
         """
 
         info = print if verbose else do_nothing

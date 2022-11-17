@@ -6,9 +6,7 @@ import sys
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Sequence, Union
-
-import numpy as np
+from typing import Any, Dict
 
 
 def identity(x):
@@ -17,58 +15,6 @@ def identity(x):
 
 def first(iterable):
     return next(iter(iterable))
-
-
-def nothing(*args, **kwargs):
-    pass
-
-
-def matches(thing, template):
-    """
-    does thing conform to the passed (and optionally nested template?)
-
-    e.g.
-    matches({"a": 1, "b": 2}, template={"a": 1}) == True
-    matches({"a": 1, "b": 2}, template={"a": 1, "c": 3}) == False
-    matches({"a": 1, "b": 2}, template={"a": lambda x: x > 0}) == True
-    matches(
-        {"a": 1, "b": {"c": 2}},
-        template={"b": {"c": lambda x: x%2 == 0}}
-    ) == True
-    """
-
-    for key in set(thing.keys()).union(set(template.keys())):
-        if key not in template:
-            # template doesn't specify what to do with this key
-            continue
-        if key not in thing:
-            # thing doesn't have this required key: doesn't match
-            return False
-        if matches_value(thing[key], template[key]):
-            continue
-        else:
-            # value doesn't match
-            return False
-
-    return True
-
-
-def matches_value(value, template_value):
-    """
-    does value conform to the entry in template_value?
-
-    e.g.
-    matches_value(1, 1) == True
-    matches_value(1, 2) == False
-    matches_value(1, lambda x: x > 0) == True
-    matches_value({"a": 1}, {"a": 1}) == True # calls back into matches
-    """
-
-    if isinstance(value, Mapping):
-        return matches(value, template_value)
-    if callable(template_value):
-        return template_value(value)
-    return value == template_value
 
 
 def flatten(_dict, seperator="."):
@@ -148,29 +94,6 @@ def get_passed_kwargs_for(func):
             relevant_kwargs[k] = interpret(v, signature.parameters[k])
 
     return relevant_kwargs
-
-
-Result = Dict[str, Union[Any, "Result"]]
-
-
-def summarise(results: Sequence[Result], agg_fns: Sequence[Callable] = None) -> Result:
-    if agg_fns is None:
-        agg_fns = [np.mean, np.std]
-
-    _template = results[0]
-    for result in results:
-        assert result.keys() == _template.keys(), "Results must have the same keys"
-
-    summary = {}
-    for key in _template:
-        if isinstance(_template[key], dict):
-            summary[key] = summarise([result[key] for result in results], agg_fns)
-        else:
-            summary[key] = {
-                agg_fn.__name__: agg_fn([result[key] for result in results])
-                for agg_fn in agg_fns
-            }
-    return summary
 
 
 def copy_docstring_from(func):
