@@ -1,12 +1,13 @@
 import json
-from abc import ABC, abstractclassmethod, abstractmethod
+from abc import ABC, abstractclassmethod
+from dataclasses import asdict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Union
 
-import numpy as np
 import pandas as pd
 
-from digital_experiments.util import first, flatten, unflatten
+from digital_experiments.experiment import Experiment
+from digital_experiments.util import flatten, pretty_json
 
 
 class Files:
@@ -15,12 +16,15 @@ class Files:
 
 
 class Backend(ABC):
-    core_files = []
+    """
+    Abstract Base Class for backends
 
-    @property
-    @abstractclassmethod
-    def rep(cls) -> str:
-        pass
+    A backend is responsible for saving and loading experiments
+    Implementations should subclass this class and implement the abstract methods
+    Any core files (e.g. config.json) should be in the `core_files` class attribute
+    """
+
+    core_files = []
 
     @abstractclassmethod
     def save(
@@ -32,34 +36,22 @@ class Backend(ABC):
     ):
         pass
 
-    @abstractmethod
-    def all_experiments(self, root: Path, metadata: bool) -> pd.DataFrame:
+    @abstractclassmethod
+    def load_all_experiments(cls, root: Path) -> Union[List[Experiment], pd.DataFrame]:
         pass
 
+    @classmethod
+    def all_experiments(cls, root: Path, metadata: bool) -> pd.DataFrame:
+        experiments = cls.load_all_experiments(root)
+        if not isinstance(experiments, pd.DataFrame):
+            experiments = pd.DataFrame([flatten(asdict(e)) for e in experiments])
 
-np_types = {
-    "bool_": bool,
-    "integer": int,
-    "floating": float,
-    "ndarray": list,
-}
-
-
-class NpEncoder(json.JSONEncoder):
-    def default(self, obj):
-        for np_type in np_types:
-            if isinstance(obj, getattr(np, np_type)):
-                return np_types[np_type](obj)
-        return json.JSONEncoder.default(self, obj)
-
-
-def pretty_json(thing):
-    return json.dumps(thing, indent=4, cls=NpEncoder)
+        experiments.sort_values("id", inplace=True)
+        return experiments if metadata else experiments.filter(regex="^(?!metadata)")
 
 
 class JSONBackend(Backend):
     core_files = ["config.json", "results.json", "metadata.json"]
-    rep = "json"
 
     @classmethod
     def save(
@@ -69,40 +61,24 @@ class JSONBackend(Backend):
         result: Union[Any, Dict[str, Any]],
         metadata: Dict[str, Any],
     ):
-        exmpt_dir.mkdir(parents=True, exist_ok=True)
         (exmpt_dir / "config.json").write_text(pretty_json(config))
         (exmpt_dir / "results.json").write_text(pretty_json(result))
         (exmpt_dir / "metadata.json").write_text(pretty_json(metadata))
 
     @classmethod
-    def all_experiments(cls, root, metadata=False) -> pd.DataFrame:
-        experiments = []
-        for id in sorted(root.iterdir()):
-            if not id.is_dir():
-                continue
-            config = json.loads((id / "config.json").read_text())
-            result = json.loads((id / "results.json").read_text())
-            if not isinstance(result, dict):
-                result = {"result": result}
-            if metadata:
-                metadata = json.loads((id / "metadata.json").read_text())
-            else:
-                metadata = {}
-            experiments.append(
-                {
-                    "id": id.name,
-                    "config": config,
-                    "results": result,
-                    "metadata": metadata,
-                }
+    def load_all_experiments(cls, root) -> List[Experiment]:
+        def experiment_from(dir: Path):
+            return Experiment(
+                id=dir.name,
+                config=json.loads((dir / "config.json").read_text()),
+                results=json.loads((dir / "results.json").read_text()),
+                metadata=json.loads((dir / "metadata.json").read_text()),
             )
 
-        return pd.DataFrame([flatten(e) for e in experiments])
+        return [experiment_from(dir) for dir in root.iterdir() if dir.is_dir()]
 
 
 class CSVBackend(Backend):
-    rep = "csv"
-
     @classmethod
     def save(
         cls,
@@ -115,36 +91,45 @@ class CSVBackend(Backend):
         previous_experiments = pd.read_csv(file) if file.exists() else pd.DataFrame()
 
         if not isinstance(result, dict):
-            result = {"result": result}
-        entry = dict(
-            id=exmpt_dir.name, config=config, results=result, metadata=metadata
+            result = {"results": result}
+
+        entry = flatten(
+            {
+                "id": exmpt_dir.name,
+                "config": config,
+                "results": result,
+                "metadata": metadata,
+            }
         )
-        entry = flatten(entry)
         df = pd.concat((previous_experiments, pd.DataFrame([entry])))
         df.to_csv(file, index=False)
 
     @classmethod
-    def all_experiments(cls, root, metadata=False) -> pd.DataFrame:
-
-        df = pd.read_csv(root / "results.csv")
-        if metadata:
-            return df
-
-        return df.filter(regex="^(?!metadata)")
+    def load_all_experiments(cls, root) -> pd.DataFrame:
+        return pd.read_csv(root / "results.csv")
 
 
-__available_backends = {b.rep: b for b in [JSONBackend, CSVBackend]}
+__available_backends = {"json": JSONBackend, "csv": CSVBackend}
 
 
-def register_backend(backend: Backend):
-    __available_backends[backend.rep()] = backend
+def register_backend(id: str, backend: Backend):
+    if id in __available_backends:
+        raise ValueError(f"Backend id already registered: {id}")
+    __available_backends[id] = backend
 
 
 def get_backend(backend_type: str) -> Backend:
     if backend_type in __available_backends:
         return __available_backends[backend_type]
-    raise ValueError(f"Unknown backend {backend_type}")
+    raise ValueError(f"Unknown backend id: {backend_type}")
 
 
 def backend_used_for(root: Path):
     return get_backend((root / Files.BACKEND).read_text())
+
+
+def id_for(backend: Backend) -> str:
+    for id, b in __available_backends.items():
+        if b == backend:
+            return id
+    raise ValueError(f"Unknown backend: {backend}")
