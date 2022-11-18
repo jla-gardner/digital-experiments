@@ -7,7 +7,11 @@ from skopt.space import Categorical, Dimension, Integer, Real
 from skopt.utils import use_named_args
 
 from digital_experiments.core import additional_metadata
-from digital_experiments.querying import experiments_matching, matches
+from digital_experiments.querying import (
+    convert_to_experiments,
+    experiments_matching,
+    matches,
+)
 
 Numeric = Union[int, float, np.number]
 
@@ -167,16 +171,14 @@ def optimize_step_for(
         ), f"cannot override parameter ({k}) that is being optimized over"
 
     df = experiments_matching(root, config=config_overides)
+    experiments = convert_to_experiments(df)
 
-    previous_arguments = df.filter(regex="config.*")
-    previous_arguments.columns = [c.replace("config.", "") for c in previous_arguments]
-
-    previous_outputs = df.filter(regex="results.*")
-    previous_outputs.columns = [c.replace("results.", "") for c in previous_outputs]
-
+    previous_arguments = [e.config for e in experiments]
+    previous_outputs = [e.results for e in experiments]
+ 
     optimize_step(
-        previous_arguments.to_dict(orient="records"),
-        previous_outputs.to_dict(orient="records"),
+        previous_arguments,
+        previous_outputs,
         space,
         objective=experiment,
         n_random_steps=n_random_points,

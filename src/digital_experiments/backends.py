@@ -43,10 +43,14 @@ class Backend(ABC):
     @classmethod
     def all_experiments(cls, root: Path, metadata: bool) -> pd.DataFrame:
         experiments = cls.load_all_experiments(root)
+        if len(experiments) == 0:
+            return pd.DataFrame()
+
         if not isinstance(experiments, pd.DataFrame):
             experiments = pd.DataFrame([flatten(asdict(e)) for e in experiments])
 
         experiments.sort_values("id", inplace=True)
+        experiments.reset_index(drop=True, inplace=True)
         return experiments if metadata else experiments.filter(regex="^(?!metadata)")
 
 

@@ -120,6 +120,7 @@ class ExperimentManager:
     def __init__(self):
         self._directories: List[Path] = []
         self._metadata: List[Dict] = []
+        self.active: bool = True
 
     def current_directory(self) -> Path:
         """
@@ -143,6 +144,12 @@ class ExperimentManager:
         self._directories.append(directory)
         yield
         self._directories.pop()
+    
+    @contextlib.contextmanager
+    def dont_record(self):
+        self.active = False
+        yield
+        self.active = True
 
     def experiment(
         self,
@@ -181,6 +188,9 @@ class ExperimentManager:
 
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
+                if not self.active:
+                    return func(*args, **kwargs)
+
                 # create a new experiment
                 expmt_dir = expmt_root_dir / new_experiment_id()
                 expmt_dir.mkdir(parents=True, exist_ok=False)
@@ -235,6 +245,10 @@ def experiment(
 def current_directory():
     return __MANAGER.current_directory()
 
+
+@copy_docstring_from(ExperimentManager.dont_record)
+def dont_record():
+    return __MANAGER.dont_record()
 
 @copy_docstring_from(ExperimentManager.additional_metadata)
 def additional_metadata(metadata=None, **more_metadata):

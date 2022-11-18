@@ -14,6 +14,9 @@ def all_experiments(thing, version="latest", metadata=False) -> pd.DataFrame:
         root = Path(thing.__name__)
     else:
         root = Path(thing)
+    
+    if not root.exists():
+        return pd.DataFrame()
 
     if Files.CODE not in [f.name for f in root.iterdir() if f.is_file()]:
         if version == "latest":

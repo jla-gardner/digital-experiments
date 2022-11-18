@@ -23,15 +23,17 @@ def get_blocks(arr):
 
 
 _colours = {
-    Modes.MANUAL: "k",
-    Modes.RANDOM: "b",
-    Modes.BAYESIAN: "r",
+    Modes.MANUAL: "black",
+    Modes.RANDOM: "blue",
+    Modes.BAYESIAN: "red",
 }
 
 
-def track_minimization(root, loss):
+def track_minimization(root, loss=None):
+    if loss is None:
+        loss = lambda x: x
+
     df = all_experiments(root, metadata=True)
-    df[f"metadata.{SEARCH_MODE}"].fillna(Modes.MANUAL, inplace=True)
     experiments = convert_to_experiments(df)
 
     results = [e.results for e in experiments]
@@ -86,9 +88,9 @@ def track_trials(x, y, root, callback=None, **kwargs):
     colours = df[f"metadata.{SEARCH_MODE}"].map(_colours)
 
     def _plot(i):
-        plt.scatter(xs[:i], ys[:i], c=colours[:i], s=20, linewidths=0)
-        for c in _colours:
-            plt.scatter([], [], c=_colours[c], label=c.replace("-", " ").title())
+        plt.scatter(xs[:i], ys[:i], c=colours[:i], s=20, linewidths=0, clip_on=False)
+        for mode in df[f'metadata.{SEARCH_MODE}'].unique():
+            plt.scatter([], [], c=_colours[mode], label=mode.replace("-", " ").title())
         plt.xlabel(x)
         plt.ylabel(y)
         if callback is not None:
