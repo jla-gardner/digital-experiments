@@ -1,9 +1,4 @@
-import sys
 from pathlib import Path
-
-# make sure we can import digital experiments
-sys.path.insert(0, "../")
-
 
 # prefix components:
 space = "    "
