@@ -1,0 +1,31 @@
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "digital-experiments"
+version = "0.1.1"
+description = "Keep track of configuration for digital experiments."
+readme = "README.md"
+authors = [{ name = "John Gardner", email = "gardner.john97@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["config", "experiments"]
+dependencies = [
+    "ipython",
+    "matplotlib",
+    "imageio",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scikit-optimize",
+]
+requires-python = ">=3.7"
+
+
+[project.urls]
+Homepage = "https://github.com/jla-gardner/digital-experiments"
