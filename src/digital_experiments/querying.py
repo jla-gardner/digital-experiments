@@ -14,7 +14,7 @@ def all_experiments(thing, version="latest", metadata=False) -> pd.DataFrame:
         root = Path(thing.__name__)
     else:
         root = Path(thing)
-    
+
     if not root.exists():
         return pd.DataFrame()
 
@@ -26,7 +26,12 @@ def all_experiments(thing, version="latest", metadata=False) -> pd.DataFrame:
         root = root / f"v-{version}"
 
     backend = backend_used_for(root)
-    return backend.all_experiments(root, metadata)
+    df = backend.all_experiments(root, metadata)
+    if "results.results" in df.columns:
+        df["results"] = df["results.results"]
+        del df["results.results"]
+
+    return df
 
 
 def experiments_matching(

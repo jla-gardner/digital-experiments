@@ -11,6 +11,7 @@ from digital_experiments.tee import stdout_to_
 from digital_experiments.util import (
     copy_docstring_from,
     do_nothing,
+    get_complete_config,
     move_tree,
     no_context,
     pretty_json,
@@ -33,10 +34,7 @@ def do_experiment(
     expmt_id = expmt_dir.name
 
     # get the (complete) config used for the experiment
-    sig = inspect.signature(func)
-    config = sig.bind(*args, **kwargs)
-    config.apply_defaults()
-    config = config.arguments
+    config = get_complete_config(func, args, kwargs)
 
     info(f"Starting new experiment - {expmt_id}")
     info(f"Arguments: {pretty_json(config)}")
@@ -87,6 +85,7 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
     # the experiment has never been run before
     if not default_root.exists():
         return setup_dir(default_root)
+    # otherwise experiment has been run ⬇️
 
     # several versions of the experiment can exist
     versions = list(default_root.glob("v-*"))
@@ -144,7 +143,7 @@ class ExperimentManager:
         self._directories.append(directory)
         yield
         self._directories.pop()
-    
+
     @contextlib.contextmanager
     def dont_record(self):
         self.active = False
@@ -183,13 +182,13 @@ class ExperimentManager:
         backend: Backend = get_backend(backend)
 
         def decorator(func: Callable):
-            # setup the file system ready for the experiment
-            expmt_root_dir = exmpt_setup(func, save_to, backend)
-
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 if not self.active:
                     return func(*args, **kwargs)
+
+                # setup the file system ready for the experiment
+                expmt_root_dir = exmpt_setup(func, save_to, backend)
 
                 # create a new experiment
                 expmt_dir = expmt_root_dir / new_experiment_id()
@@ -249,6 +248,7 @@ def current_directory():
 @copy_docstring_from(ExperimentManager.dont_record)
 def dont_record():
     return __MANAGER.dont_record()
+
 
 @copy_docstring_from(ExperimentManager.additional_metadata)
 def additional_metadata(metadata=None, **more_metadata):

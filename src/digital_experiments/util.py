@@ -154,3 +154,14 @@ class NpEncoder(json.JSONEncoder):
 
 def pretty_json(thing):
     return json.dumps(thing, indent=4, cls=NpEncoder)
+
+
+independent_random = np.random.RandomState(int(datetime.now().timestamp()))
+
+
+def get_complete_config(func, args, kwargs):
+    sig = inspect.signature(func)
+    config = sig.bind(*args, **kwargs)
+    config.apply_defaults()
+    config = config.arguments
+    return config

@@ -65,7 +65,7 @@ def track_minimization(root, loss=None):
     plt.plot(
         df.index + 1,
         pd.Series(losses).cummin(),
-        "-ok",
+        "-k",
         markersize=4,
         label="Best So Far",
     )

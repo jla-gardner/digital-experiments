@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import Any, Callable, Dict, Sequence, Union
 
 import numpy as np
-from skopt import Space, gp_minimize
+from skopt import gp_minimize
 from skopt.sampler import Hammersly
 from skopt.space import Categorical, Dimension, Integer, Real
 from skopt.utils import use_named_args
@@ -12,6 +13,7 @@ from digital_experiments.querying import (
     experiments_matching,
     matches,
 )
+from digital_experiments.util import independent_random
 
 Numeric = Union[int, float, np.number]
 
@@ -87,7 +89,9 @@ def optimize_step(
 
     # ensure no overrides are passed that also being optimized over
     overrides = overrides or {}
-    assert not any(k in overrides for k in space)
+    assert not any(
+        k in overrides for k in space
+    ), "you're overriding a variable you're trying to optimize for"
 
     # if no loss_fn is passed, use the identity function
     loss_fn = loss_fn or (lambda x: x)
@@ -122,7 +126,7 @@ def optimize_step(
 
         # choose a new random point we have not used
         _random_points = [p for p in _random_points if tuple(p) not in x0]
-        point = _random_points[np.random.randint(0, len(_random_points))]
+        point = _random_points[independent_random.randint(0, len(_random_points))]
 
         # perform the random step
         with additional_metadata({SEARCH_MODE: Modes.RANDOM}):
@@ -175,7 +179,7 @@ def optimize_step_for(
 
     previous_arguments = [e.config for e in experiments]
     previous_outputs = [e.results for e in experiments]
- 
+
     optimize_step(
         previous_arguments,
         previous_outputs,
@@ -185,3 +189,22 @@ def optimize_step_for(
         overrides=config_overides,
         loss_fn=loss_fn,
     )
+
+
+# class Optimizer:
+#     def __init__(
+#         self,
+#         experiment: Callable,
+#         space: Dict[str, Dimension],
+#         overrides: Dict[str, Any] = None,
+#         loss_fn: Callable = None,
+#         root: str = None,
+#     ):
+#         self.experiment = experiment
+#         self.space = space
+#         self.overrides = overrides
+#         self.loss_fn = loss_fn
+#         self.root = root
+
+#     def random_step():
+#         pass
