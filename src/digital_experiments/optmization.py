@@ -8,11 +8,7 @@ from skopt.space import Categorical, Dimension, Integer, Real
 from skopt.utils import use_named_args
 
 from digital_experiments.core import additional_metadata
-from digital_experiments.querying import (
-    convert_to_experiments,
-    experiments_matching,
-    matches,
-)
+from digital_experiments.querying import experiments_for, matches
 from digital_experiments.util import independent_random
 
 Numeric = Union[int, float, np.number]
@@ -121,8 +117,8 @@ def optimize_step(
 
     # if we have not yet performed enough random steps, perform a random step
     if n_random_steps > len(previous_arguments):
-        # deterministicaly sample from the space
-        _random_points = Hammersly().generate(dimensions, n_random_steps)
+        # deterministicaly (over)sample from the space
+        _random_points = Hammersly().generate(dimensions, int(n_random_steps * 1.2))
 
         # choose a new random point we have not used
         _random_points = [p for p in _random_points if tuple(p) not in x0]
@@ -130,13 +126,7 @@ def optimize_step(
 
         # perform the random step
         with additional_metadata({SEARCH_MODE: Modes.RANDOM}):
-            gp_minimize(
-                _objective,
-                dimensions,
-                x0=point,
-                n_calls=1,
-                n_initial_points=0,
-            )
+            _objective(point)
 
     else:
         # perform a single step of bayesian optimization
@@ -170,15 +160,13 @@ def optimize_step_for(
     config_overides = config_overides or {}
 
     for k in config_overides:
-        assert (
-            k not in space
-        ), f"cannot override parameter ({k}) that is being optimized over"
+        msg = f"cannot override parameter ({k}) that is being optimized over"
+        assert k not in space, msg
 
-    df = experiments_matching(root, config=config_overides)
-    experiments = convert_to_experiments(df)
+    experiments = experiments_for(root, config=config_overides)
 
     previous_arguments = [e.config for e in experiments]
-    previous_outputs = [e.results for e in experiments]
+    previous_outputs = [e.result for e in experiments]
 
     optimize_step(
         previous_arguments,
@@ -189,22 +177,3 @@ def optimize_step_for(
         overrides=config_overides,
         loss_fn=loss_fn,
     )
-
-
-# class Optimizer:
-#     def __init__(
-#         self,
-#         experiment: Callable,
-#         space: Dict[str, Dimension],
-#         overrides: Dict[str, Any] = None,
-#         loss_fn: Callable = None,
-#         root: str = None,
-#     ):
-#         self.experiment = experiment
-#         self.space = space
-#         self.overrides = overrides
-#         self.loss_fn = loss_fn
-#         self.root = root
-
-#     def random_step():
-#         pass

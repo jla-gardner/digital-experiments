@@ -7,7 +7,7 @@ import pandas as pd
 from IPython.display import HTML
 
 from digital_experiments.optmization import SEARCH_MODE, Modes
-from digital_experiments.querying import all_experiments, convert_to_experiments
+from digital_experiments.querying import experiments_for, to_dataframe
 
 
 def get_blocks(arr):
@@ -33,14 +33,16 @@ def track_minimization(root, loss=None):
     if loss is None:
         loss = lambda x: x
 
-    df = all_experiments(root, metadata=True)
-    experiments = convert_to_experiments(df)
+    experiments = experiments_for(root)
 
-    results = [e.results for e in experiments]
+    results = [e.result for e in experiments]
     losses = [loss(out) for out in results]
+    n = range(1, len(experiments) + 1)
 
-    plt.plot(df.index + 1, losses, "-k+", alpha=0.5)
+    plt.plot(n, losses, "-k+", alpha=0.5)
     contexts = [e.metadata.get(SEARCH_MODE, Modes.MANUAL) for e in experiments]
+    contexts = [c if pd.notna(c) else Modes.MANUAL for c in contexts]
+
     blocks = get_blocks(contexts)
 
     in_legend = {}
@@ -63,7 +65,7 @@ def track_minimization(root, loss=None):
 
     plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.15), ncol=3)
     plt.plot(
-        df.index + 1,
+        n,
         pd.Series(losses).cummin(),
         "-k",
         markersize=4,
@@ -79,17 +81,18 @@ def legend_outside(ax):
 
 
 def track_trials(x, y, root, callback=None, **kwargs):
-    df = all_experiments(root, metadata=True)
+    experiments = experiments_for(root)
+    df = to_dataframe(experiments, metadata=True)
     df[f"metadata.{SEARCH_MODE}"].fillna(Modes.MANUAL, inplace=True)
 
-    experiments = convert_to_experiments(df)
+    # experiments = convert_to_experiments(df)
     xs = [e.config[x] for e in experiments]
     ys = [e.config[y] for e in experiments]
     colours = df[f"metadata.{SEARCH_MODE}"].map(_colours)
 
     def _plot(i):
         plt.scatter(xs[:i], ys[:i], c=colours[:i], s=20, linewidths=0, clip_on=False)
-        for mode in df[f'metadata.{SEARCH_MODE}'].unique():
+        for mode in df[f"metadata.{SEARCH_MODE}"].unique():
             plt.scatter([], [], c=_colours[mode], label=mode.replace("-", " ").title())
         plt.xlabel(x)
         plt.ylabel(y)

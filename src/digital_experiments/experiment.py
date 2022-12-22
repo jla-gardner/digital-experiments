@@ -6,5 +6,5 @@ from typing import Any, Dict, Union
 class Experiment:
     id: str
     config: Dict[str, Any]
-    results: Union[Any, Dict[str, Any]]
+    result: Union[Any, Dict[str, Any]]
     metadata: Dict[str, Any] = None
