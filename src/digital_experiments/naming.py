@@ -1,7 +1,8 @@
 from datetime import datetime
 from pathlib import Path
-from random import choice
 from typing import Callable
+
+from digital_experiments.util import independent_random as rand
 
 me = Path(__file__).parent
 nouns = (me / "nouns.txt").read_text().split()
@@ -18,8 +19,8 @@ def new_experiment_id(rejection_function: Callable = None) -> Path:
         id = "-".join(
             (
                 datetime.now().strftime("%y%m%d-%H%M%S-%f")[:-2],
-                choice(adjectives),
-                choice(nouns),
+                rand.choice(adjectives),
+                rand.choice(nouns),
             )
         )
         if not rejection_function(id):
