@@ -8,7 +8,6 @@ from skopt.utils import use_named_args
 
 from digital_experiments.core import additional_metadata
 from digital_experiments.querying import experiments_for, matches
-from digital_experiments.util import independent_random
 
 Numeric = Union[int, float, np.number]
 

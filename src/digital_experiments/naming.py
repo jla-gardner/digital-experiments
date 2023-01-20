@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable
 
-from digital_experiments.util import independent_random as rand
+from digital_experiments.random import truly_random as rand
 
 me = Path(__file__).parent
 nouns = (me / "nouns.txt").read_text().split()
