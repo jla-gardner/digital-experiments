@@ -3,8 +3,7 @@ from typing import Any, Callable, Dict, Sequence, Union
 
 import numpy as np
 from skopt import gp_minimize
-from skopt.sampler import Hammersly
-from skopt.space import Categorical, Dimension, Integer, Real
+from skopt.space import Categorical, Dimension, Integer, Real, Space
 from skopt.utils import use_named_args
 
 from digital_experiments.core import additional_metadata
@@ -117,12 +116,7 @@ def optimize_step(
 
     # if we have not yet performed enough random steps, perform a random step
     if n_random_steps > len(previous_arguments):
-        # deterministicaly (over)sample from the space
-        _random_points = Hammersly().generate(dimensions, int(n_random_steps * 1.2))
-
-        # choose a new random point we have not used
-        _random_points = [p for p in _random_points if tuple(p) not in x0]
-        point = _random_points[independent_random.randint(0, len(_random_points))]
+        point = Space(dimensions).rvs(random_state=datetime.now().microsecond)[0]
 
         # perform the random step
         with additional_metadata({SEARCH_MODE: Modes.RANDOM}):
