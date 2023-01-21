@@ -1,0 +1,3 @@
+[ ] no file called results - do bettter error handling
+[ ] add attributes to experiment function
+[ ] as_df(root) to get experiments - too verbose currently

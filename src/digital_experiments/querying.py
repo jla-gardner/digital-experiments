@@ -61,3 +61,22 @@ def to_dataframe(
     if not metadata:
         df = df.filter(regex="^(?!metadata)")
     return df
+
+
+def to_df(
+    thing: Union[str, Callable],
+    template: dict = None,
+    version="latest",
+    id: bool = False,
+    metadata: bool = False,
+    **more_template,
+) -> pd.DataFrame:
+    """
+    collect all config and results for a given experiment into a dataframe
+    """
+
+    return to_dataframe(
+        experiments_for(thing, template=template, version=version, **more_template),
+        id=id,
+        metadata=metadata,
+    )
