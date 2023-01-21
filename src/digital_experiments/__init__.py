@@ -6,4 +6,4 @@ from digital_experiments.querying import (
     to_df,
 )
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
