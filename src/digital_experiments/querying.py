@@ -7,7 +7,7 @@ import pandas as pd
 
 from digital_experiments.backends import Files, backend_used_for
 from digital_experiments.experiment import Experiment
-from digital_experiments.util import flatten, matches
+from digital_experiments.util import flatten, matches, root_dir_for
 
 
 def experiments_for(
@@ -18,7 +18,7 @@ def experiments_for(
 ) -> List[Experiment]:
 
     if callable(thing):
-        root = Path(thing.__name__)
+        root = Path(root_dir_for(thing))
     else:
         root = Path(thing)
 
@@ -39,7 +39,12 @@ def experiments_for(
     return [e for e in experiments if matches(asdict(e), template)]
 
 
-def get_artefacts(root: str, id: str):
+def get_artefacts(thing: str, id: str):
+    if not isinstance(thing, str):
+        root = root_dir_for(thing)
+    else:
+        root = thing
+
     paths = [Path(p) for p in glob(f"{root}/**", recursive=True) if id in p]
     root_dir = paths[0].parent
     backend = backend_used_for(root_dir)

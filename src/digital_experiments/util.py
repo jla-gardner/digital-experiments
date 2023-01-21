@@ -7,7 +7,7 @@ import sys
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 import numpy as np
 
@@ -18,6 +18,10 @@ def identity(x):
 
 def first(iterable):
     return next(iter(iterable))
+
+
+def root_dir_for(experiment: Callable):
+    return "experiments/" + experiment.__name__
 
 
 def flatten(_dict, seperator="."):

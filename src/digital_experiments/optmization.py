@@ -8,6 +8,7 @@ from skopt.utils import use_named_args
 
 from digital_experiments.core import additional_metadata
 from digital_experiments.querying import experiments_for, matches
+from digital_experiments.util import root_dir_for
 
 Numeric = Union[int, float, np.number]
 
@@ -149,7 +150,7 @@ def optimize_step_for(
     root: str = "",
     loss_fn: Callable = None,
 ):
-    root = root or experiment.__name__
+    root = root or root_dir_for(experiment)
     config_overides = config_overides or {}
 
     for k in config_overides:

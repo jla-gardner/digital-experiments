@@ -15,6 +15,7 @@ from digital_experiments.util import (
     move_tree,
     no_context,
     pretty_json,
+    root_dir_for,
     time,
 )
 
@@ -50,7 +51,9 @@ def do_experiment(
     return ret
 
 
-def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> Path:
+def exmpt_setup_and_version(
+    func: Callable, save_to: Union[None, str], backend: Backend
+) -> Path:
     """
     setup the file system ready for an experiment
 
@@ -67,6 +70,8 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
     """
 
     code = inspect.getsource(func)
+    if save_to is None:
+        save_to = root_dir_for(func)
 
     def setup_dir(dir: Path) -> Path:
         """
@@ -75,25 +80,27 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
         - contain the code of the experiment in `code.py`
         - contain the backend identifier in `.backend`
         """
-        dir.mkdir(parents=True, exist_ok=False)
+        dir.mkdir(parents=True, exist_ok=True)
         (dir / Files.CODE).write_text(code)
         (dir / Files.BACKEND).write_text(id_for(backend))
         return dir
 
-    default_root = Path(save_to or func.__name__)
+    default_root = Path(save_to)
 
-    # the experiment has never been run before
     if not default_root.exists():
+        # the experiment has never been run before
         return setup_dir(default_root)
+
     # otherwise experiment has been run ⬇️
 
     # several versions of the experiment can exist
     versions = list(default_root.glob("v-*"))
 
     if not versions:
-        # the experiment's code has not been changed
         if (default_root / Files.CODE).read_text() == code:
+            # the experiment's code has not been changed
             return default_root
+
         # the experiment's code has been changed for the first time:
         # move all the old results to v-1, and setup v-2
         else:
@@ -105,7 +112,7 @@ def exmpt_setup(func: Callable, save_to: Union[None, str], backend: Backend) -> 
         if (version / Files.CODE).read_text() == code:
             return version
 
-    # the experiment's code has been changed again, create a new version
+    # the experiment's code has been changed, and is new: create a new version
     return setup_dir(default_root / f"v-{len(versions) + 1}")
 
 
@@ -138,7 +145,7 @@ class ExperimentManager:
         return self._metadata[-1] if self._metadata else {}
 
     @contextlib.contextmanager
-    def _using_directory(self, directory: Path):
+    def using_directory(self, directory: Path):
         """Context manager for setting the current directory"""
         self._directories.append(directory)
         yield
@@ -188,16 +195,16 @@ class ExperimentManager:
                     return func(*args, **kwargs)
 
                 # setup the file system ready for the experiment
-                expmt_root_dir = exmpt_setup(func, save_to, backend)
+                root_dir = exmpt_setup_and_version(func, save_to, backend)
 
                 # create a new experiment
-                expmt_dir = expmt_root_dir / new_experiment_id()
+                expmt_dir = root_dir / new_experiment_id()
                 expmt_dir.mkdir(parents=True, exist_ok=False)
 
                 optional_logging = (
                     stdout_to_(expmt_dir / "log") if capture_logs else no_context()
                 )
-                with optional_logging, self._using_directory(expmt_dir):
+                with optional_logging, self.using_directory(expmt_dir):
                     ret = do_experiment(
                         func,
                         args,

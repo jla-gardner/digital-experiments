@@ -61,9 +61,12 @@ class JSONBackend(Backend):
         result: Union[Any, Dict[str, Any]],
         metadata: Dict[str, Any],
     ):
-        (exmpt_dir / "config.json").write_text(pretty_json(config))
-        (exmpt_dir / "results.json").write_text(pretty_json(result))
-        (exmpt_dir / "metadata.json").write_text(pretty_json(metadata))
+        for name, content in {
+            "config": config,
+            "results": result,
+            "metadata": metadata,
+        }.items():
+            (exmpt_dir / f"{name}.json").write_text(pretty_json(content))
 
     @classmethod
     def _load_all_experiments(cls, root) -> List[Experiment]:
@@ -88,7 +91,7 @@ class CSVBackend(Backend):
         metadata: Dict[str, Any],
     ):
         file = exmpt_dir.parent / "results.csv"
-        previous_experiments = pd.read_csv(file) if file.exists() else pd.DataFrame()
+        previous_experiments = cls._previous_experiments(file.parent)
 
         entry = flatten(
             {
@@ -106,6 +109,13 @@ class CSVBackend(Backend):
         df = pd.read_csv(root / "results.csv")
         rows = [unflatten(row) for _, row in df.iterrows()]
         return [Experiment(**row) for row in rows]
+
+    @classmethod
+    def _previous_experiments(cls, root: Path) -> pd.DataFrame:
+        file = root / "results.csv"
+        if file.exists():
+            return pd.read_csv(file)
+        return pd.DataFrame()
 
 
 __available_backends = {"json": JSONBackend, "csv": CSVBackend}
