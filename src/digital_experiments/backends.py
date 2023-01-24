@@ -106,6 +106,8 @@ class CSVBackend(Backend):
 
     @classmethod
     def _load_all_experiments(cls, root) -> pd.DataFrame:
+        if not (root / "results.csv").exists():
+            return []
         df = pd.read_csv(root / "results.csv")
         rows = [unflatten(row) for _, row in df.iterrows()]
         return [Experiment(**row) for row in rows]

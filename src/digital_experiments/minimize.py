@@ -1,10 +1,10 @@
 import warnings
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List
+from datetime import datetime
+from typing import Any, Callable, Dict, List, Union
 
 import numpy as np
 from skopt import Optimizer
-from skopt.sampler import Hammersly
 from skopt.space import Dimension, Space
 
 from digital_experiments.core import additional_metadata
@@ -25,29 +25,69 @@ Point = Dict[str, Any]
 @dataclass
 class Step:
     point: Point
-    y: float
+    observation: float
 
 
-class NiceOptimizer:
+class Minimizer:
+    """
+    Minimize a function while avoiding skopt's `@use_named_args` decorator.
+
+    Usage:
+
+    ```python
+    from skopt.space import Real
+    from digital_experiments.optmization import Minimizer
+
+    def objective(x, y):
+        return x + y
+
+    minimizer = Minimizer(
+        objective=objective,
+        space={
+            "x": Real(0, 1),
+            "y": Real(0, 1),
+        },
+        n_explore_steps=10,
+    )
+
+    # manually perform an exploration step
+    minimizer.explore_step()
+
+    # manually perform an exploitation step
+    minimizer.exploit_step()
+
+    # perform a single optimization step (based on the number of steps so far)
+    minimizer.optimize_step()
+    """
+
     def __init__(
         self,
         objective: Callable,
         space: Dict[str, Dimension],
         steps: List[Step] = None,
         seed: int = None,
+        n_explore_steps: int = 10,
+        optimizer: Optimizer = None,
     ) -> None:
 
         if steps is None:
             steps = []
-        self.random_points: List[Point] = []
-        self.steps_so_far: List[Step] = []
+
+        if seed is None:
+            seed = datetime.now().microsecond
         self.random = np.random.RandomState(seed=seed)
-        self.objective = objective
+
         self.space = space
-        self.generate_more_random_points()
-        self.actual_optimizer = get_default_optimizer(space)
+        if optimizer is None:
+            optimizer = get_default_optimizer(space, self.random)
+        self.actual_optimizer = optimizer
+
+        self.n_explore_steps = n_explore_steps
+
+        self.objective = objective
+        self.steps_so_far: List[Step] = []
         for step in steps:
-            self.record(step.point, step.y, fit=step is steps[-1])
+            self.record(step.point, step.observation, fit=step is steps[-1])
 
     def explore_step(self):
         """Perform a single exploration step."""
@@ -71,11 +111,10 @@ class NiceOptimizer:
     def get_random_point(self) -> Point:
         """Get the next point to try, randomly."""
 
-        # If we have no more random points, generate some more
-        if len(self.unused_random_points) == 0:
-            self.generate_more_random_points()
-
-        return self.random.choice(self.unused_random_points)
+        return {
+            name: dimension.rvs(1, random_state=self.random)[0]
+            for name, dimension in self.space.items()
+        }
 
     def get_optimized_point(self) -> Point:
         """Get the next point to try, optimized."""
@@ -114,25 +153,11 @@ class NiceOptimizer:
             return False
         return True
 
-    @property
-    def unused_random_points(self) -> List[Point]:
-        """Random points that have not been used yet."""
-
-        return [p for p in self.random_points if p not in self.points_so_far()]
-
     def to_point(self, values):
         return dict(zip(self.space.keys(), values))
 
-    def generate_more_random_points(self):
-        """Generate more random points."""
 
-        N = len(self.steps_so_far) * 2 + 1
-
-        values = sample_random_points(self.space, N)
-        self.random_points += [self.to_point(v) for v in values]
-
-
-class ExperimentMinimizer(NiceOptimizer):
+class ExperimentMinimizer(Minimizer):
     def explore_step(self):
         with additional_metadata({SEARCH_MODE: Modes.RANDOM}):
             return super().explore_step()
@@ -142,18 +167,14 @@ class ExperimentMinimizer(NiceOptimizer):
             return super().exploit_step()
 
 
-def sample_random_points(space, n) -> List[Dict[str, Any]]:
-    return Hammersly().generate(list(space.values()), n)
-    # return to_skopt_space(space).rvs(n_samples=n)
-
-
-def get_default_optimizer(space):
+def get_default_optimizer(space, rng) -> Optimizer:
     """Get the default optimizer."""
 
     return Optimizer(
         dimensions=list(space.values()),
         base_estimator="GP",
         n_initial_points=1,
+        random_state=rng,
     )
 
 
@@ -162,24 +183,72 @@ def to_skopt_space(space: Dict[str, Dimension]) -> Space:
 
     dimensions = []
     for name, dimension in space.items():
+        dimension.name = name
         dimensions.append(dimension)
     return Space(dimensions)
 
 
-def optimizer(experiment, space, overrides=None, loss_fn=None):
+def identity(x):
+    return x
+
+
+def minimizer(
+    experiment: Union[str, Callable],
+    space: Dict[str, Dimension],
+    overrides: Dict[str, Any] = None,
+    loss_fn: Callable = None,
+    seed: int = None,
+    n_explore_steps: int = 10,
+) -> Minimizer:
+    """
+    Create a minimizer for a given experiment.
+
+    Args:
+        experiment: The experiment to optimize.
+        space: The search space.
+        overrides: Any overrides to the experiment.
+        loss_fn: A function to convert the experiment result to a float.
+
+    Returns:
+        An optimizer.
+
+    Usage:
+
+    ```python
+    from digital_experiments import experiment
+    from digital_experiments.minimize import minimizer, Real
+
+    @experiment
+    def objective(x, y):
+        return x - y
+
+    minim = minimizer(
+        objective,
+        {"x": Real(-10, 10), "y": Real(-10, 10)}
+        n_explore_steps=5,
+    )
+
+    for _ in range(10):
+        minim.optimize_step()
+    ```
+    """
+
     if overrides is None:
         overrides = {}
     if loss_fn is None:
-        loss_fn = lambda x: x
+        loss_fn = identity
 
-    experiments = experiments_for(experiment, config=overrides)
+    previous_exmpts = experiments_for(experiment, config=overrides)
 
-    points = [{k: v for k, v in e.config.items() if k in space} for e in experiments]
-    values = [loss_fn(e.result) for e in experiments]
+    points = [
+        {k: v for k, v in expmt.config.items() if k in space.keys()}
+        for expmt in previous_exmpts
+    ]
+    values = [loss_fn(e.result) for e in previous_exmpts]
     steps = [Step(p, v) for p, v in zip(points, values)]
 
     def objective(**kwargs):
         result = experiment(**{**overrides, **kwargs})
         return loss_fn(result)
 
-    return ExperimentMinimizer(objective, space, steps)
+    return ExperimentMinimizer(objective, space, steps, seed, n_explore_steps)

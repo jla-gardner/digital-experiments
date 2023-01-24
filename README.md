@@ -28,6 +28,6 @@ The [examples directory](examples/) contains some notebooks that help explain ho
 ---
 
 <div align="center">
-    <img src="res/optimization.gif" alt="drawing" width="400"/>
-    <img src="res/optimization.svg" alt="drawing" width="400"/>
+    <img src="https://raw.github.com/jla-gardner/digital-experiments/master/res/optimization.gif" alt="drawing" width="400"/>
+    <img src="https://raw.github.com/jla-gardner/digital-experiments/master/res/optimization.svg" alt="drawing" width="400"/>
 </div>

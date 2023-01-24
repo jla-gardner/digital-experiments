@@ -61,6 +61,9 @@ def to_dataframe(
     Convert a list of experiments into a dataframe
     """
     df = pd.DataFrame([flatten(asdict(e)) for e in experiments])
+
+    assert not df.empty, "Excpected at least one experiment"
+
     if not id:
         df = df.drop(columns="id")
     if not metadata:
