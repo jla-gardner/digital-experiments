@@ -177,14 +177,16 @@ class ExperimentManager:
         - recording the experiment's code
         - saving the above
 
-        Usage:
-        ```
-        @experiment
-        def my_experiment(a, b):
-            return a + b
-        ```
-        """
+        Args:
+            _func: the function to decorate
+            save_to (str): the directory to save the experiment to
+            capture_logs (bool): whether to capture the experiment's logs
+            verbose (bool): whether to print information about the experiment
+            backend (str): the backend to use for saving the experiment
 
+        Returns:
+            the decorated function
+        """
         info = print if verbose else do_nothing
         backend: Backend = get_backend(backend)
 
@@ -238,6 +240,7 @@ def experiment(
     verbose: bool = False,
     backend: str = "json",
 ):
+
     return __MANAGER.experiment(
         _func=_func,
         save_to=save_to,

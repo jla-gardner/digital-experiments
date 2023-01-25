@@ -71,7 +71,7 @@ def to_dataframe(
     return df
 
 
-def to_df(
+def results_for(
     thing: Union[str, Callable],
     template: dict = None,
     version="latest",
