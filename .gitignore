@@ -2,10 +2,13 @@
 .vscode/
 **/.DS_Store
 
-examples
 *.egg-info
 dist
 build.sh
+publish.sh
 
 blah*
-publish.sh
+
+docs/build
+docs/source/examples/
+**/experiments
