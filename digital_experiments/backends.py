@@ -19,9 +19,8 @@ class Backend(ABC):
     """
     Abstract Base Class for backends
 
-    A backend is responsible for saving and loading experiments
+    A backend is responsible for saving and loading experiments. 
     Implementations should subclass this class and implement the abstract methods
-    Any core files (e.g. config.json) should be returned by the `core_files`
     """
 
     @abstractclassmethod
@@ -32,19 +31,29 @@ class Backend(ABC):
         result: Union[Any, Dict[str, Any]],
         metadata: Dict[str, Any],
     ):
+        """
+        Save an experiment to the given directory
+        """
         pass
 
     @abstractclassmethod
-    def _load_all_experiments(cls, root: Path) -> Iterable[Experiment]:
+    def load_all_experiments(cls, root: Path) -> Iterable[Experiment]:
+        """
+        Load all experiments from the given directory
+        """
         pass
 
     @classmethod
-    def core_files(self):
+    def core_files(cls):
+        """
+        Files created by this backend that should be ignored
+        when querying artefacts etc.
+        """
         return []
 
     @classmethod
     def all_experiments(cls, root: Path) -> List[Experiment]:
-        experiments = cls._load_all_experiments(root)
+        experiments = cls.load_all_experiments(root)
         return sorted(experiments, key=lambda e: e.metadata["timing"]["start"])
 
 
@@ -69,7 +78,7 @@ class JSONBackend(Backend):
             (exmpt_dir / f"{name}.json").write_text(pretty_json(content))
 
     @classmethod
-    def _load_all_experiments(cls, root) -> List[Experiment]:
+    def load_all_experiments(cls, root) -> List[Experiment]:
         def experiment_from(dir: Path):
             return Experiment(
                 id=dir.name,
@@ -105,7 +114,7 @@ class CSVBackend(Backend):
         df.to_csv(file, index=False)
 
     @classmethod
-    def _load_all_experiments(cls, root) -> pd.DataFrame:
+    def load_all_experiments(cls, root) -> pd.DataFrame:
         if not (root / "results.csv").exists():
             return []
         df = pd.read_csv(root / "results.csv")

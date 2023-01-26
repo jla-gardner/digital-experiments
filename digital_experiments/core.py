@@ -153,39 +153,38 @@ class ExperimentManager:
 
     @contextlib.contextmanager
     def dont_record(self):
+        """Context manager for disabling recording"""
+
         self.active = False
         yield
         self.active = True
 
     def experiment(
         self,
-        _func=None,
+        _func: Callable = None,
         *,
         save_to: str = None,
         capture_logs: bool = False,
         verbose: bool = False,
         backend: str = "json",
-    ):
+    ) -> Callable:
         """
         decorator for running an experiment
 
-        This decorator takes care of:
-        - recording the experiment's config
-        - recording the experiment's results
-        - recording other metadata (e.g. timing)
-        - recording the experiment's logs
-        - recording the experiment's code
-        - saving the above
+        This decorator takes care of recording the experiment's:
+        config, results, logs, code and other metadata (e.g. timing).
+        These are saved locally to disk, and can be accessed
+        in a (optionally different) python session.
 
         Args:
-            _func: the function to decorate
+            _func (Callable): the function to decorate
             save_to (str): the directory to save the experiment to
             capture_logs (bool): whether to capture the experiment's logs
             verbose (bool): whether to print information about the experiment
             backend (str): the backend to use for saving the experiment
 
         Returns:
-            the decorated function
+            the decorator
         """
         info = print if verbose else do_nothing
         backend: Backend = get_backend(backend)
@@ -233,13 +232,13 @@ __MANAGER = ExperimentManager()
 
 @copy_docstring_from(ExperimentManager.experiment)
 def experiment(
-    _func=None,
+    _func: Callable = None,
     *,
     save_to: str = None,
     capture_logs: bool = False,
     verbose: bool = False,
     backend: str = "json",
-):
+) -> Callable:
 
     return __MANAGER.experiment(
         _func=_func,
@@ -251,12 +250,12 @@ def experiment(
 
 
 @copy_docstring_from(ExperimentManager.current_directory)
-def current_directory():
+def current_directory() -> Path:
     return __MANAGER.current_directory()
 
 
 @copy_docstring_from(ExperimentManager.dont_record)
-def dont_record():
+def dont_record() -> contextlib._GeneratorContextManager:
     return __MANAGER.dont_record()
 
 

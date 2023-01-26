@@ -13,7 +13,7 @@ from digital_experiments.util import flatten, matches, root_dir_for
 def experiments_for(
     thing: Union[str, Callable],
     template: dict = None,
-    version="latest",
+    version: Union[str, int]="latest",
     **more_template,
 ) -> List[Experiment]:
 
@@ -74,7 +74,7 @@ def to_dataframe(
 def results_for(
     thing: Union[str, Callable],
     template: dict = None,
-    version="latest",
+    version : Union[str, int]="latest",
     id: bool = False,
     metadata: bool = False,
     **more_template,

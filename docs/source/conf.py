@@ -40,11 +40,20 @@ extensions = [
     "sphinx.ext.autosummary",
     "nbsphinx",
     "sphinx.ext.napoleon",
+    "sphinx.ext.intersphinx",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
 
+html_css_files = [
+    "css/linebreaks.css",
+]
+
+intersphinx_mapping = {
+    "python": ("http://docs.python.org/", None),
+    "pandas": ("http://pandas.pydata.org/pandas-docs/dev", None),
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
