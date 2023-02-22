@@ -7,10 +7,12 @@ from typing import List
 __CURRENTLY_RUNNING: List["Run"] = []
 __RECORDING: bool = True
 
+
 @dataclass
 class Run:
     id: str
     directory: Path
+
 
 @contextlib.contextmanager
 def recording_run(run: Run):
@@ -37,6 +39,3 @@ def current_directory():
 
 def should_record():
     return __RECORDING
-
-
-
