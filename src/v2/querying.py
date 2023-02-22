@@ -35,6 +35,7 @@ def flatten(dict_of_dicts: Dict[str, Dict], seperator="_") -> Dict[str, Any]:
     >>> flatten({"a": {"b": 1, "c": 2}, "d": 3})
     {'a_b': 1, 'a_c': 2, 'd': 3}
     """
+
     result = {}
     for k, v in dict_of_dicts.items():
         if isinstance(v, dict):

@@ -3,24 +3,15 @@ import shutil
 from abc import ABC, abstractmethod
 from functools import partial
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List
 
 import yaml
 
 from .control_center import Run
-from .inspection import code_for
 from .observation import Observation
 from .util import generate_id
 
 __BACKENDS: Dict[str, "Backend"] = {}
-
-
-def backend_for(
-    backend: str, experiment_fn, root: Union[str, Path] = None
-) -> "Backend":
-    if backend not in __BACKENDS:
-        raise ValueError(f"Unknown backend: {backend}")
-    return __BACKENDS[backend](experiment_fn, root=root)
 
 
 def register_backend(name: str, cls: "Backend"):
@@ -33,42 +24,53 @@ def this_is_a_backend(name: str):
     return partial(register_backend, name)
 
 
+def backend_from_type(backend_type: str):
+    if backend_type not in __BACKENDS:
+        raise ValueError(
+            f"Unknown backend type {backend_type}. "
+            f"Available backends are: {list(__BACKENDS.keys())}. "
+            "Did you forget to register your backend using @this_is_a_backend?"
+        )
+    return __BACKENDS[backend_type]
+
+
 class Backend(ABC):
     """
+    Base class for a backend.
+
+    A backend is repsponsible for saving and loading observations to
+    a specific directory on disk.
+
     To implement a new backend, subclass this class and decorate it with
     @this_is_a_backend(<name>). You need to implement the following methods:
     - save
     - all_observations
 
+    Any additional setup you want to do when the file structure for this
+    backend is created, you can do in the create_new class method.
 
-    general structure of the file system:
+    The default structure of the file system in a backend is as follows:
+    <home>
+    ├── .code
+    ├── .backend
+    ├── observations.<format>
+    └─── runs
+        ├── <run_id>
+        │   ├── <artefacts>
+        │   ├── <artefacts>
+        │   └── <artefacts>
+        └── ...
 
-    <root>
-    ├── version-1
-    │   ├── .code
-    │   ├── .backend
-    │   ├── observations.<backend>
-    │   └── runs
-    │       └── 23.02.21-15.09.15-477669
-    │           └── <artefacts...>
-    └── version-2/...
+    The .code file contains the experiment's code.
+    The .backend file contains the name of the backend serves this directoty.
     """
 
     name: str
 
-    def __init__(self, experiment_fn, root: Union[str, Path] = None):
-        self.root = Path(root or experiment_fn.__name__)
-        self.experiment_fn = experiment_fn
-        self._currently_running = []
-        self._lazy_home = None
-
-    @property
-    def home(self) -> Path:
-        # lazily creating the home directory ensures that
-        # we only add to the file system if we actually record
-        if self._lazy_home is None:
-            self._lazy_home = self._setup_and_version_control()
-        return self._lazy_home
+    def __init__(self, home: Path):
+        assert home.exists(), f"{home} doesn't exist"
+        assert (home / Files.BACKEND).read_text() == self.name, "wrong backend"
+        self.home = home
 
     @abstractmethod
     def save(self, obs: Observation):
@@ -84,71 +86,28 @@ class Backend(ABC):
         """
         pass
 
-    def _setup_and_version_control(self) -> Path:
+    @classmethod
+    def create_new(cls, location: Path, code: str):
         """
-        if the experiment has never been run before, or the code has changed,
-        we create a new version of the experiment.
-        this contains .code, .backend, and runs/
-
-        <root>
-        ├── version-1
-        │   ├── .code
-        │   ├── .backend
-        │   ├── observations.<backend>
-        │   └── runs/...
-        └── version-2/... (or another name - this should be editable by a human)
+        Create a new backend at the given location.
         """
-
-        current_code = code_for(self.experiment_fn)
-
-        def setup(home: Path):
-            home.mkdir(parents=True)
-            (home / "runs").mkdir()
-            (home / Files.CODE).write_text(current_code)
-            (home / Files.BACKEND).write_text(self.name)
-            return home
-
-        if not self.root.exists():
-            return setup(self.root / "version-1")
-
-        existing_versions = [
-            file.parent.name for file in self.root.glob(f"**/{Files.CODE}")
-        ]
-
-        for version in existing_versions:
-            home = self.root / version
-            if (home / Files.CODE).read_text() == current_code:
-                return home
-
-        version_numbers = [
-            int(version.split("-")[-1])
-            for version in existing_versions
-            if "version-" in version
-        ]
-        new_number = max(version_numbers, default=0) + 1
-        return setup(self.root / f"version-{new_number}")
-
-    def _start_run(self):
-
-        id = generate_id()
-        directory = self.home / "runs" / id
-        directory.mkdir(parents=True, exist_ok=True)
-
-        run = Run(id, directory)
-        self._currently_running.append(run)
-        return run
-
-    def _end_run(self, run: Run):
-        assert run == self._currently_running[-1]
-        self._currently_running.pop()
-        if not any(run.directory.iterdir()):
-            shutil.rmtree(run.directory)
+        assert not location.exists(), f"{location} already exists"
+        location.mkdir(parents=True)
+        (location / Files.RUNS).mkdir()
+        (location / Files.BACKEND).write_text(cls.name)
+        (location / Files.CODE).write_text(code)
+        return cls(location)
 
     @contextlib.contextmanager
     def unique_run(self):
-        run = self._start_run()
-        yield run
-        self._end_run(run)
+        id = generate_id()
+        directory = self.home / Files.RUNS / id
+        directory.mkdir(parents=True, exist_ok=False)
+
+        run = Run(id, directory)
+        yield run  # experiments happen while this is yielded
+        if not any(run.directory.iterdir()):
+            shutil.rmtree(run.directory)
 
 
 @this_is_a_backend("yaml")
@@ -177,3 +136,4 @@ class ObservationLoader(yaml.Loader):
 class Files:
     CODE = ".code"
     BACKEND = ".backend"
+    RUNS = "runs"
