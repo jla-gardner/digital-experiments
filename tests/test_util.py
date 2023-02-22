@@ -1,29 +1,15 @@
-import numpy as np
-
-from digital_experiments.util import flatten, pretty_json, unflatten
+from digital_experiments.util import flatten, generate_id
 
 nested = {"a": 1, "b": {"c": 2, "d": "hi"}}
-flat = {"a": 1, "b.c": 2, "b.d": "hi"}
+flat = {"a": 1, "b_c": 2, "b_d": "hi"}
+
 
 def test_flatten():
     assert flatten(nested) == flat
 
-def test_unflatten():
-    assert unflatten(flat) == nested
 
-def test_pretty_json():
-    assert pretty_json(nested) == """{
-    "a": 1,
-    "b": {
-        "c": 2,
-        "d": "hi"
-    }
-}"""
-    # check that serialising numpy arrays works
-    assert pretty_json({'a': np.array([1, 2, 3])}) == """{
-    "a": [
-        1,
-        2,
-        3
-    ]
-}"""
+def test_id_generation():
+    id1 = generate_id()
+    id2 = generate_id()
+    assert id1 != id2, "IDs should be unique"
+    assert id1 < id2, "IDs should be ordered by time"
