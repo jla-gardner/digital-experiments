@@ -47,3 +47,9 @@ def current_directory():
 
 def should_record():
     return __RECORDING
+
+
+def current_metadata():
+    if len(__ADDITIONAL_METADATA) == 0:
+        return {}
+    return __ADDITIONAL_METADATA[-1]

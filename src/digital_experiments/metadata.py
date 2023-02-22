@@ -19,5 +19,5 @@ def record_metadata(func, args, kwargs) -> tuple:
     result = func(*args, **kwargs)
     end = now()
     metadata = {"time": {"start": start, "end": end, "duration": end - start}}
-    metadata.update(GLOBAL.additional_metadata())
+    metadata.update(GLOBAL.current_metadata())
     return metadata, result
