@@ -68,6 +68,11 @@ class Backend(ABC):
     name: str
 
     def __init__(self, home: Path):
+        if not hasattr(self, "name"):
+            raise ValueError(
+                "Ooops! You must decorate your backend "
+                "class with @this_is_a_backend(<name>)"
+            )
         assert home.exists(), f"{home} doesn't exist"
         assert (home / Files.BACKEND).read_text() == self.name, "wrong backend"
         self.home = home
