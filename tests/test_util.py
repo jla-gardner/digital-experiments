@@ -1,11 +1,11 @@
 from digital_experiments.util import flatten, generate_id
 
-nested = {"a": 1, "b": {"c": 2, "d": "hi"}}
-flat = {"a": 1, "b_c": 2, "b_d": "hi"}
-
 
 def test_flatten():
-    assert flatten(nested) == flat
+    nested = {"a": 1, "b": {"c": 2, "d": "hi"}}
+    flat = {"a": 1, "b_c": 2, "b_d": "hi"}
+
+    assert flatten(nested, seperator="_") == flat
 
 
 def test_id_generation():
