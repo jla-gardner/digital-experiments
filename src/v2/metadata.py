@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from . import control_center as GLOBAL
+
 
 def now():
     """
@@ -17,4 +19,5 @@ def record_metadata(func, args, kwargs) -> tuple:
     result = func(*args, **kwargs)
     end = now()
     metadata = {"time": {"start": start, "end": end, "duration": end - start}}
+    metadata.update(GLOBAL.additional_metadata())
     return metadata, result

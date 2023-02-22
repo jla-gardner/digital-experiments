@@ -6,6 +6,7 @@ from typing import List
 # isolate all global state here
 __CURRENTLY_RUNNING: List["Run"] = []
 __RECORDING: bool = True
+__ADDITIONAL_METADATA: List[dict] = []
 
 
 @dataclass
@@ -27,6 +28,13 @@ def dont_record():
     __RECORDING = False
     yield
     __RECORDING = True
+
+
+@contextlib.contextmanager
+def additional_metadata(metadata: dict):
+    __ADDITIONAL_METADATA.append(metadata)
+    yield
+    __ADDITIONAL_METADATA.pop()
 
 
 def currently_running():
