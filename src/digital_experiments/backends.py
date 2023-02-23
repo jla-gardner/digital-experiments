@@ -5,11 +5,12 @@ from functools import partial
 from pathlib import Path
 from typing import Dict, List
 
+import pandas as pd
 import yaml
 
 from .control_center import Run
 from .observation import Observation
-from .util import generate_id
+from .util import flatten, generate_id, unflatten
 
 __BACKENDS: Dict[str, "Backend"] = {}
 
@@ -136,6 +137,37 @@ class ObservationLoader(yaml.Loader):
     def construct_observation(self, node):
         data = self.construct_mapping(node)
         return Observation(**data)
+
+
+@this_is_a_backend("csv")
+class CSVBackend(Backend):
+    SEPARATOR = "|"
+
+    @property
+    def csv_file(self):
+        return self.home / "observations.csv"
+
+    def save(self, obs: Observation):
+        existing_observations = self.all_observations()
+        existing_observations.append(obs)
+
+        df = pd.DataFrame(
+            [
+                flatten(o.as_dict(), self.SEPARATOR)
+                for o in existing_observations
+            ],
+        )
+        df.to_csv(self.csv_file, index=False)
+
+    def all_observations(self) -> List[Observation]:
+        if not self.csv_file.exists():
+            return []
+
+        df = pd.read_csv(self.csv_file, dtype={"id": str})
+        return [
+            Observation(**unflatten(row, self.SEPARATOR))
+            for _, row in df.iterrows()
+        ]
 
 
 class Files:
