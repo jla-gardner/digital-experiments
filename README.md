@@ -1,4 +1,8 @@
-# 💻 digital-experiments 🧪
+<div align="center">
+<img src="docs/source/logo.svg" width="50%px">
+</div>
+
+---
 
 A lightweight python library for keeping track of, and optimizing, configuration and results for digital experiments.
 

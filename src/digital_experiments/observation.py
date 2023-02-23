@@ -26,7 +26,6 @@ class Observation:
     def __repr__(self):
         return pretty_instance(
             "Observation",
-            f'"{self.id}"',
             config=self.config,
             result=self.result,
         )
