@@ -75,7 +75,7 @@ def test_unknown_backend_type():
 def test_available_backends(tmp_path):
     observation = Observation(id="1", config={"a": 1, "b": 2}, result=1)
 
-    for backend in ("yaml",):
+    for backend in ("yaml", "csv"):
         # will throw an error if doesn't exist
         klass = backend_from_type(backend)
         assert klass.name == backend
@@ -85,4 +85,6 @@ def test_available_backends(tmp_path):
         actual_backend = klass(home)
         actual_backend.save(observation)
 
-        assert actual_backend.all_observations() == [observation]
+        observations = actual_backend.all_observations()
+        assert len(observations) == 1
+        assert observations[0] == observation
