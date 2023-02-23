@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any, Callable, Dict, Tuple
 
 from . import control_center as GLOBAL
 
@@ -10,7 +11,9 @@ def now():
     return datetime.now().timestamp()
 
 
-def record_metadata(func, args, kwargs) -> tuple:
+def record_metadata(
+    func: Callable, args: Tuple, kwargs: Dict
+) -> Tuple[Dict, Any]:
     """
     record metadata for a function's execution
     """
