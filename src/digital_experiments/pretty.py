@@ -11,7 +11,9 @@ def pretty_instance(class_name, *things, **keywords) -> str:
     make a pretty representation of an instance of a class
     """
 
-    all_things = list(things) + [f"{k}={v}" for k, v in keywords.items()]
+    all_things = list(map(str, things)) + [
+        f"{k}={v}" for k, v in keywords.items()
+    ]
 
     naive_rep = f"{class_name}({', '.join(all_things)})"
     if len(naive_rep) < 80:

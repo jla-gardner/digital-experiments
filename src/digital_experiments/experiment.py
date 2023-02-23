@@ -11,22 +11,38 @@ from .pretty import pretty_instance
 from .version_control import get_or_create_backend_for
 
 
-def experiment(experiment_fn=None, *, backend: str = "yaml", root: str = None):
+def experiment(
+    experiment_fn=None,
+    *,
+    backend: str = "yaml",
+    root: str = None,
+    absolute_root: Union[str, Path] = None
+):
     """
     decorator to record an experiment
     """
     if experiment_fn is None:
-        return partial(experiment, backend=backend, root=root)
+        return partial(
+            experiment, backend=backend, root=root, absolute_root=absolute_root
+        )
 
     # get the directory of the file where the experiment is defined
+    # and where <root> should be relative to
     expmt_file = Path(experiment_fn.__code__.co_filename).parent
     if "ipykernel" in str(expmt_file):
         expmt_file = Path(".")
-    if root is None:
-        root = "experiments/" + experiment_fn.__name__
 
-    absolute_root = expmt_file.resolve() / root
-    return Experiment(experiment_fn, backend, absolute_root)
+    if absolute_root is None and root is None:
+        final_root = (
+            expmt_file.resolve() / "experiments" / experiment_fn.__name__
+        )
+    elif absolute_root:
+        assert root is None, "Cannot specify both root and absolute_root"
+        final_root = Path(absolute_root).resolve()
+    else:
+        final_root = expmt_file.resolve() / root
+
+    return Experiment(experiment_fn, backend, final_root)
 
 
 class Experiment:

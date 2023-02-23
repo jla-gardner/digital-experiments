@@ -12,3 +12,5 @@ blah*
 docs/build
 docs/source/examples/
 **/experiments
+
+.isort.cfg

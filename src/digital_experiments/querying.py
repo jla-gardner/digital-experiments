@@ -1,18 +1,10 @@
 import warnings
-from typing import Any, Dict, List
+from typing import List
 
 import pandas as pd
 
 from .observation import Observation
-from .util import flatten
-
-
-def union(things):
-    return set.union(*[set(t) for t in things])
-
-
-def intersect(things):
-    return set.intersection(*[set(t) for t in things])
+from .util import flatten, intersect, union
 
 
 def to_dataframe(
