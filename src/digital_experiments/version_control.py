@@ -9,14 +9,15 @@ used to store its results.
 The general structure of the file system for this directory (root) is:
 <root>
 ├── version-1
-│   ├── .code
-│   ├── .backend
+│   ├── .digital-experiment
+│   ├── observations.<format>
 │   └── ... other backend specific files
 ├── version-2/...
 └── named-version/...
 
 i.e. every version of the experiment is stored in a subdirectory
-which definitely contains the .code and .backend files.
+which definitely contains the .digital-experiment metadata file.
+
 These directories are numbered sequentially, but can be renamed
 by the user to be more descriptive.
 """
@@ -24,7 +25,7 @@ by the user to be more descriptive.
 from pathlib import Path
 from typing import List, Optional
 
-from .backends import Backend, Files, backend_from_type
+from .backends import Backend, Files, HomeLabel, backend_from_type
 
 MUST_SPECIFY_BACKEND = ValueError(
     "If the experiment has never been run before, "
@@ -37,7 +38,7 @@ def get_all_versions(root: Path) -> List[str]:
     Find all the versions of the experiment in the root directory
     """
     assert root.exists()
-    return [file.parent.name for file in root.glob(f"**/{Files.CODE}")]
+    return [file.parent.name for file in root.glob(f"**/{Files.LABEL}")]
 
 
 def current_max_version(root: Path) -> int:
@@ -71,8 +72,7 @@ def get_backend_for(root, acceptance_function) -> Optional[Backend]:
     for version in sorted(existing_versions):
         home = root / version
         if acceptance_function(root, version):
-            backend_name = (home / Files.BACKEND).read_text()
-            return backend_from_type(backend_name)(home)
+            return Backend.from_existing(home)
 
     return None
 
@@ -115,9 +115,8 @@ def latest_version(root: Path, version: str):
 def matches_code_and_backend(code, backend):
     def acceptance(root, version):
         home = root / version
-        return (home / Files.CODE).read_text() == code and (
-            home / Files.BACKEND
-        ).read_text() == backend
+        label = HomeLabel.from_existing(home)
+        return label.code == code and label.backend == backend
 
     return acceptance
 

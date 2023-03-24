@@ -1,6 +1,7 @@
 import contextlib
 import shutil
 from abc import ABC, abstractmethod
+from dataclasses import asdict, dataclass
 from functools import partial
 from pathlib import Path
 from typing import Dict, List
@@ -48,12 +49,11 @@ class Backend(ABC):
     - all_observations
 
     Any additional setup you want to do when the file structure for this
-    backend is created, you can do in the create_new class method.
+    backend is created, you can do by extending the create_new class method.
 
     The default structure of the file system in a backend is as follows:
     <home>
-    ├── .code
-    ├── .backend
+    ├── .digital-experiment
     ├── observations.<format>
     └─── runs
         ├── <run_id>
@@ -62,8 +62,9 @@ class Backend(ABC):
         │   └── <artefacts>
         └── ...
 
-    The .code file contains the experiment's code.
-    The .backend file contains the name of the backend serves this directoty.
+    The .digital-experiment file labels this directory as containing a digital
+    experiment. It contains the name of the backend that is used to store
+    the experiment's data, and the code of the experiment.
     """
 
     name: str
@@ -74,8 +75,6 @@ class Backend(ABC):
                 "Ooops! You must decorate your backend "
                 "class with @this_is_a_backend(<name>)"
             )
-        assert home.exists(), f"{home} doesn't exist"
-        assert (home / Files.BACKEND).read_text() == self.name, "wrong backend"
         self.home = home
 
     @abstractmethod
@@ -99,9 +98,11 @@ class Backend(ABC):
         """
         assert not location.exists(), f"{location} already exists"
         location.mkdir(parents=True)
-        (location / Files.RUNS).mkdir()
-        (location / Files.BACKEND).write_text(cls.name)
-        (location / Files.CODE).write_text(code)
+
+        # label this directory as a digital experiment
+        # and store various required metadata
+        HomeLabel.create_new(location, cls.name, code)
+             
         return cls(location)
 
     @contextlib.contextmanager
@@ -115,6 +116,15 @@ class Backend(ABC):
         if not any(run.directory.iterdir()):
             shutil.rmtree(run.directory)
 
+    @staticmethod
+    def from_existing(home: Path):
+        """
+        Load an existing backend from the given location.
+        """
+
+        label = HomeLabel.from_existing(home)
+        return backend_from_type(label.backend_name)(home)
+
 
 @this_is_a_backend("yaml")
 class YAMLBackend(Backend):
@@ -123,6 +133,7 @@ class YAMLBackend(Backend):
         return self.home / "observations.yaml"
 
     def save(self, obs: Observation):
+        # append to the yaml file
         with open(self.yaml_file, "a") as f:
             yaml.dump([obs], f, indent=2)
 
@@ -171,6 +182,35 @@ class CSVBackend(Backend):
 
 
 class Files:
-    CODE = ".code"
-    BACKEND = ".backend"
+    LABEL = ".digital-experiment"
     RUNS = "runs"
+
+
+@dataclass
+class HomeLabel:
+    backend_name: str
+    code: str
+
+    @classmethod
+    def file_path(cls, home: Path):
+        return home / Files.LABEL
+
+    def save_to(self, home: Path):
+        namespace = asdict(self)
+
+        with open(self.file_path(home), "w") as f:
+            yaml.dump(namespace, f, default_style='|')
+    
+    @classmethod
+    def from_existing(cls, home: Path):
+        with open(cls.file_path(home)) as f:
+            namespace = yaml.load(f)
+
+        return cls(**namespace)
+    
+    @classmethod
+    def create_new(cls, home: Path, backend_name: str, code: str):
+        label = cls(backend_name, code)
+        label.save_to(home)
+        return label
+    
