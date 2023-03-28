@@ -88,3 +88,10 @@ def union(things):
 
 def intersect(things):
     return set.intersection(*[set(t) for t in things])
+
+
+def is_in(thing):
+    def _is_in(things):
+        return thing in things
+
+    return _is_in
