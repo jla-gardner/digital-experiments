@@ -204,7 +204,7 @@ class HomeLabel:
     @classmethod
     def from_existing(cls, home: Path):
         with open(cls.file_path(home)) as f:
-            namespace = yaml.load(f)
+            namespace = yaml.safe_load(f)
 
         return cls(**namespace)
     
