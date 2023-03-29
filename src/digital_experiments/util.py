@@ -1,5 +1,9 @@
+from contextlib import contextmanager
 from datetime import datetime
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, Union
+
+from filelock import FileLock
 
 
 def generate_id():
@@ -95,3 +99,18 @@ def is_in(thing):
         return thing in things
 
     return _is_in
+
+
+@contextmanager
+def exclusive_file_access(filehandle: Union[str, Path], mode: str = "r"):
+    if isinstance(filehandle, str):
+        filehandle = Path(filehandle)
+
+    lock_path = filehandle.with_suffix(".lock")
+    lock = FileLock(lock_path)
+    with lock:
+        with open(filehandle, mode) as f:
+            yield f
+
+    # remove the lock file
+    lock_path.unlink(missing_ok=True)
