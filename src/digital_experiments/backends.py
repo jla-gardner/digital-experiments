@@ -36,6 +36,10 @@ def backend_from_type(backend_type: str):
     return __BACKENDS[backend_type]
 
 
+def available_backends():
+    return list(__BACKENDS.keys())
+
+
 class Backend(ABC):
     """
     Base class for a backend.

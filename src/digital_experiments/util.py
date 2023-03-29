@@ -109,6 +109,8 @@ def exclusive_file_access(filehandle: Union[str, Path], mode: str = "r"):
     lock_path = filehandle.with_suffix(".lock")
     lock = FileLock(lock_path)
     with lock:
+        if not filehandle.exists():
+            filehandle.touch()
         with open(filehandle, mode) as f:
             yield f
 
