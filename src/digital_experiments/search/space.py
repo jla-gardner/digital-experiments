@@ -12,7 +12,7 @@ Samplers sample from these spaces to generate new points to evaluate.
 
 import math
 import random
-from typing import Mapping
+from typing import Any, Dict, Iterable, Mapping, Sequence
 
 
 def default_generator():
@@ -92,7 +92,7 @@ class LogUniform(Distribution):
 
 
 class Categorical(Distribution):
-    def __init__(self, options):
+    def __init__(self, options: Sequence):
         self.options = options
 
     def transform(self, unit_value):
@@ -105,15 +105,32 @@ class Categorical(Distribution):
         return value in self.options
 
 
+def process_dimensions(dimensions: Mapping[str, Any]):
+    new_dims = {}
+
+    for name, dim in dimensions.items():
+        if isinstance(dim, Distribution):
+            new_dims[name] = dim
+        elif isinstance(dim, Iterable):
+            new_dims[name] = Categorical(dim)
+        else:
+            raise ValueError(f"Invalid dimension: {dim}")
+
+    return new_dims
+
+
 class Space:
     def __init__(self, **dimensions: Distribution):
-        self.dimensions = dimensions
+        self.dimensions = process_dimensions(dimensions)
 
     def items(self):
         return self.dimensions.items()
 
     def keys(self):
         return self.dimensions.keys()
+
+    def values(self):
+        return self.dimensions.values()
 
     def random_sample(self, n=1, generator=None):
         if generator is None:
@@ -145,10 +162,7 @@ class Space:
         to a mapping of keys to values in the unit range.
         """
 
-        return {
-            k: d.inverse_transform(point[k])
-            for k, d in self.dimensions.items()
-        }
+        return {k: d.inverse_transform(point[k]) for k, d in self.dimensions.items()}
 
     def contains(self, point: Mapping[str, float]):
         """
@@ -163,7 +177,23 @@ class Space:
         return self.dimensions[key]
 
 
+class Grid(Space):
+    def __init__(self, **dimensions: Any):
+        dimensions = process_dimensions(dimensions)
+
+        for k, v in dimensions.items():
+            if not isinstance(v, Categorical):
+                raise ValueError(f"Grid dimensions must be Categorical: {k}")
+
+        self.dimensions: Dict[str, Categorical] = dimensions
+
+
+def is_iterable(obj):
+    return hasattr(obj, "__iter__")
+
+
 def to_space(thing):
     if isinstance(thing, Space):
         return thing
+
     return Space(**thing)

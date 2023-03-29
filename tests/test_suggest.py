@@ -3,11 +3,12 @@ import pytest
 from digital_experiments.search.skopt_suggest import SKSuggester
 from digital_experiments.search.space import (
     Categorical,
+    Grid,
     LogUniform,
     Space,
     Uniform,
 )
-from digital_experiments.search.suggest import RandomSuggester
+from digital_experiments.search.suggest import GridSuggester, RandomSuggester
 
 SPACE = Space(
     x=Uniform(3.6, 10.7),
@@ -39,3 +40,20 @@ def test_suggester(suggester_class):
     assert unit_point in suggester.previous_unit_points()
     assert len(suggester.previous_points()) == 1
     assert len(suggester.previous_unit_points()) == 1
+
+
+def test_grid():
+    grid = Grid(
+        x=range(3),
+        y=[4, 5, 6],
+        z=Categorical("ab"),
+    )
+
+    suggester = GridSuggester(grid)
+
+    assert suggester.total_points == 3 * 3 * 2
+    assert suggester.suggest() == {"x": 0, "y": 4, "z": "a"}
+
+    suggester.tell({"x": 0, "y": 4, "z": "a"}, observation=5.0)
+
+    assert suggester.suggest() == {"x": 1, "y": 4, "z": "a"}
