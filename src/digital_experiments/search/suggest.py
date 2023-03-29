@@ -10,13 +10,7 @@ from typing import Any, Dict, List, Mapping, Union
 
 import numpy as np
 
-from digital_experiments.search.space import (
-    Categorical,
-    Distribution,
-    Grid,
-    Space,
-    to_space,
-)
+from digital_experiments.search.space import Distribution, Grid, Space, to_space
 
 Point = Mapping[str, Any]
 UnitPoint = Mapping[str, float]  # a point in the unit hypercube
@@ -96,20 +90,20 @@ class GridSuggester(Suggester):
 
         self.sampled = [False] * self.total_points
         for step in self.previous_steps:
-            idx = self._point_to_idx(step.point)
+            idx = self.point_to_idx(step.point)
             self.sampled[idx] = True
 
     def suggest(self) -> Point:
         # get first unsampled point
         idx = self.sampled.index(False)
-        return self._idx_to_point(idx)
+        return self.idx_to_point(idx)
 
     def tell(self, point: Point, observation: float):
         super().tell(point, observation)
-        idx = self._point_to_idx(point)
+        idx = self.point_to_idx(point)
         self.sampled[idx] = True
 
-    def _point_to_idx(self, point: Point):
+    def point_to_idx(self, point: Point):
         """
         convert a point in the grid to a scalar index
         """
@@ -122,7 +116,7 @@ class GridSuggester(Suggester):
 
         return idx
 
-    def _idx_to_point(self, idx):
+    def idx_to_point(self, idx: int):
         """
         convert a scalar index to a point in the grid
         """

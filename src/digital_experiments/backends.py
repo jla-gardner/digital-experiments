@@ -11,7 +11,7 @@ import yaml
 
 from .control_center import Run
 from .observation import Observation
-from .util import flatten, generate_id, unflatten
+from .util import exclusive_file_access, flatten, generate_id, unflatten
 
 __BACKENDS: Dict[str, "Backend"] = {}
 
@@ -134,13 +134,13 @@ class YAMLBackend(Backend):
 
     def save(self, obs: Observation):
         # append to the yaml file
-        with open(self.yaml_file, "a") as f:
+        with exclusive_file_access(self.yaml_file, "a") as f:
             yaml.dump([obs], f, indent=2)
 
     def all_observations(self) -> List[Observation]:
         if not self.yaml_file.exists():
             return []
-        with open(self.yaml_file) as f:
+        with exclusive_file_access(self.yaml_file) as f:
             return yaml.load(f, Loader=ObservationLoader)
 
 
@@ -168,13 +168,16 @@ class CSVBackend(Backend):
                 for o in existing_observations
             ],
         )
-        df.to_csv(self.csv_file, index=False)
+        with exclusive_file_access(self.csv_file):
+            df.to_csv(self.csv_file, index=False)
 
     def all_observations(self) -> List[Observation]:
         if not self.csv_file.exists():
             return []
 
-        df = pd.read_csv(self.csv_file, dtype={"id": str})
+        with exclusive_file_access(self.csv_file):
+            df = pd.read_csv(self.csv_file, dtype={"id": str})
+        
         return [
             Observation(**unflatten(row, self.SEPARATOR))
             for _, row in df.iterrows()
