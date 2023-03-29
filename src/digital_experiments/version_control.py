@@ -116,7 +116,7 @@ def matches_code_and_backend(code, backend):
     def acceptance(root, version):
         home = root / version
         label = HomeLabel.from_existing(home)
-        return label.code == code and label.backend == backend
+        return label.code == code and label.backend_name == backend
 
     return acceptance
 

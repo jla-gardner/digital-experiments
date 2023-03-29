@@ -25,14 +25,9 @@ class SKSuggester(Suggester):
         seed: int = 42,
     ) -> None:
 
-        self.space = to_space(space)
-        self.tells_since_suggest = 0
+        super().__init__(space, previous_steps)
 
-        previous_steps = previous_steps or []
-        self.previous_steps = previous_steps
-        for step in previous_steps:
-            self.tell(step.point, step.observation)
-
+        self.tells_since_suggest = len(self.previous_steps)
         self.n_explore_steps = n_explore_steps
         self.random = np.random.RandomState(seed=seed).random
 
@@ -70,7 +65,7 @@ class SKSuggester(Suggester):
         for i, step in enumerate(
             self.previous_steps[-self.tells_since_suggest :]
         ):
-            values = step.point.values()
+            values = list(step.point.values())
             observation = step.observation
 
             # only fit the underlying model on the last step

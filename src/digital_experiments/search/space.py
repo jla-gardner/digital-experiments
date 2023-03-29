@@ -12,7 +12,6 @@ Samplers sample from these spaces to generate new points to evaluate.
 
 import math
 import random
-from collections import namedtuple
 from typing import Mapping
 
 
@@ -112,6 +111,9 @@ class Space:
 
     def items(self):
         return self.dimensions.items()
+
+    def keys(self):
+        return self.dimensions.keys()
 
     def random_sample(self, n=1, generator=None):
         if generator is None:

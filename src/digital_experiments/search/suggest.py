@@ -28,12 +28,12 @@ class Suggester(ABC):
         space: Union[Dict[str, Distribution], Space],
         previous_steps: List[Step] = None,
     ):
-        self.space = to_space(space)
-        previous_steps = previous_steps or []
+        space = to_space(space)
+        self.space = space
 
-        self.previous_steps = []
-        for step in previous_steps:
-            self.tell(step.point, step.observation)
+        previous_steps = previous_steps or []
+        previous_steps = filter(self.is_valid_step, previous_steps)
+        self.previous_steps = list(previous_steps)
 
     @abstractmethod
     def suggest(self) -> Point:
@@ -48,7 +48,7 @@ class Suggester(ABC):
     def is_valid_point(self, point: Point):
         return self.space.contains(point)
 
-    def previous_points(self):
+    def previous_points(self) -> List[Point]:
         return [step.point for step in self.previous_steps]
 
     def previous_unit_points(self):
