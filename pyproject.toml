@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "digital-experiments"
 version = "1.0.0"
-description = "Keep track of configuration for digital experiments."
+description = "Keep track of digital experiments."
 readme = "README.md"
 authors = [{ name = "John Gardner", email = "gardner.john97@gmail.com" }]
 license = { file = "LICENSE" }
@@ -14,7 +14,7 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
 ]
-keywords = ["config", "experiments"]
+keywords = ["config", "experiments", "optimisation"]
 dependencies = [
     "ipython",
     "matplotlib",
