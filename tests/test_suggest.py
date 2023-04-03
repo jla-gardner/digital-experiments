@@ -57,3 +57,37 @@ def test_grid():
     suggester.tell({"x": 0, "y": 4, "z": "a"}, observation=5.0)
 
     assert suggester.suggest() == {"x": 1, "y": 4, "z": "a"}
+
+
+def test_grid_suggestions():
+    """
+    test that the suggested points cover the space
+    and that the points are suggested in the correct order,
+    i.e last dimension (y) changes fastest
+    """
+
+    suggester = GridSuggester(
+        Grid(
+            x=[1, 2],
+            y=[3, 4],
+        )
+    )
+
+    true_points = [
+        {"x": 1, "y": 3},
+        {"x": 2, "y": 3},
+        {"x": 1, "y": 4},
+        {"x": 2, "y": 4},
+    ]
+
+    for idx, point in enumerate(true_points):
+        assert suggester.point_from(idx) == point, "point_from failed"
+        assert suggester.idx_from(point) == idx, "idx_from failed"
+
+    suggested_points = []
+    for _ in range(4):
+        point = suggester.suggest()
+        suggester.tell(point, observation=5.0)
+        suggested_points.append(point)
+
+    assert suggested_points == true_points

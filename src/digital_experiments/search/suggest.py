@@ -75,7 +75,27 @@ class RandomSuggester(Suggester):
         return self.space.random_sample(n=n, generator=self.random)
 
 
+class HitTracker:
+    def __init__(self, n):
+        self.n = n
+        self.sampled = [False] * n
+
+    def __getitem__(self, idx):
+        return self.sampled[idx]
+
+    def hit(self, idx):
+        self.sampled[idx] = True
+
+    def first_miss(self):
+        return self.sampled.index(False)
+
+
 class GridSuggester(Suggester):
+    """
+    suggestions happen by iterating over the grid with the first dimension
+    changing fastest
+    """
+
     def __init__(
         self,
         space: Grid,
@@ -88,37 +108,38 @@ class GridSuggester(Suggester):
 
         self.total_points = np.prod([len(dist.options) for dist in space.values()])
 
-        self.sampled = [False] * self.total_points
+        self.sampled = HitTracker(self.total_points)
         for step in self.previous_steps:
-            idx = self.point_to_idx(step.point)
-            self.sampled[idx] = True
+            idx = self.idx_from(step.point)
+            self.sampled.hit(idx)
 
     def suggest(self) -> Point:
         # get first unsampled point
-        idx = self.sampled.index(False)
-        return self.idx_to_point(idx)
+        idx = self.sampled.first_miss()
+        return self.point_from(idx)
 
     def tell(self, point: Point, observation: float):
         super().tell(point, observation)
-        idx = self.point_to_idx(point)
-        self.sampled[idx] = True
+        self.sampled.hit(self.idx_from(point))
 
-    def point_to_idx(self, point: Point):
+    def idx_from(self, point: Point):
         """
         convert a point in the grid to a scalar index
+        where the first dimension changes fastest
         """
 
         idx = 0
-        for name, dist in self.space.items():
+        for name, dist in reversed(self.space.items()):
             options = dist.options
             idx *= len(options)
             idx += options.index(point[name])
 
         return idx
 
-    def idx_to_point(self, idx: int):
+    def point_from(self, idx: int):
         """
         convert a scalar index to a point in the grid
+        where the first dimension changes fastest
         """
 
         point = {}

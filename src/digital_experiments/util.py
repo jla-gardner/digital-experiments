@@ -7,6 +7,8 @@ from typing import Any, Dict, Union
 
 from filelock import FileLock
 
+from digital_experiments.experiment import Experiment
+
 
 def generate_id():
     return datetime.now().strftime("%y.%m.%d-%H.%M.%S-%f")
@@ -139,11 +141,12 @@ def interpret(value: str, parameter: inspect.Parameter) -> Any:
     return value if is_str else eval(value)
 
 
-def get_passed_kwargs_for(func):
+# TODO update this to take an Experiment object
+def get_passed_kwargs_for(experiment: Experiment):
     kwargs: Dict[str, str] = get_passed_kwargs()
 
     relevant_kwargs = {}
-    signature = inspect.signature(func)
+    signature = inspect.signature(experiment._experiment)
     for k, v in kwargs.items():
         if k in signature.parameters:
             relevant_kwargs[k] = interpret(v, signature.parameters[k])
