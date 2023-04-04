@@ -14,3 +14,4 @@ docs/source/examples/
 **/experiments
 
 .isort.cfg
+.coverage
