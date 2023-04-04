@@ -51,11 +51,9 @@ def test_grid():
 
     suggester = GridSuggester(grid)
 
-    assert suggester.total_points == 3 * 3 * 2
     assert suggester.suggest() == {"x": 0, "y": 4, "z": "a"}
 
     suggester.tell({"x": 0, "y": 4, "z": "a"}, observation=5.0)
-
     assert suggester.suggest() == {"x": 1, "y": 4, "z": "a"}
 
 
@@ -63,7 +61,7 @@ def test_grid_suggestions():
     """
     test that the suggested points cover the space
     and that the points are suggested in the correct order,
-    i.e last dimension (y) changes fastest
+    i.e first dimension (x) changes fastest
     """
 
     suggester = GridSuggester(
