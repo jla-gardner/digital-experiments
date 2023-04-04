@@ -195,6 +195,10 @@ class Files:
 
 @dataclass
 class HomeLabel:
+    """
+    A class to label a directory as containing the results of a digital
+    experiment.
+    """
     backend_name: str
     code: str
 

@@ -7,8 +7,6 @@ from typing import Any, Dict, Union
 
 from filelock import FileLock
 
-from digital_experiments.experiment import Experiment
-
 
 def generate_id():
     return datetime.now().strftime("%y.%m.%d-%H.%M.%S-%f")
@@ -141,8 +139,7 @@ def interpret(value: str, parameter: inspect.Parameter) -> Any:
     return value if is_str else eval(value)
 
 
-# TODO update this to take an Experiment object
-def get_passed_kwargs_for(experiment: Experiment):
+def get_passed_kwargs_for(experiment):
     kwargs: Dict[str, str] = get_passed_kwargs()
 
     relevant_kwargs = {}

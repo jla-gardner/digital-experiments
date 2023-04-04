@@ -100,5 +100,53 @@ def minimizer(
     return ExperimentMinimzer(objective, suggester)
 
 
+class ExperimentController:
+    def __init__(
+        self,
+        experiment: Experiment,
+        suggester: Suggester,
+        overrides: Dict[str, Any] = None,
+        loss_fn: Callable = None,
+    ):
+
+        assert not any(
+            key in suggester.space.keys() for key in overrides.keys()
+        ), "Attempting to override a search dimension."
+        assert suggester.previous_steps == [], "Suggester must be empty."
+
+        self.experiment = experiment
+        self.suggester = suggester
+        self.overrides = overrides or {}
+        self.loss_fn = identity if loss_fn is None else loss_fn
+
+        # get all the previous observations
+        previous_steps = experiment.observations
+
+        # remove points that don't match the overrides
+        def matches(point):
+            return all(point[key] == value for key, value in overrides.items())
+
+        previous_steps = [step for step in previous_steps if matches(step.config)]
+
+        # remove dimensions that are not in the search space
+        def trim(point):
+            return {k: v for k, v in point.items() if k in suggester.space.keys()}
+
+        actual_steps = [
+            Step(trim(step.config), self.loss_fn(step.result))
+            for step in previous_steps
+        ]
+
+        # set up the suggester
+        for step in actual_steps:
+            suggester.tell(step.point, step.observation)
+
+    def run_step(self):
+        point = self.suggester.suggest()
+        observation = self.experiment(**point, **self.overrides)
+        self.suggester.tell(point, self.loss_fn(observation))
+        return observation
+
+
 def identity(x):
     return x

@@ -87,6 +87,8 @@ class HitTracker:
         self.sampled[idx] = True
 
     def first_miss(self):
+        if False not in self.sampled:
+            raise ValueError("All points have been sampled.")
         return self.sampled.index(False)
 
 
@@ -106,12 +108,11 @@ class GridSuggester(Suggester):
 
         super().__init__(space, previous_steps)
 
-        self.total_points = np.prod([len(dist.options) for dist in space.values()])
+        total_points = np.prod([len(dist.options) for dist in space.values()])
 
-        self.sampled = HitTracker(self.total_points)
+        self.sampled = HitTracker(total_points)
         for step in self.previous_steps:
-            idx = self.idx_from(step.point)
-            self.sampled.hit(idx)
+            self.sampled.hit(self.idx_from(step.point))
 
     def suggest(self) -> Point:
         # get first unsampled point
