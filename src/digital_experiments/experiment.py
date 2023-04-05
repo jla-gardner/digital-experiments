@@ -16,7 +16,8 @@ def experiment(
     *,
     backend: str = "yaml",
     root: str = None,
-    absolute_root: Union[str, Path] = None
+    absolute_root: Union[str, Path] = None,
+    verbose: bool = False,
 ):
     """
     decorator to record an experiment
@@ -33,16 +34,14 @@ def experiment(
         expmt_file = Path(".")
 
     if absolute_root is None and root is None:
-        final_root = (
-            expmt_file.resolve() / "experiments" / experiment_fn.__name__
-        )
+        final_root = expmt_file.resolve() / "experiments" / experiment_fn.__name__
     elif absolute_root:
         assert root is None, "Cannot specify both root and absolute_root"
         final_root = Path(absolute_root).resolve()
     else:
         final_root = expmt_file.resolve() / root
 
-    return Experiment(experiment_fn, backend, final_root)
+    return Experiment(experiment_fn, backend, final_root, verbose=verbose)
 
 
 class Experiment:
@@ -51,11 +50,11 @@ class Experiment:
         experiment: callable,
         backend: str,
         root: Path,
+        verbose: bool = False,
     ):
         self._experiment = experiment
-        self._backend = get_or_create_backend_for(
-            root, code_for(experiment), backend
-        )
+        self._backend = get_or_create_backend_for(root, code_for(experiment), backend)
+        self.verbose = verbose
 
     def run(self, args: list, kwargs: dict):
         if not GLOBAL.should_record():
@@ -65,7 +64,15 @@ class Experiment:
 
         with self._backend.unique_run() as run, GLOBAL.recording_run(run):
             id = run.id
+            if self.verbose:
+                print(
+                    f"digital-experiments: Running experiment {id} with config: {config}"
+                )
             metadata, result = record_metadata(self._experiment, args, kwargs)
+            if self.verbose:
+                print(
+                    f"digital-experiments: Finished experiment {id} with result: {result}"
+                )
 
         observation = Observation(id, config, result, metadata)
         self._backend.save(observation)
