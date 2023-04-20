@@ -31,8 +31,7 @@ def to_dataframe(
     dicts = [o.as_dict() for o in observations]
     config_keys = union(d["config"].keys() for d in dicts)
     result_keys = union(
-        d["result"].keys() if isinstance(d["result"], dict) else []
-        for d in dicts
+        d["result"].keys() if isinstance(d["result"], dict) else [] for d in dicts
     )
 
     overlap = intersect([config_keys, result_keys])
@@ -60,3 +59,46 @@ def to_dataframe(
         df = df.filter(regex="^(?!metadata).*$")
 
     return df
+
+
+def matches(thing, template):
+    return all(thing.get(k) == v for k, v in template.items())
+
+
+def filtered_observations(
+    observations,
+    config=None,
+    metadata=None,
+    result=None,
+):
+    """
+    Filter a list of observations based on config, metadata and result.
+
+    Parameters
+    ----------
+    observations: list of Observation
+        list of observations to filter
+    config: dict
+        filter on the config
+    metadata: dict
+        filter on the metadata
+    result: dict
+        filter on the result
+
+    Returns
+    -------
+    list of Observation
+        filtered list of observations
+    """
+
+    config = config or {}
+    metadata = metadata or {}
+    result = result or {}
+
+    return [
+        obs
+        for obs in observations
+        if matches(obs.config, config)
+        and matches(obs.metadata, metadata)
+        and matches(obs.result, result)
+    ]

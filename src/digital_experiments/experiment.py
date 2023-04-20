@@ -86,8 +86,20 @@ class Experiment:
     def observations(self):
         return self._backend.all_observations()
 
-    def to_dataframe(self, *args, **kwargs):
-        return querying.to_dataframe(self.observations, *args, **kwargs)
+    def to_dataframe(
+        self,
+        include_metadata=False,
+        include_id=True,
+        config=None,
+        metadata=None,
+        result=None,
+    ):
+        filtered_observations = querying.filter_observations(
+            self.observations, config, metadata, result
+        )
+        return querying.to_dataframe(
+            filtered_observations, include_id, include_metadata
+        )
 
     def __repr__(self):
         return pretty_instance(
