@@ -94,7 +94,7 @@ class Experiment:
         metadata=None,
         result=None,
     ):
-        filtered_observations = querying.filter_observations(
+        filtered_observations = querying.filtered_observations(
             self.observations, config, metadata, result
         )
         return querying.to_dataframe(
