@@ -48,3 +48,6 @@ def test_dict_equality():
     assert not dict_equality(nested1, nested2)
 
     assert not dict_equality({"a": 1, "b": 2}, nested1)
+    assert not dict_equality(nested1, {"a": 1, "b": 2})
+
+    assert not dict_equality({"a": 1, "b": 2}, {"a": 1, "b": 2, "c": 3})
