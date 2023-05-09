@@ -149,3 +149,24 @@ def get_passed_kwargs_for(experiment):
             relevant_kwargs[k] = interpret(v, signature.parameters[k])
 
     return relevant_kwargs
+
+
+def dict_equality(d1: Dict, d2: Dict):
+    if set(d1.keys()) != set(d2.keys()):
+        return False
+
+    for k in d1.keys():
+        v1 = d1[k]
+        v2 = d2[k]
+
+        if isinstance(v1, dict):
+            if not isinstance(v2, dict):
+                return False
+            if not dict_equality(v1, v2):
+                return False
+            continue
+
+        if v1 != v2:
+            return False
+
+    return True
