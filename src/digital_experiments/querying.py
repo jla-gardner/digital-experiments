@@ -28,6 +28,10 @@ def to_dataframe(
         DataFrame with the observations
     """
 
+    if len(observations) == 0:
+        warnings.warn("No observations to convert to dataframe")
+        return pd.DataFrame()
+
     dicts = [o.as_dict() for o in observations]
     config_keys = union(d["config"].keys() for d in dicts)
     result_keys = union(

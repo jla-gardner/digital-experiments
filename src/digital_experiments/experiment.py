@@ -18,13 +18,19 @@ def experiment(
     root: str = None,
     absolute_root: Union[str, Path] = None,
     verbose: bool = False,
+    cache: bool = True,
 ):
     """
     decorator to record an experiment
     """
     if experiment_fn is None:
         return partial(
-            experiment, backend=backend, root=root, absolute_root=absolute_root
+            experiment,
+            backend=backend,
+            root=root,
+            absolute_root=absolute_root,
+            verbose=verbose,
+            cache=cache,
         )
 
     # get the directory of the file where the experiment is defined
@@ -41,7 +47,7 @@ def experiment(
     else:
         final_root = expmt_file.resolve() / root
 
-    return Experiment(experiment_fn, backend, final_root, verbose=verbose)
+    return Experiment(experiment_fn, backend, final_root, verbose, cache)
 
 
 class Experiment:
@@ -51,16 +57,22 @@ class Experiment:
         backend: str,
         root: Path,
         verbose: bool = False,
+        cache: bool = True,
     ):
         self._experiment = experiment
         self._backend = get_or_create_backend_for(root, code_for(experiment), backend)
         self.verbose = verbose
+        self.cache = cache
 
     def run(self, args: list, kwargs: dict):
         if not GLOBAL.should_record():
             return self._experiment(*args, **kwargs)
 
         config = complete_config(self._experiment, args, kwargs)
+
+        previous_observation = self._backend._observation_for_(config)
+        if self.cache and previous_observation is not None:
+            return previous_observation.result
 
         with self._backend.unique_run() as run, GLOBAL.recording_run(run):
             id = run.id

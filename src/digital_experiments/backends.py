@@ -11,7 +11,7 @@ import yaml
 
 from .control_center import Run
 from .observation import Observation
-from .util import exclusive_file_access, flatten, generate_id, unflatten
+from .util import dict_equality, exclusive_file_access, flatten, generate_id, unflatten
 
 __BACKENDS: Dict[str, "Backend"] = {}
 
@@ -106,7 +106,7 @@ class Backend(ABC):
         # label this directory as a digital experiment
         # and store various required metadata
         HomeLabel.create_new(location, cls.name, code)
-             
+
         return cls(location)
 
     @contextlib.contextmanager
@@ -116,7 +116,9 @@ class Backend(ABC):
         directory.mkdir(parents=True, exist_ok=False)
 
         run = Run(id, directory)
+
         yield run  # experiments happen while this is yielded
+
         if not any(run.directory.iterdir()):
             shutil.rmtree(run.directory)
 
@@ -128,6 +130,12 @@ class Backend(ABC):
 
         label = HomeLabel.from_existing(home)
         return backend_from_type(label.backend_name)(home)
+
+    def _observation_for_(self, config):
+        for obs in self.all_observations():
+            if dict_equality(obs.config, config):
+                return obs
+        return None
 
 
 @this_is_a_backend("yaml")
@@ -167,10 +175,7 @@ class CSVBackend(Backend):
         existing_observations.append(obs)
 
         df = pd.DataFrame(
-            [
-                flatten(o.as_dict(), self.SEPARATOR)
-                for o in existing_observations
-            ],
+            [flatten(o.as_dict(), self.SEPARATOR) for o in existing_observations],
         )
         with exclusive_file_access(self.csv_file):
             df.to_csv(self.csv_file, index=False)
@@ -181,10 +186,9 @@ class CSVBackend(Backend):
 
         with exclusive_file_access(self.csv_file):
             df = pd.read_csv(self.csv_file, dtype={"id": str})
-        
+
         return [
-            Observation(**unflatten(row, self.SEPARATOR))
-            for _, row in df.iterrows()
+            Observation(**unflatten(row, self.SEPARATOR)) for _, row in df.iterrows()
         ]
 
 
@@ -199,6 +203,7 @@ class HomeLabel:
     A class to label a directory as containing the results of a digital
     experiment.
     """
+
     backend_name: str
     code: str
 
@@ -210,18 +215,17 @@ class HomeLabel:
         namespace = asdict(self)
 
         with open(self.file_path(home), "w") as f:
-            yaml.dump(namespace, f, default_style='|')
-    
+            yaml.dump(namespace, f, default_style="|")
+
     @classmethod
     def from_existing(cls, home: Path):
         with open(cls.file_path(home)) as f:
             namespace = yaml.safe_load(f)
 
         return cls(**namespace)
-    
+
     @classmethod
     def create_new(cls, home: Path, backend_name: str, code: str):
         label = cls(backend_name, code)
         label.save_to(home)
         return label
-    

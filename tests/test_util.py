@@ -1,4 +1,5 @@
 from digital_experiments.util import (
+    dict_equality,
     flatten,
     generate_id,
     intersect,
@@ -33,3 +34,15 @@ def test_union():
 def test_intersect():
     assert intersect(([1, 2, 3], [2, 3, 4])) == {2, 3}
     assert intersect(("hi", "there")) == {"h"}
+
+
+def test_dict_equality():
+    assert dict_equality({"a": 1, "b": 2}, {"b": 2, "a": 1})
+
+    nested1 = {"a": 1, "b": {"c": 2, "d": {"f": "hi"}}}
+    nested2 = {"a": 1, "b": {"c": 2, "d": {"f": "hi"}}}
+    assert dict_equality(nested1, nested2)
+
+    nested1 = {"a": 1, "b": {"c": 2, "d": {"f": "hi"}}}
+    nested2 = {"a": 1, "b": {"c": 2, "d": {"f": "bye"}}}
+    assert not dict_equality(nested1, nested2)
