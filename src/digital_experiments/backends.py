@@ -195,15 +195,19 @@ class CSVBackend(Backend):
 
 @this_is_a_backend("pickle")
 class PickleBackend(Backend):
+    @property
+    def observations_dir(self):
+        return self.home / "observations"
+
     def save(self, obs: Observation):
-        file = self.home / "runs" / obs.id / "observation.pickle"
+        file = self.observations_dir / f"{obs.id}.pickle"
         file.parent.mkdir(parents=True, exist_ok=True)
 
         with exclusive_file_access(file, "wb") as f:
             pickle.dump(obs, f)
 
     def all_observations(self) -> List[Observation]:
-        files = sorted(self.home.glob("**/observation.pickle"))
+        files = sorted(self.observations_dir.glob("*.pickle"))
         observations = []
         for f in files:
             with exclusive_file_access(f, "rb") as f:
