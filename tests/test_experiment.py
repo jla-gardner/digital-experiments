@@ -59,8 +59,8 @@ def test_caching(tmp_path):
     assert calls == 2
 
 
-def test_verbose(capsys):
-    @experiment(verbose=True)
+def test_verbose(capsys, tmp_path):
+    @experiment(verbose=True, absolute_root=tmp_path)
     def add(a, b):
         return a + b
 
@@ -71,8 +71,8 @@ def test_verbose(capsys):
     assert "Finished experiment" in captured.out
 
 
-def test_repr():
-    @experiment
+def test_repr(tmp_path):
+    @experiment(absolute_root=tmp_path)
     def add(a, b):
         return a + b
 

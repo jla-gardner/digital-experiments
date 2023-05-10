@@ -21,8 +21,8 @@ def test_current_directory():
         assert current_directory() == run.directory.resolve()
 
 
-def test_dont_record():
-    @experiment
+def test_dont_record(tmp_path):
+    @experiment(absolute_root=tmp_path)
     def add(a, b):
         return a + b
 

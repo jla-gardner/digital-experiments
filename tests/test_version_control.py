@@ -14,8 +14,8 @@ def _get_root_for(experiment):
     return experiment._backend.home.parent
 
 
-def test_multiple_versions():
-    @experiment
+def test_multiple_versions(tmp_path):
+    @experiment(absolute_root=tmp_path)
     def add(a, b):
         return a + b
 
@@ -33,8 +33,8 @@ def test_get_backend():
     assert backend is None, "root doesn't exist, should be None"
 
 
-def test_acceptance_functions():
-    @experiment
+def test_acceptance_functions(tmp_path):
+    @experiment(absolute_root=tmp_path)
     def add(a, b):
         return a + b
 

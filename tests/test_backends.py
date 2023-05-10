@@ -84,7 +84,7 @@ def test_available_backends(backend, tmp_path):
     assert observations[0].config == {"a": 1, "b": 2}
     assert observations[0].result == 1
 
-    @experiment(backend=backend)
+    @experiment(backend=backend, absolute_root=tmp_path)
     def add(a, b):
         return a + b
 
