@@ -98,8 +98,7 @@ def intersect(things):
 
 @contextmanager
 def exclusive_file_access(filehandle: Union[str, Path], mode: str = "r"):
-    if isinstance(filehandle, str):
-        filehandle = Path(filehandle)
+    filehandle = Path(filehandle)
 
     lock_path = filehandle.with_suffix(".lock")
     lock = FileLock(lock_path)
