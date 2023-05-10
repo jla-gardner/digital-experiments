@@ -57,3 +57,25 @@ def test_caching(tmp_path):
 
     add(1, 3)
     assert calls == 2
+
+
+def test_verbose(capsys):
+    @experiment(verbose=True)
+    def add(a, b):
+        return a + b
+
+    add(1, 2)
+    captured = capsys.readouterr()
+
+    assert "Running experiment" in captured.out
+    assert "Finished experiment" in captured.out
+
+
+def test_repr():
+    @experiment
+    def add(a, b):
+        return a + b
+
+    add(1, 2)
+    add(2, 3)
+    assert repr(add) == "Experiment(add, observations=2)"
