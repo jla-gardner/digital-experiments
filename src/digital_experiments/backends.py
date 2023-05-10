@@ -1,4 +1,5 @@
 import contextlib
+import pickle
 import shutil
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
@@ -190,6 +191,24 @@ class CSVBackend(Backend):
         return [
             Observation(**unflatten(row, self.SEPARATOR)) for _, row in df.iterrows()
         ]
+
+
+@this_is_a_backend("pickle")
+class PickleBackend(Backend):
+    def save(self, obs: Observation):
+        file = self.home / obs.id / "observation.pickle"
+        file.parent.mkdir(parents=True, exist_ok=True)
+
+        with exclusive_file_access(file, "wb") as f:
+            pickle.dump(obs, f)
+
+    def all_observations(self) -> List[Observation]:
+        files = sorted(self.home.glob("**/observation.pickle"))
+        observations = []
+        for f in files:
+            with exclusive_file_access(f, "rb") as f:
+                observations.append(pickle.load(f))
+        return observations
 
 
 class Files:
