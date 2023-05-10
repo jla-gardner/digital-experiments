@@ -196,7 +196,7 @@ class CSVBackend(Backend):
 @this_is_a_backend("pickle")
 class PickleBackend(Backend):
     def save(self, obs: Observation):
-        file = self.home / obs.id / "observation.pickle"
+        file = self.home / "runs" / obs.id / "observation.pickle"
         file.parent.mkdir(parents=True, exist_ok=True)
 
         with exclusive_file_access(file, "wb") as f:
