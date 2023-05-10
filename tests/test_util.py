@@ -1,7 +1,14 @@
+import sys
+
+import pytest
+
+from digital_experiments import experiment
 from digital_experiments.util import (
     dict_equality,
     flatten,
     generate_id,
+    get_passed_kwargs,
+    get_passed_kwargs_for,
     intersect,
     unflatten,
     union,
@@ -51,3 +58,25 @@ def test_dict_equality():
     assert not dict_equality(nested1, {"a": 1, "b": 2})
 
     assert not dict_equality({"a": 1, "b": 2}, {"a": 1, "b": 2, "c": 3})
+
+
+def test_kwarg_parsing(tmp_path):
+    sys.argv = ["test.py", "a=1", "b=2", "c=3", "d"]
+    with pytest.raises(ValueError, match="Invalid keyword argument passed"):
+        get_passed_kwargs()
+
+    sys.argv = ["test.py", "a=1", "b=False", "c=hello"]
+
+    # get_passed_kwargs should return a dict of strings
+    assert get_passed_kwargs() == {"a": "1", "b": "False", "c": "hello"}
+
+    @experiment(absolute_root=tmp_path)
+    def test_experiment(a: int, b=False, *, c: str):
+        return a + int(b) + len(c)
+
+    # get_passed_kwargs_for should return a dict of the correct types
+    # by inferring them either from
+    #  - the defaults in a signature
+    #  - type hints
+    kwargs = get_passed_kwargs_for(test_experiment)
+    assert kwargs == {"a": 1, "b": False, "c": "hello"}

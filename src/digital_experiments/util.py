@@ -96,13 +96,6 @@ def intersect(things):
     return set.intersection(*[set(t) for t in things])
 
 
-def is_in(thing):
-    def _is_in(things):
-        return thing in things
-
-    return _is_in
-
-
 @contextmanager
 def exclusive_file_access(filehandle: Union[str, Path], mode: str = "r"):
     if isinstance(filehandle, str):
