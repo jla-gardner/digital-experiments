@@ -1,3 +1,4 @@
+import shutil
 from pathlib import Path
 
 from digital_experiments import experiment
@@ -26,6 +27,26 @@ def test_multiple_versions(tmp_path):
     assert versions[0] == "version-1", "Should have one version"
     assert current_max_version(root) == 1
 
+    shutil.move(root / "version-1", root / "my-renamed-version")
+    versions = get_all_versions(root)
+    assert len(versions) == 1, "Should have one version"
+    assert versions[0] == "my-renamed-version", "Should have one version"
+
+    backend = get_backend_for(root, for_version("my-renamed-version"))
+    assert backend is not None, "Should have a backend"
+
+    # define a new version
+    # since we have renamed our old one, this should be version-1
+    @experiment(absolute_root=tmp_path)
+    def add(a, b):
+        # this is a new version
+        return a + b
+
+    versions = get_all_versions(root)
+    assert len(versions) == 2, "Should have two versions"
+    assert "my-renamed-version" in versions
+    assert "version-1" in versions
+
 
 def test_get_backend():
     root = Path("made-up-path")
@@ -43,3 +64,7 @@ def test_acceptance_functions(tmp_path):
     assert backend is not None, "Should have a backend"
 
     backend = get_backend_for(root, for_version("version-1"))
+    assert backend is not None, "Should have a backend"
+
+    backend = get_backend_for(root, for_version("version-2"))
+    assert backend is None, "Should not have a backend"
