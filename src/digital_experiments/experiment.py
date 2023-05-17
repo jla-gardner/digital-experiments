@@ -66,8 +66,9 @@ class Experiment:
         config = complete_config(self._experiment, args, kwargs)
 
         # check if we've run this experiment before
-        previous_observation = self._backend._observation_for_(config)
-        if self.cache and previous_observation is not None:
+        previous_observations = self._backend._observations_for_(config)
+        if self.cache and len(previous_observations) > 0:
+            previous_observation = previous_observations[0]
             return previous_observation.result
 
         # if we're not recording, just run the experiment
@@ -100,6 +101,20 @@ class Experiment:
     @property
     def observations(self):
         return self._backend.all_observations()
+
+    def observation_for(self, config: Dict):
+        """
+        return the observation for the given config
+        """
+        observations = self._backend._observations_for_(config)
+        if len(observations) == 0:
+            return None
+
+        if len(observations) > 1:
+            raise Exception(
+                f"Found multiple observations for config {config}: {observations}"
+            )
+        return observations[0]
 
     def to_dataframe(
         self,

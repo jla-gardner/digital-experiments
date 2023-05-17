@@ -135,11 +135,10 @@ class Backend(ABC):
         label = HomeLabel.from_existing(home)
         return backend_from_type(label.backend_name)(home)
 
-    def _observation_for_(self, config):
-        for obs in self.all_observations():
-            if dict_equality(obs.config, config):
-                return obs
-        return None
+    def _observations_for_(self, config):
+        return [
+            obs for obs in self.all_observations() if dict_equality(obs.config, config)
+        ]
 
 
 @this_is_a_backend("yaml")
