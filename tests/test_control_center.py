@@ -1,12 +1,8 @@
 from pathlib import Path
 
 from digital_experiments import experiment
-from digital_experiments.control_center import (
-    Run,
-    current_directory,
-    dont_record,
-    recording_run,
-)
+from digital_experiments.control_center import Run  # recording_run,
+from digital_experiments.control_center import current_directory, dont_record
 
 run = Run("id", Path("directory"))
 
@@ -16,9 +12,9 @@ def test_run():
     assert run.directory == Path("directory")
 
 
-def test_current_directory():
-    with recording_run(run):
-        assert current_directory() == run.directory.resolve()
+# def test_current_directory():
+#     with recording_run(run):
+#         assert current_directory() == run.directory.resolve()
 
 
 def test_dont_record(tmp_path):

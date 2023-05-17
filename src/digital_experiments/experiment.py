@@ -1,11 +1,10 @@
 from functools import partial
 from pathlib import Path
-from typing import Union
+from typing import Dict, Union
 
-from . import control_center as GLOBAL
-from . import querying
+from . import control_center as ControlCenter
+from . import querying, timing
 from .inspection import code_for, complete_config
-from .metadata import record_metadata
 from .observation import Observation
 from .pretty import pretty_instance
 from .version_control import get_or_create_backend_for
@@ -18,20 +17,15 @@ def experiment(
     root: str = None,
     absolute_root: Union[str, Path] = None,
     verbose: bool = False,
-    cache: bool = False,
+    cache: bool = True,
 ):
     """
     decorator to record an experiment
     """
     if experiment_fn is None:
-        return partial(
-            experiment,
-            backend=backend,
-            root=root,
-            absolute_root=absolute_root,
-            verbose=verbose,
-            cache=cache,
-        )
+        kwargs = locals()
+        kwargs.pop("experiment_fn")
+        return partial(experiment, **kwargs)
 
     # get the directory of the file where the experiment is defined
     # and where <root> should be relative to
@@ -65,28 +59,33 @@ class Experiment:
         self.cache = cache
 
     def run(self, args: list, kwargs: dict):
-        if not GLOBAL.should_record():
-            return self._experiment(*args, **kwargs)
+        """
+        run the experiment with the given arguments and save the result
+        """
 
         config = complete_config(self._experiment, args, kwargs)
 
+        # check if we've run this experiment before
         previous_observation = self._backend._observation_for_(config)
         if self.cache and previous_observation is not None:
             return previous_observation.result
 
-        with self._backend.unique_run() as run, GLOBAL.recording_run(run):
-            id = run.id
-            if self.verbose:
-                print(
-                    f"digital-experiments: Running experiment {id} with config: {config}"
-                )
-            metadata, result = record_metadata(self._experiment, args, kwargs)
-            if self.verbose:
-                print(
-                    f"digital-experiments: Finished experiment {id} with result: {result}"
-                )
+        # if we're not recording, just run the experiment
+        if not ControlCenter.should_record():
+            return self._experiment(*args, **kwargs)
 
-        observation = Observation(id, config, result, metadata)
+        # otherwise, run the experiment and record the result
+        id, directory = self._backend.unique_run()
+        ControlCenter.start_run(id, directory)
+        self._log(f"Running experiment {id} with config: {config}")
+        timing.mark("start")
+        result = self._experiment(*args, **kwargs)
+        timing.mark("end")
+        self._log(f"Finished experiment {id} with result: {result}")
+        finished_run = ControlCenter.end_run()
+        self._backend.clean_up(id)
+
+        observation = Observation(id, config, result, finished_run.metadata)
         self._backend.save(observation)
 
         return result
@@ -94,9 +93,16 @@ class Experiment:
     def __call__(self, *args, **kwargs):
         return self.run(args, kwargs)
 
+    def _log(self, msg):
+        if self.verbose:
+            print(f"digital-experiments: {self._experiment.__name__}: {msg}")
+
     @property
     def observations(self):
         return self._backend.all_observations()
+
+    def observation_for(self, config: Dict[str, any]):
+        return self._backend._observation_for_(config)
 
     def to_dataframe(
         self,

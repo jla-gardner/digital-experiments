@@ -1,4 +1,3 @@
-import contextlib
 import pickle
 import shutil
 from abc import ABC, abstractmethod
@@ -10,7 +9,6 @@ from typing import Dict, List
 import pandas as pd
 import yaml
 
-from .control_center import Run
 from .observation import Observation
 from .util import dict_equality, exclusive_file_access, flatten, generate_id, unflatten
 
@@ -108,18 +106,25 @@ class Backend(ABC):
 
         return cls(location)
 
-    @contextlib.contextmanager
     def unique_run(self):
+        """
+        Create a new unique run.
+        """
+
         id = generate_id()
         directory = self.home / Files.RUNS / id
         directory.mkdir(parents=True, exist_ok=False)
 
-        run = Run(id, directory)
+        return id, directory
 
-        yield run  # experiments happen while this is yielded
+    def clean_up(self, id):
+        """
+        clean up after the run with the given id has finished
+        """
 
-        if not any(run.directory.iterdir()):
-            shutil.rmtree(run.directory)
+        directory = self.home / Files.RUNS / id
+        if not any(directory.iterdir()):
+            shutil.rmtree(directory)
 
     @staticmethod
     def from_existing(home: Path):
