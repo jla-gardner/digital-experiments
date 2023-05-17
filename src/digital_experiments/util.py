@@ -204,4 +204,9 @@ def merge_dicts(d1, d2):
         # the values are equal, so we can just add the value from d2
         new_dict[k] = d2[k]
 
+    # now we need to add all the keys from d2 that are not in d1
+    for k, v in d2.items():
+        if k not in d1:
+            new_dict[k] = v
+
     return new_dict
