@@ -18,7 +18,7 @@ def experiment(
     root: str = None,
     absolute_root: Union[str, Path] = None,
     verbose: bool = False,
-    cache: bool = True,
+    cache: bool = False,
 ):
     """
     decorator to record an experiment

@@ -1,6 +1,9 @@
 import shutil
 from pathlib import Path
 
+import pytest
+
+from digital_experiments.backends import available_backends
 from digital_experiments.experiment import experiment
 
 
@@ -57,3 +60,38 @@ def test_caching(tmp_path):
 
     add(1, 3)
     assert calls == 2
+
+
+def test_verbose(capsys, tmp_path):
+    @experiment(verbose=True, absolute_root=tmp_path)
+    def add(a, b):
+        return a + b
+
+    add(1, 2)
+    captured = capsys.readouterr()
+
+    assert "Running experiment" in captured.out
+    assert "Finished experiment" in captured.out
+
+
+def test_repr(tmp_path):
+    @experiment(absolute_root=tmp_path)
+    def add(a, b):
+        return a + b
+
+    add(1, 2)
+    add(2, 3)
+    assert repr(add) == "Experiment(add, observations=2)"
+
+
+@pytest.mark.parametrize("backend", available_backends())
+def test_backends(backend, tmp_path):
+    @experiment(backend=backend, absolute_root=tmp_path)
+    def add(a, b):
+        return a + b
+
+    add(1, 2)
+    assert len(add.observations) == 1
+    observation = add.observations[0]
+    assert observation.config == {"a": 1, "b": 2}
+    assert observation.result == 3

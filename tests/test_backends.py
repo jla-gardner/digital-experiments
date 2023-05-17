@@ -1,5 +1,6 @@
 import pytest
 
+from digital_experiments import experiment
 from digital_experiments.backends import (
     Backend,
     available_backends,
@@ -74,11 +75,19 @@ def test_available_backends(backend, tmp_path):
 
     home = tmp_path / backend
     home.mkdir()
-    backend = klass(home)
-    backend.save(Observation(id="1", config={"a": 1, "b": 2}, result=1))
+    backend_instance = klass(home)
+    backend_instance.save(Observation(id="1", config={"a": 1, "b": 2}, result=1))
 
-    observations = backend.all_observations()
+    observations = backend_instance.all_observations()
     assert len(observations) == 1
     assert observations[0].id == "1"
     assert observations[0].config == {"a": 1, "b": 2}
     assert observations[0].result == 1
+
+    @experiment(backend=backend, absolute_root=tmp_path)
+    def add(a, b):
+        return a + b
+
+    add(1, 2)
+
+    assert len(add.observations) == 1

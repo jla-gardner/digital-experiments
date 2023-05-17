@@ -87,14 +87,12 @@ class Backend(ABC):
         """
         save an observation object to the backend
         """
-        pass
 
     @abstractmethod
     def all_observations(self) -> List[Observation]:
         """
         load all observations from the backend
         """
-        pass
 
     @classmethod
     def create_new(cls, location: Path, code: str):
