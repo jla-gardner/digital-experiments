@@ -49,7 +49,7 @@ def current_directory():
     """
     get the directory assigned to the currently running experiment
     """
-    current_run().directory
+    return current_run().directory
 
 
 @contextlib.contextmanager
