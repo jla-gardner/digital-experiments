@@ -101,9 +101,6 @@ class Experiment:
     def observations(self):
         return self._backend.all_observations()
 
-    def observation_for(self, config: Dict[str, any]):
-        return self._backend._observation_for_(config)
-
     def to_dataframe(
         self,
         include_metadata=False,

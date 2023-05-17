@@ -157,13 +157,7 @@ class YAMLBackend(Backend):
         if not self.yaml_file.exists():
             return []
         with exclusive_file_access(self.yaml_file) as f:
-            return yaml.load(f, Loader=ObservationLoader)
-
-
-class ObservationLoader(yaml.Loader):
-    def construct_observation(self, node):
-        data = self.construct_mapping(node)
-        return Observation(**data)
+            return yaml.load(f, Loader=yaml.Loader)
 
 
 @this_is_a_backend("csv")
