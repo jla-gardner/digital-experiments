@@ -10,6 +10,7 @@ from digital_experiments.util import (
     get_passed_kwargs,
     get_passed_kwargs_for,
     intersect,
+    merge_dicts,
     unflatten,
     union,
 )
@@ -80,3 +81,22 @@ def test_kwarg_parsing(tmp_path):
     #  - type hints
     kwargs = get_passed_kwargs_for(test_experiment)
     assert kwargs == {"a": 1, "b": False, "c": "hello"}
+
+
+def test_merge_dicts():
+    d1 = {"a": {"b": 1, "c": 2}, "d": 3}
+    d2 = {"a": {"e": 5}, "f": 6}
+
+    # ensure correct nested merge
+    assert merge_dicts(d1, d2) == {"a": {"b": 1, "c": 2, "e": 5}, "d": 3, "f": 6}
+
+    bad_d2 = {"a": 1}
+    with pytest.raises(ValueError):
+        merge_dicts(d1, bad_d2)
+
+    bad_d2 = {"d": 4}
+    with pytest.raises(ValueError):
+        merge_dicts(d1, bad_d2)
+
+    good_d2 = {"d": 3}
+    assert merge_dicts(d1, good_d2) == {"a": {"b": 1, "c": 2}, "d": 3}

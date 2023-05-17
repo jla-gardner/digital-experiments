@@ -162,3 +162,51 @@ def dict_equality(d1: Dict, d2: Dict):
             return False
 
     return True
+
+
+def merge_dicts(d1, d2):
+    """
+    nestedly merge two dictionaries
+
+    Example
+    -------
+    >>> d1 = {"a": {"b": 1, "c": 2}, "d": 3}
+    >>> d2 = {"a": {"b": 4, "e": 5}, "f": 6}
+    >>> merge_dictionaries(d1, d2)
+    {'a': {'b': 4, 'c': 2, 'e': 5}, 'd': 3, 'f': 6}
+    """
+
+    new_dict = {}
+    for k, v in d1.items():
+        if k not in d2:
+            # the key is not in d2, so we can just add it
+            new_dict[k] = v
+            continue
+
+        # the key is in d2
+
+        # first, check if the value is a dict
+        if isinstance(v, dict):
+            # if the matching value in d2 is not a dict, we can't merge
+            if not isinstance(d2[k], dict):
+                raise ValueError(f"Cannot merge {v} with {d2[k]}")
+
+            # if the matching value in d2 is a dict, we can merge
+            new_dict[k] = merge_dicts(v, d2[k])
+            continue
+
+        # if the value is not a dict
+        # we can want to ensure that the values are equal
+        # if they are not, we can't merge
+        if v != d2[k]:
+            raise ValueError(f"Cannot merge {v} with {d2[k]}")
+
+        # the values are equal, so we can just add the value from d2
+        new_dict[k] = d2[k]
+
+    # now we need to add all the keys from d2 that are not in d1
+    for k, v in d2.items():
+        if k not in d1:
+            new_dict[k] = v
+
+    return new_dict
