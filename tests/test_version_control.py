@@ -50,7 +50,7 @@ def test_multiple_versions(tmp_path):
 
     versions = get_all_versions(root)
     assert len(versions) == 2, "Should have two versions"
-    assert "my-renamed-version" in versions
+    assert "version-renamed" in versions
     assert "version-1" in versions
 
 
