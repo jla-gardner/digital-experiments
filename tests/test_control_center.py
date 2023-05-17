@@ -3,7 +3,13 @@ from pathlib import Path
 import pytest
 
 from digital_experiments import experiment
-from digital_experiments.control_center import Run, current_directory, dont_record
+from digital_experiments.control_center import (
+    Run,
+    add_metadata,
+    current_directory,
+    dont_record,
+    end_run,
+)
 
 run = Run("id", Path("directory"))
 
@@ -31,3 +37,9 @@ def test_errors():
     # no current directory outside of experiment
     with pytest.raises(Exception):
         current_directory()
+
+    with pytest.raises(RuntimeError):
+        add_metadata({})
+
+    with pytest.raises(RuntimeError):
+        end_run()

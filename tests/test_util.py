@@ -97,3 +97,6 @@ def test_merge_dicts():
     bad_d2 = {"d": 4}
     with pytest.raises(ValueError):
         merge_dicts(d1, bad_d2)
+
+    good_d2 = {"d": 3}
+    assert merge_dicts(d1, good_d2) == {"a": {"b": 1, "c": 2}, "d": 3}
