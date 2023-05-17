@@ -35,6 +35,12 @@ def test_multiple_versions(tmp_path):
     backend = get_backend_for(root, for_version("my-renamed-version"))
     assert backend is not None, "Should have a backend"
 
+    # test that we don't error if we rename a version to something
+    # that still matches the pattern `version-*`
+    shutil.move(root / "my-renamed-version", root / "version-renamed")
+    max_version = current_max_version(root)
+    assert max_version == 0, "No numbered versions should exist"
+
     # define a new version
     # since we have renamed our old one, this should be version-1
     @experiment(absolute_root=tmp_path)
