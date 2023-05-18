@@ -1,8 +1,9 @@
 from typing import Any, Callable, Dict, Union
 
 from digital_experiments.experiment import Experiment
+from digital_experiments.search.distributions import Distribution
 from digital_experiments.search.skopt_suggest import SKSuggester
-from digital_experiments.search.space import Distribution, Space, to_space
+from digital_experiments.search.space import Space, to_space
 from digital_experiments.search.suggest import Step, Suggester
 
 from . import control_center as GLOBAL
@@ -108,7 +109,6 @@ class ExperimentController:
         overrides: Dict[str, Any] = None,
         loss_fn: Callable = None,
     ):
-
         assert not any(
             key in suggester.space.keys() for key in overrides.keys()
         ), "Attempting to override a search dimension."
