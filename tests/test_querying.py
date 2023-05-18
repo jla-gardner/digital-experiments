@@ -59,3 +59,12 @@ def test_to_dataframe(tmp_path):
 
     df = add.to_dataframe()
     assert len(df) == 2, "Should have two rows"
+
+    df = add.to_dataframe(config={"b": 2})
+    assert len(df) == 1, "Should have one row"
+
+    df = add.to_dataframe(include_id=False)
+    assert "id" not in df.columns, "Should not have id column"
+
+    df = add.to_dataframe(include_metadata=True)
+    assert not df.filter(regex="metadata.*").empty, "Should have metadata columns"

@@ -2,11 +2,13 @@ import shutil
 from pathlib import Path
 
 from digital_experiments import experiment
+from digital_experiments.inspection import code_for
 from digital_experiments.version_control import (
     current_max_version,
     for_version,
     get_all_versions,
     get_backend_for,
+    get_or_create_backend_for,
     latest_version,
 )
 
@@ -74,3 +76,16 @@ def test_acceptance_functions(tmp_path):
 
     backend = get_backend_for(root, for_version("version-2"))
     assert backend is None, "Should not have a backend"
+
+
+def test_get_or_create_backend_for(tmp_path):
+    @experiment(absolute_root=tmp_path, backend="csv")
+    def add(a, b):
+        return a + b
+
+    # get the code
+    code = code_for(add._experiment)
+    backend_str = "csv"
+
+    backend = get_or_create_backend_for(tmp_path, code, backend_str)
+    assert backend is not None, "Should have a backend"

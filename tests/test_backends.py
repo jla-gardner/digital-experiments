@@ -7,6 +7,7 @@ from digital_experiments.backends import (
     backend_from_type,
     this_is_a_backend,
 )
+from digital_experiments.inspection import code_for
 from digital_experiments.observation import Observation
 
 
