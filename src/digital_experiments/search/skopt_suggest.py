@@ -1,19 +1,17 @@
 from typing import Dict, List, Union
 
 import numpy as np
-from pandas import Categorical
 from skopt import Optimizer as SKOptimizer
 from skopt import space as SK
 
-from digital_experiments.search.space import (
+from digital_experiments.search.distributions import (
     Categorical,
     Distribution,
     LogUniform,
-    Space,
     Uniform,
-    to_space,
 )
-from digital_experiments.search.suggest import Point, Step, Suggester
+from digital_experiments.search.space import Point, Space, to_space
+from digital_experiments.search.suggest import Step, Suggester
 
 
 class SKSuggester(Suggester):
@@ -24,7 +22,6 @@ class SKSuggester(Suggester):
         n_explore_steps: int = 10,
         seed: int = 42,
     ) -> None:
-
         super().__init__(space, previous_steps)
 
         self.tells_since_suggest = len(self.previous_steps)
@@ -52,7 +49,7 @@ class SKSuggester(Suggester):
             return self.exploit_step()
 
     def explore_step(self) -> Point:
-        return self.space.random_sample(n=1, generator=self.random)
+        return self.space.random_sample(random_number_generator=self.random)
 
     def exploit_step(self) -> Point:
         values = self.optimizer.ask()
@@ -62,9 +59,7 @@ class SKSuggester(Suggester):
         if self.tells_since_suggest == 0:
             return
 
-        for i, step in enumerate(
-            self.previous_steps[-self.tells_since_suggest :]
-        ):
+        for i, step in enumerate(self.previous_steps[-self.tells_since_suggest :]):
             values = list(step.point.values())
             observation = step.observation
 
