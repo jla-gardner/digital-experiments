@@ -20,6 +20,9 @@ def test_boolean_grid():
     things = dict(x=[1, 2, 3], y="hi")
     grid = NamedBooleanGrid(things)
 
+    assert grid.total_hits() == 0
+    assert grid.total_misses() == 6
+
     assert grid.first_miss() == {"x": 1, "y": "h"}
 
     grid.hit({"x": 1, "y": "h"})
@@ -31,6 +34,9 @@ def test_boolean_grid():
 
     with pytest.raises(ValueError, match="Grid is full"):
         grid.first_miss()
+
+    assert grid.total_hits() == 6
+    assert grid.total_misses() == 0
 
 
 def test_grid_suggester():

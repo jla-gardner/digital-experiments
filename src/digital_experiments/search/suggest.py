@@ -131,6 +131,18 @@ class NamedBooleanGrid:
                 return self._index_to_point(idx)
         raise ValueError("Grid is full")
 
+    def total_hits(self):
+        """
+        find the first point that has not been hit
+        """
+        return sum(self._hits)
+
+    def total_misses(self):
+        """
+        find the first point that has not been hit
+        """
+        return len(self._hits) - sum(self._hits)
+
     def _point_to_index(self, point: Point):
         """
         convert a point to an index in the grid
