@@ -1,4 +1,5 @@
 import inspect
+import random
 import sys
 from contextlib import contextmanager
 from datetime import datetime
@@ -210,3 +211,15 @@ def merge_dicts(d1, d2):
             new_dict[k] = v
 
     return new_dict
+
+
+def is_iterable(obj):
+    """
+    check if an object is iterable
+    """
+    return hasattr(obj, "__iter__")
+
+
+def get_random_number():
+    """returns a random number between 0 and 1"""
+    return random.random()
