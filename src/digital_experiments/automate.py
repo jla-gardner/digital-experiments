@@ -11,12 +11,6 @@ def automate_experiment(
     overrides: Dict[str, Any] = None,
     extract_observation: Callable[[Any], float] = None,
 ):
-    if n_steps is None:
-        try:
-            n_steps = len(suggester)
-        except TypeError:
-            raise ValueError("Please pass a value for `n_steps`")
-
     if len(suggester.previous_steps) > 0:
         raise ValueError(
             "Experiment automation requires a new suggester instance with no previous steps"
@@ -45,6 +39,12 @@ def automate_experiment(
     # tell the suggester about the initial observations
     for step in steps:
         suggester.tell(step.point, step.observation)
+
+    if n_steps is None:
+        try:
+            n_steps = len(suggester)
+        except TypeError:
+            raise ValueError("Please pass a value for `n_steps`")
 
     # run the experiment
     for _ in range(n_steps):
