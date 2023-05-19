@@ -79,3 +79,8 @@ def test_apply():
     wrong_d2 = Data(c=[8, 9], d=[11, 12])
     with pytest.raises(ValueError):
         Data.apply(concatenate, d1, wrong_d2)
+
+
+def test_repr():
+    data = Data(a=[1, 2])
+    assert repr(data) == "Data({'a': [1, 2]})"
