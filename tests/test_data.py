@@ -61,3 +61,26 @@ def test_data_math():
     assert d**2 == Data(x=1, y=4)  # normal power
     assert 2**d == Data(x=2, y=4)  # reverse power
     assert d ** Data(x=4, y=2) == Data(x=1, y=4)
+
+
+def test_map():
+    data = Data(a=[1, 2, 3], b=[4, 5, 6, 7])
+    assert data.map(sum) == Data({"a": 6, "b": 22})
+
+
+def test_apply():
+    def concatenate(*lists):
+        return [item for sublist in lists for item in sublist]
+
+    d1 = Data(a=[1, 2], b=[4, 5])
+    d2 = Data(a=[8, 9], b=[11, 12])
+    assert Data.apply(concatenate, d1, d2) == Data(a=[1, 2, 8, 9], b=[4, 5, 11, 12])
+
+    wrong_d2 = Data(c=[8, 9], d=[11, 12])
+    with pytest.raises(ValueError):
+        Data.apply(concatenate, d1, wrong_d2)
+
+
+def test_repr():
+    data = Data(a=[1, 2])
+    assert repr(data) == "Data({'a': [1, 2]})"
