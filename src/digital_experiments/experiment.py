@@ -119,7 +119,7 @@ class Experiment:
     def to_dataframe(
         self,
         include_metadata=False,
-        include_id=True,
+        include_id=False,
         config=None,
         metadata=None,
         result=None,

@@ -141,7 +141,7 @@ class NamedBooleanGrid:
         """
         find the first point that has not been hit
         """
-        return len(self._hits) - sum(self._hits)
+        return len(self._hits) - self.total_hits()
 
     def _point_to_index(self, point: Point):
         """
@@ -199,7 +199,7 @@ class GridSuggester(Suggester):
             self._grid.hit(step.point)
 
     def __len__(self):
-        return np.prod([len(dist.options) for dist in self.space.values()])
+        return self._grid.total_misses()
 
     def suggest(self) -> Point:
         return self._grid.first_miss()

@@ -31,7 +31,7 @@ def automate_experiment(
         {k: v for k, v in obs.config.items() if k in suggester.space.keys()}
         for obs in experiment.observations
     ]
-    values = [obs.value for obs in experiment.observations]
+    values = [extract_observation(obs.result) for obs in experiment.observations]
 
     # filter out invalid points
     steps = [Step(p, v) for p, v in zip(points, values) if suggester.is_valid_point(p)]
