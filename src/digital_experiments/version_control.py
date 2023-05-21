@@ -23,22 +23,23 @@ by the user to be more descriptive.
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from .backends import Backend, Files, HomeLabel, backend_from_type
 
 MUST_SPECIFY_BACKEND = ValueError(
-    "If the experiment has never been run before, "
-    "you must specify a backend."
+    "If the experiment has never been run before, you must specify a backend."
 )
 
+AcceptanceFunction = Callable[[Path], bool]
 
-def get_all_versions(root: Path) -> List[str]:
+
+def get_all_versions(root: Path) -> List[Path]:
     """
     Find all the versions of the experiment in the root directory
     """
     assert root.exists()
-    return [file.parent.name for file in root.glob(f"**/{Files.LABEL}")]
+    return [file.parent for file in root.glob(f"**/{Files.LABEL}")]
 
 
 def current_max_version(root: Path) -> int:
@@ -49,16 +50,16 @@ def current_max_version(root: Path) -> int:
     numbered_versions = []
 
     for version in get_all_versions(root):
-        if version.startswith("version-"):
+        if version.name.startswith("version-"):
             try:
-                numbered_versions.append(int(version.split("-")[-1]))
+                numbered_versions.append(int(version.name.split("-")[-1]))
             except:
                 pass
 
     return max(numbered_versions, default=0)
 
 
-def get_backend_for(root, acceptance_function) -> Optional[Backend]:
+def get_backend_for(root, acceptance_function: AcceptanceFunction) -> Optional[Backend]:
     """
     Find the alphabetically-first home for this experiment
     that satisfies the acceptance function, if it exists.
@@ -69,18 +70,14 @@ def get_backend_for(root, acceptance_function) -> Optional[Backend]:
 
     existing_versions = get_all_versions(root)
 
-    for version in sorted(existing_versions):
-        home = root / version
-        if acceptance_function(root, version):
-            return Backend.from_existing(home)
+    for version in sorted(existing_versions, key=lambda v: v.name):
+        if acceptance_function(version):
+            return Backend.from_existing(version)
 
     return None
 
 
-def create_backend_for(
-    root, experiment_code: str, backend_name: str
-) -> Backend:
-
+def create_backend_for(root, experiment_code: str, backend_name: str) -> Backend:
     version = 1 if not root.exists() else current_max_version(root) + 1
     home = root / f"version-{version}"
 
@@ -105,21 +102,30 @@ def get_or_create_backend_for(
 # Acceptance functions --------------------------------------------------------
 
 
-def latest_version(root: Path, version: str):
+def latest_version(path: Path):
     """
-    Find the latest version of the experiment in the root directory
+    is this the latest version of the experiment?
     """
-    return version == f"version-{current_max_version(root)}"
+    root = path.parent
+    max_version = current_max_version(root)
+    return path.name == f"version-{max_version}"
 
 
-def matches_code_and_backend(code, backend):
-    def acceptance(root, version):
-        home = root / version
-        label = HomeLabel.from_existing(home)
+def matches_code_and_backend(code, backend) -> AcceptanceFunction:
+    """
+    create an acceptance function to validate a version
+    based on the code and backend name
+    """
+
+    def acceptance(path: Path):
+        label = HomeLabel.from_existing(path)
         return label.code == code and label.backend_name == backend
 
     return acceptance
 
 
-def for_version(specified_version: str):
-    return lambda root, version: version == specified_version
+def is_version(version_name: str) -> AcceptanceFunction:
+    """
+    create an acceptance functions that asks if this version has the given name?
+    """
+    return lambda path: path.name == version_name
