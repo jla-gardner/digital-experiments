@@ -1,0 +1,30 @@
+name: PyPI Publish
+on:
+    push:
+        branches:
+            - master
+
+permissions:
+    contents: read
+    packages: write
+
+jobs:
+    pypi-publish:
+        name: Upload release to PyPI
+        runs-on: ubuntu-latest
+        environment:
+            name: publishing
+            url: https://pypi.org/p/digital-experiments
+        permissions:
+            id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+
+        # only publish on tags
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-python@v3
+            - name: Install digital-experiments and dependencies
+              run: pip install -e ".[dev]"
+            - name: Publish package distributions to PyPI
+              uses: pypa/gh-action-pypi-publish@release/v1
