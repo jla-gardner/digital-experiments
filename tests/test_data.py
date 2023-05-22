@@ -67,6 +67,9 @@ def test_map():
     data = Data(a=[1, 2, 3], b=[4, 5, 6, 7])
     assert data.map(sum) == Data({"a": 6, "b": 22})
 
+    get_nth = lambda lst, n: lst[n]
+    assert data.map(get_nth, n=1) == Data({"a": 2, "b": 5})
+
 
 def test_apply():
     def concatenate(*lists):

@@ -141,12 +141,23 @@ class Data(DoesMathsMixin, DotDict):
         # so we e.g. add `thing` to each of the values in `data`
         return Data({k: operation(thing, v) for k, v in self.items()})
 
-    def map(self, func: Callable) -> "Data":
+    def map(self, func: Callable, *args, **kwargs) -> "Data":
         """
         Return a new `Data` object with the same keys, but with the
         values mapped by the function passed in.
+
+        Parameters:
+        -----------
+        func: The function to map to the values. The first argument
+            passed to the function will be the value.
+        *args: Any additional positional arguments to pass to the function.
+        **kwargs: Any additional keyword arguments to pass to the function.
+
+        Returns:
+        --------
+        A new `Data` object with the same keys and new values.
         """
-        return Data({k: func(v) for k, v in self.items()})
+        return Data({k: func(v, *args, **kwargs) for k, v in self.items()})
 
     @classmethod
     def apply(cls, func: Callable, *data_objects: "Data") -> "Data":
