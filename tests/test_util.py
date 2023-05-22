@@ -5,6 +5,7 @@ import pytest
 from digital_experiments import experiment
 from digital_experiments.experiment import get_passed_kwargs_for
 from digital_experiments.util import (
+    ExistingPath,
     dict_equality,
     flatten,
     generate_id,
@@ -100,3 +101,13 @@ def test_merge_dicts():
 
     good_d2 = {"d": 3}
     assert merge_dicts(d1, good_d2) == {"a": {"b": 1, "c": 2}, "d": 3}
+
+
+def test_existing_path(tmp_path):
+    assert tmp_path.exists()
+    ExistingPath(tmp_path)
+
+    fake_path = tmp_path / "fake"
+    assert not fake_path.exists()
+    with pytest.raises(FileNotFoundError):
+        ExistingPath(fake_path)

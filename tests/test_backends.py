@@ -93,3 +93,8 @@ def test_available_backends(backend, tmp_path):
     add(1, 2)
 
     assert len(add.observations) == 1
+
+
+def test_failed_load(tmp_path):
+    with pytest.raises(ValueError, match="does not contain a "):
+        Backend.from_existing(tmp_path)

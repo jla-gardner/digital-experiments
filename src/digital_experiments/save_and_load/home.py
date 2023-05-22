@@ -7,10 +7,11 @@ from digital_experiments.util import ExistingPath
 
 class Home:
     """
-    when a digital experiment, it is given a "home"
+    a digital experiment is given a "home"
 
-    this is a directory that contains a collection of backends
-    each of which stores a different version of the experiment
+    this is a directory that contains a collection of backends,
+    each of which is responsible for saving and loading results for
+    stores a specific version of the experiment
     """
 
     def __init__(self, root: Path):
