@@ -132,18 +132,6 @@ def interpret(value: str, parameter: inspect.Parameter) -> Any:
     return value if is_str else eval(value)
 
 
-def get_passed_kwargs_for(experiment):
-    kwargs: Dict[str, str] = get_passed_kwargs()
-
-    relevant_kwargs = {}
-    signature = inspect.signature(experiment._experiment)
-    for k, v in kwargs.items():
-        if k in signature.parameters:
-            relevant_kwargs[k] = interpret(v, signature.parameters[k])
-
-    return relevant_kwargs
-
-
 def dict_equality(d1: Dict, d2: Dict):
     if set(d1.keys()) != set(d2.keys()):
         return False
@@ -223,3 +211,16 @@ def is_iterable(obj):
 def get_random_number():
     """returns a random number between 0 and 1"""
     return random.random()
+
+
+class ExistingPath(type(Path())):
+    """A path that must exist"""
+
+    def __new__(cls, *args, **kwargs):
+        self = super().__new__(cls, *args, **kwargs)
+        if not self.exists():
+            raise FileNotFoundError(self)
+        return self
+
+    def __truediv__(self, other: str) -> Path:
+        return Path(self) / other

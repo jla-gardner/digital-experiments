@@ -3,12 +3,12 @@ import sys
 import pytest
 
 from digital_experiments import experiment
+from digital_experiments.experiment import get_passed_kwargs_for
 from digital_experiments.util import (
     dict_equality,
     flatten,
     generate_id,
     get_passed_kwargs,
-    get_passed_kwargs_for,
     intersect,
     merge_dicts,
     unflatten,

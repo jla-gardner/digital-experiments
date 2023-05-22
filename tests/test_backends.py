@@ -1,14 +1,14 @@
 import pytest
 
 from digital_experiments import experiment
-from digital_experiments.backends import (
-    Backend,
-    available_backends,
-    backend_from_type,
-    this_is_a_backend,
-)
 from digital_experiments.inspection import code_for
 from digital_experiments.observation import Observation
+from digital_experiments.save_and_load.backend import (
+    Backend,
+    _available_backends,
+    backend_type_from_name,
+    this_is_a_backend,
+)
 
 
 def test_incomplete_subclassing():
@@ -37,7 +37,7 @@ def test_failure_to_register(tmp_path):
             pass
 
     with pytest.raises(ValueError):
-        IncorrectBackend(tmp_path)
+        IncorrectBackend(tmp_path, "fake code")
 
 
 def test_correct_backend(tmp_path):
@@ -53,7 +53,7 @@ def test_correct_backend(tmp_path):
         def all_observations(self):
             pass
 
-    CorrectBackend(tmp_path)
+    CorrectBackend(tmp_path, "fake code")
 
 
 def test_unknown_backend_type():
@@ -62,21 +62,22 @@ def test_unknown_backend_type():
     """
 
     with pytest.raises(ValueError):
-        backend_from_type("unknown")
+        backend_type_from_name("unknown")
 
 
-@pytest.mark.parametrize("backend", available_backends())
+@pytest.mark.parametrize("backend", _available_backends())
 def test_available_backends(backend, tmp_path):
     """
     All available backends can be instantiated and used
     """
 
-    klass = backend_from_type(backend)
+    fake_code = code_for(lambda: 1 + 1)
+    klass = backend_type_from_name(backend)
     assert klass.name == backend
 
     home = tmp_path / backend
     home.mkdir()
-    backend_instance = klass(home)
+    backend_instance = klass(home, fake_code)
     backend_instance.save(Observation(id="1", config={"a": 1, "b": 2}, result=1))
 
     observations = backend_instance.all_observations()

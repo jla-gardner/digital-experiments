@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from digital_experiments.backends import available_backends
 from digital_experiments.experiment import experiment
+from digital_experiments.save_and_load.backend import _available_backends
 
 
 def test_absolute_path(tmp_path):
@@ -84,7 +84,7 @@ def test_repr(tmp_path):
     assert repr(add) == "Experiment(add, observations=2)"
 
 
-@pytest.mark.parametrize("backend", available_backends())
+@pytest.mark.parametrize("backend", _available_backends())
 def test_backends(backend, tmp_path):
     @experiment(backend=backend, absolute_root=tmp_path)
     def add(a, b):
