@@ -17,15 +17,9 @@ classifiers = [
 keywords = ["config", "experiments", "optimisation"]
 dependencies = [
     "ipython",
-    "matplotlib",
-    "imageio",
-    "numpy",
-    "pandas",
-    "scikit-learn",
-    "scikit-optimize",
     "filelock",
 ]
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 [project.optional-dependencies]
 dev = [
@@ -56,3 +50,11 @@ push = false
 [tool.bumpver.file_patterns]
 "pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
 "src/digital_experiments/__init__.py" = ["{version}"]
+
+
+[tool.coverage.report]
+exclude_also = [
+    "def __repr__",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    ]

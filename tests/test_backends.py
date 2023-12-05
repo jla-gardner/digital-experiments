@@ -1,5 +1,11 @@
 import pytest
-from digital_experiments.backends import Backend, instantiate_backend, register_backend
+from digital_experiments.backends import (
+    _ALL_BACKENDS,
+    Backend,
+    instantiate_backend,
+    register_backend,
+)
+from digital_experiments.core import Observation
 
 
 def test_incomplete_subclassing(tmp_path):
@@ -20,30 +26,17 @@ def test_failure_to_register(tmp_path):
         instantiate_backend("un-registered", tmp_path)
 
 
-# @pytest.mark.parametrize("backend", available_backends())
-# def test_available_backends(backend, tmp_path):
-#     """
-#     All available backends can be instantiated and used
-#     """
+@pytest.mark.parametrize("backend", _ALL_BACKENDS.keys())
+def test_success_to_register(backend, tmp_path):
+    """A backend must be registered with @register_backend"""
 
-#     klass = backend_from_type(backend)
-#     assert klass.name == backend
+    backend = instantiate_backend(backend, tmp_path)
+    assert isinstance(backend, Backend)
 
-#     home = tmp_path / backend
-#     home.mkdir()
-#     backend_instance = klass(home)
-#     backend_instance.save(Observation(id="1", config={"a": 1, "b": 2}, result=1))
+    observation = Observation(id="1", config={"a": 1, "b": 2}, result=1, metadata={})
+    backend.record(observation)
 
-#     observations = backend_instance.all_observations()
-#     assert len(observations) == 1
-#     assert observations[0].id == "1"
-#     assert observations[0].config == {"a": 1, "b": 2}
-#     assert observations[0].result == 1
+    loaded = backend.load("1")
+    assert loaded == observation
 
-#     @experiment(backend=backend, absolute_root=tmp_path)
-#     def add(a, b):
-#         return a + b
-
-#     add(1, 2)
-
-#     assert len(add.observations) == 1
+    assert backend.all_ids() == ["1"]

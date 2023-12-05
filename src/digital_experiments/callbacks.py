@@ -34,7 +34,7 @@ class GlobalStateNotifier(Callback):
 
 def current_id() -> str:
     if len(_RUNNING_IDS) == 0:
-        raise ValueError(
+        raise RuntimeError(
             "No experiment running - this function only works "
             "inside an experiment context"
         )
@@ -43,7 +43,7 @@ def current_id() -> str:
 
 def current_dir() -> Path:
     if len(_CURRENT_DIR) == 0:
-        raise ValueError(
+        raise RuntimeError(
             "No experiment running - this function only works "
             "inside an experiment context"
         )
@@ -65,7 +65,7 @@ class Logging(Callback):
         value = str(observation.result)
         if len(value) > 100:
             value = value[:50] + "..." + value[-50:]
-        print(f"finished experiment {observation.id} with value {observation.result}")
+        print(f"finished experiment {observation.id} with result {value}")
 
 
 class CodeVersioning(Callback):

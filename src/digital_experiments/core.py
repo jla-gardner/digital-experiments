@@ -92,15 +92,15 @@ class Backend(ABC):
 
     @abstractmethod
     def record(self, observation: Observation) -> None:
-        ...
+        """Record an `Observation`"""
 
     @abstractmethod
     def load(self, id: str) -> Observation:
-        ...
+        """Load an `Observation` by its id"""
 
     @abstractmethod
     def all_ids(self) -> list[str]:
-        ...
+        """Return a list of all ids"""
 
     def load_all(self) -> list[Observation]:
         return [self.load(id) for id in self.all_ids()]
