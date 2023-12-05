@@ -3,16 +3,15 @@ from __future__ import annotations
 import json
 import pickle
 from pathlib import Path
-from typing import Type
 
 from .core import Backend, Observation
 
 # Global state is isolated here:
-_ALL_BACKENDS: dict[str, Type[Backend]] = {}
+_ALL_BACKENDS: dict[str, type[Backend]] = {}
 
 
 def register_backend(name: str):
-    def decorator(cls: Type[Backend]):
+    def decorator(cls: type[Backend]):
         _ALL_BACKENDS[name] = cls
         return cls
 
@@ -38,7 +37,7 @@ class JSONBackend(Backend):
 
     def load(self, id: str) -> Observation:
         path = self.root / f"{id}.json"
-        with open(path, "r") as f:
+        with open(path) as f:
             return Observation(**json.load(f))
 
     def all_ids(self) -> list[str]:

@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import pytest
 from digital_experiments import experiment
 from digital_experiments.backends import _ALL_BACKENDS
@@ -14,3 +17,27 @@ def test_experiment(backend: str, tmp_path):
     observations = square.observations()
     assert len(observations) == 1, "there should be one observation"
     assert observations[0].result == 4, "result should be 4"
+
+
+def test_caching(tmp_path):
+    @experiment(root=tmp_path, cache=True)
+    def square(x):
+        return x**2
+
+    assert square(2) == 4, "square(2) should be 4"
+    assert square(2) == 4, "square(2) should be 4"
+
+    observations = square.observations()
+    assert len(observations) == 1, "there should be one observation"
+
+
+def test_root():
+    os.environ["DE_ROOT"] = "test-loc"
+
+    @experiment
+    def square(x):
+        return x**2
+
+    assert square.backend.root == Path("test-loc")
+
+    del os.environ["DE_ROOT"]

@@ -33,7 +33,9 @@ def test_success_to_register(backend, tmp_path):
     backend = instantiate_backend(backend, tmp_path)
     assert isinstance(backend, Backend)
 
-    observation = Observation(id="1", config={"a": 1, "b": 2}, result=1, metadata={})
+    observation = Observation(
+        id="1", config={"a": 1, "b": 2}, result=1, metadata={}
+    )
     backend.record(observation)
 
     loaded = backend.load("1")

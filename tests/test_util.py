@@ -1,12 +1,13 @@
 from digital_experiments.util import complete_config, source_code
 
 
-def test_get_code():
-    def my_func(a):
-        return a + 1
+def my_func(a):
+    return a + 1
 
+
+def test_get_code():
     code = source_code(my_func)
-    assert code == "    def my_func(a):\n        return a + 1\n"
+    assert code == "def my_func(a):\n    return a + 1\n"
 
 
 def test_complete_config():

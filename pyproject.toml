@@ -17,7 +17,6 @@ classifiers = [
 keywords = ["config", "experiments", "optimisation"]
 dependencies = [
     "ipython",
-    "filelock",
 ]
 requires-python = ">=3.8"
 
@@ -25,7 +24,7 @@ requires-python = ">=3.8"
 dev = [
     "notebook",
     "pytest",
-    "black",
+    "ruff",
     "bumpver",
     "sphinx",
     "furo",
@@ -57,4 +56,57 @@ exclude_also = [
     "def __repr__",
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
+    "\\.\\.\\."
     ]
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+include = ["src", "tests"]
+extend-include = ["*.ipynb"]
+
+line-length = 80
+indent-width = 4
+
+# Assume Python 3.8
+target-version = "py38"
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I",
+]
+ignore = ["SIM300", "E402", "E703"]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"

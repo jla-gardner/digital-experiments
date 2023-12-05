@@ -55,7 +55,9 @@ def test_logging(capsys):
     assert "starting experiment" in captured.out
 
     result = "a really long string that should be truncated" * 10
-    noisy_callback.end(Observation(id="1", config={}, result=result, metadata={}))
+    noisy_callback.end(
+        Observation(id="1", config={}, result=result, metadata={})
+    )
     captured = capsys.readouterr()
     assert "finished experiment" in captured.out
     # assert "..." in captured.out

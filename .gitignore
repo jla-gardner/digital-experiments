@@ -15,3 +15,4 @@ docs/source/examples/
 
 .isort.cfg
 .coverage
+.ruff_cache
