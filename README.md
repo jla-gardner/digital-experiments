@@ -1,16 +1,31 @@
 <div align="center">
-<img src="docs/source/logo.svg" width="50%">
+    <img src="docs/source/logo.svg" style="width: min(100%, 350px); height: auto;"/>
 </div>
 
 ---
 
-A lightweight python library for keeping track of, and optimizing, configuration and results for digital experiments.
 
-## Getting Started
+A lightweight python package for recording and analysing configurations and results of coding experiments.
 
-Installation is as easy as `pip install digital-experiments`
+<div align="center">
 
-Using the library is easy too. Here's a simple example:
+[![PyPI](https://img.shields.io/pypi/v/digital-experiments)](https://pypi.org/project/digital-experiments/)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/digital-experiments?color=green&label=installs&logo=Python&logoColor=white)](https://pypistats.org/packages/digital-experiments)
+[![GitHub](https://img.shields.io/github/license/jla-gardner/local-cache)](LICENCE.md)
+[![](https://github.com/jla-gardner/load-atoms/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/jla-gardner/load-atoms/actions/workflows/tests.yaml)
+[![codecov](https://codecov.io/gh/jla-gardner/digital-experiments/branch/master/graph/badge.svg?token=VGSFM0GWF1)](https://codecov.io/gh/jla-gardner/digital-experiments)
+
+</div>
+
+
+## Installation
+
+`pip install digital-experiments`
+
+## Basic Use
+
+
+1. Define your experiment as a pure-python function, and decorate it with `@experiment`:
 
 ```python
 from digital_experiments import experiment
@@ -18,20 +33,25 @@ from digital_experiments import experiment
 @experiment
 def my_experiment(a, b=2):
     return a ** b
-
-my_experiment(2, b=3)
 ```
 
-## Walkthrough
+2. Call the function as normal:
 
-The [examples directory](examples/) contains some notebooks that help explain how this package works
+```python
+>>> my_experiment(2, 3)
+8
+>>> my_experiment(4)
+16
+```
 
--   [Basic Overview](examples/digital_experiments.ipynb)
--   [Optimising with digital-experiments](examples/optimization.ipynb)
+3. Access the results of the experiment:
 
----
+```python
+>>> my_experiment.observations
+[Observation(<id1>, {'a': 2, 'b': 3} → 8}),
+Observation(<id2>, {'a': 4, 'b': 2} → 16})]
+```
 
-<div align="center">
-    <img src="https://raw.github.com/jla-gardner/digital-experiments/master/res/optimization.gif" alt="drawing" width="400"/>
-    <img src="https://raw.github.com/jla-gardner/digital-experiments/master/res/optimization.svg" alt="drawing" width="400"/>
-</div>
+<!-- ## Documentation
+
+For more information, see the [documentation](https://digital-experiments.readthedocs.io/en/latest/). -->

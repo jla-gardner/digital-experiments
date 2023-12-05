@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, NamedTuple
+from typing import Any, Callable, NamedTuple
 
 from digital_experiments.util import complete_config, source_code
 
@@ -59,9 +59,9 @@ class Experiment:
 
 class Observation(NamedTuple):
     id: str
-    config: Dict[str, Any]
+    config: dict[str, Any]
     result: Any
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
     def __repr__(self):
         return f"Observation({self.id}, {self.config} → {self.result})"

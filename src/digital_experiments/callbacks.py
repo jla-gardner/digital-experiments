@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, TypedDict
+from typing import Any, Callable, TypedDict
 
 from .core import Callback, Observation
 from .util import source_code
@@ -54,7 +54,7 @@ class Logging(Callback):
     def __init__(self, verbose: bool = True):
         self.verbose = verbose
 
-    def start(self, id: str, config: Dict[str, Any]):
+    def start(self, id: str, config: dict[str, Any]):
         if self.verbose:
             print(f"starting experiment {id} with config {config}")
 

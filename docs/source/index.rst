@@ -8,9 +8,6 @@
 💻 digital-experiments 🧪
 =========================
 
-.. warning::
-
-   This project is under active development. Until version 1.0.0 is released, breaking changes to the API may occur.
 
 Use this python package to locally track the results of your experiments, and automatically optimise their parameters.
 
@@ -48,15 +45,6 @@ At first glance, this decorator doesn't change the behaviour of the function at 
       >>> example(b=2, a=3)
       9
 
-Under the hood, however, the parameters and results from each function call are stored locally. These can be accessed (as a :class:`pandas.DataFrame`) using the :func:`get_results<digital_experiments.results_for>` method:
-
-.. code-block:: python
-
-      >>> from digital_experiments import get_results
-      >>> get_results(example)
-
-.. raw:: html
-   :file: _static/df.html
 
 
 Overview
@@ -66,14 +54,6 @@ Overview
    :maxdepth: 1
 
    Home <self>
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Examples:
-
-   examples/basic-usage.ipynb
-   examples/advanced-usage.ipynb
-   examples/simple-optimization.ipynb
 
 .. toctree::
    :maxdepth: 3

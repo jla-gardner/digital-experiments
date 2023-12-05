@@ -1,18 +1,16 @@
 **/__pycache__
-.vscode/
 **/.DS_Store
 
 *.egg-info
 dist
-build.sh
 publish.sh
-
-blah*
 
 docs/build
 docs/source/examples/
 **/experiments
+test-loc
 
+.vscode/
 .isort.cfg
 .coverage
 .ruff_cache
