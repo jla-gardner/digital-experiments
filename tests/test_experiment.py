@@ -41,3 +41,9 @@ def test_root():
     assert square.backend.root == Path("test-loc")
 
     del os.environ["DE_ROOT"]
+
+    @experiment
+    def cube(x):
+        return x**3
+
+    assert cube.backend.root == Path("experiments/cube")
