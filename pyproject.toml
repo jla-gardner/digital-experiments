@@ -47,7 +47,7 @@ push = false
 [tool.bumpver.file_patterns]
 "pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
 "src/digital_experiments/__init__.py" = ["{version}"]
-"docs/source/conf.py" = ["release = {version}"]
+"docs/source/conf.py" = ['release = "{version}"']
 
 
 [tool.coverage.report]
