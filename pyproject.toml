@@ -58,6 +58,7 @@ exclude_also = [
     "@(abc\\.)?abstractmethod",
     "\\.\\.\\.",
     "raise ImportError",
+    "except ImportError",
 ]
 
 
