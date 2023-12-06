@@ -3,6 +3,7 @@ from digital_experiments.callbacks import (
     CodeVersioning,
     GlobalStateNotifier,
     Logging,
+    SaveLogs,
     Timing,
     current_dir,
     current_id,
@@ -88,3 +89,36 @@ def test_timing():
 
     assert "custom-block" in metadata["timing"]
     assert "start" in metadata["timing"]["total"]
+
+    with pytest.raises(RuntimeError, match="No experiment running"):  # noqa: SIM117
+        with time_block("custom-block"):
+            pass
+
+
+def test_save_logs(tmp_path, capsys):
+    callbacks = [
+        GlobalStateNotifier(tmp_path),
+        SaveLogs("logs.txt"),
+    ]
+
+    for callback in callbacks:
+        callback.setup(dummy)
+
+    id, metadata = "1", {}
+    for callback in callbacks:
+        callback.start(id, {})
+
+    print("hello world")
+
+    obs = Observation(id=id, config={}, result=1, metadata=metadata)
+    for callback in reversed(callbacks):
+        callback.end(obs)
+
+    assert (
+        tmp_path / "storage" / id / "logs.txt"
+    ).read_text() == "hello world\n"
+
+    # test printing still works
+    print("other text")
+    captured = capsys.readouterr()
+    assert "other text" in captured.out

@@ -19,8 +19,11 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "nbsphinx",
+    "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
+    "sphinxext.opengraph",
+    "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
@@ -29,3 +32,27 @@ exclude_patterns = []
 intersphinx_mapping = {"python": ("http://docs.python.org/", None)}
 html_theme = "furo"
 html_static_path = ["_static"]
+autodoc_member_order = "bysource"
+
+copybutton_prompt_text = (
+    r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+)
+copybutton_prompt_is_regexp = True
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg'}",
+]
+copybutton_selector = "div.copy-button pre"
+
+logo_highlight_colour = "#3c78d8"
+code_color = "#00b398"
+html_theme_options = {
+    "sidebar_hide_name": True,
+    "light_css_variables": {
+        "color-problematic": code_color,
+        "color-brand-primary": logo_highlight_colour,
+        "color-brand-content": logo_highlight_colour,
+    },
+    "dark_css_variables": {
+        "color-problematic": code_color,
+    },
+}

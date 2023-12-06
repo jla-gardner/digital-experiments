@@ -27,6 +27,8 @@ dev = [
     "furo",
     "nbsphinx",
     "sphinx-autobuild",
+    "sphinxext-opengraph",
+    "sphinx-copybutton",
 ]
 test = ["pytest", "pytest-cov"]
 publish = ["build", "twine"]

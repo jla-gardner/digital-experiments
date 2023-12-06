@@ -1,4 +1,5 @@
 import inspect
+from pathlib import Path
 from typing import Any, Callable, Dict
 
 
@@ -15,3 +16,9 @@ def source_code(function: Callable) -> str:
     """get the source code for `function`"""
 
     return inspect.getsource(function)
+
+
+def artefact_location(root: Path, id: str) -> Path:
+    """get the location of an artefact"""
+
+    return root / "storage" / id

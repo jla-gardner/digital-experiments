@@ -1,34 +1,38 @@
-.. digital-experiments documentation master file, created by
-   sphinx-quickstart on Wed Jan 25 11:37:34 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 :github_url: https://github.com/jla-gardner/digital-experiments
 
-💻 digital-experiments 🧪
-=========================
+.. toctree::
+   :maxdepth: 4
+   :hidden:
+   :caption: Contents:
+
+   Home <self>
+   usage
+   api
+
+.. image:: logo.svg
+   :alt: digital-experiments logo
+   :width: 450px
+   :align: center
 
 
-Use this python package to locally track the results of your experiments, and automatically optimise their parameters.
+Use the `💻 digital-experiments 🧪 <https://github.com/jla-gardner/digital-experiments>`_ python package to track the results of your coding experiments.
 
 Installation
 ------------
-.. _installation:
 
 .. code-block:: console
+   :class: copy-button
 
-   (.venv) $ pip install digital-experiments
+   $ pip install digital-experiments
 
-.. _usage:
 
-Usage
------
+Quickstart
+----------
 
-.. The main concept of this package is that of an `experiment`. An experiment is a peice of code that takes as input some configuration, does some processing (the actual experiment) and outputs some result. You've seen such experiments before: python functions.
-
-The main entry point to `digital-experiments` is the :func:`@experiment<digital_experiments.experiment>` decorator. This can be used to wrap any function that takes a set of parameters and returns a result:
+The main entry point to ``digital-experiments`` is the :func:`@experiment <digital_experiments.experiment>` decorator. This can be used to wrap any python function:
 
 .. code-block:: python
+   :class: copy-button
 
       from digital_experiments import experiment
 
@@ -36,7 +40,7 @@ The main entry point to `digital-experiments` is the :func:`@experiment<digital_
       def example(a, b):
          return a ** b
 
-At first glance, this decorator doesn't change the behaviour of the function at all:
+This decorator leaves the apparent behaviour of the function unchanged:
 
 .. code-block:: python
 
@@ -46,18 +50,15 @@ At first glance, this decorator doesn't change the behaviour of the function at 
       9
 
 
+Under-the-hood, these results have been saved. You can access these results using the :func:`observations<digital_experiments.core.Experiment.observations>` method attached to the experiment:
 
-Overview
---------
+.. code-block:: python
 
-.. toctree::
-   :maxdepth: 1
+      >>> example.observations()
+      [Observation(<id1>, {'a': 2, 'b': 3} → 8}),
+      Observation(<id2>, {'a': 3, 'b': 2} → 9})]
 
-   Home <self>
+For more information on how to use ``digital-experiments``, see :doc:`the usage page <usage>`.
 
-.. toctree::
-   :maxdepth: 3
-   :caption: API Reference:
 
-   api
 

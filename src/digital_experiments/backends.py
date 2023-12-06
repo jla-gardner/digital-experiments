@@ -11,6 +11,25 @@ _ALL_BACKENDS: dict[str, type[Backend]] = {}
 
 
 def register_backend(name: str):
+    """
+    Use this decorator (along with subclassing :class:`Backend`) to register
+    a new custom backend.
+
+    Example
+    -------
+    .. code-block:: python
+
+        from digital_experiments import register_backend, Backend
+
+        @register_backend("my-backend")
+        class MyBackend(Backend):
+            ...
+
+        @experiment(backend="my-backend")
+        def my_experiment():
+            ...
+    """
+
     def decorator(cls: type[Backend]):
         _ALL_BACKENDS[name] = cls
         return cls
@@ -28,24 +47,16 @@ def instantiate_backend(name: str, root: Path) -> Backend:
     return _ALL_BACKENDS[name](root)
 
 
-@register_backend("json")
-class JSONBackend(Backend):
-    def record(self, observation: Observation) -> None:
-        path = self.root / f"{observation.id}.json"
-        with open(path, "w") as f:
-            json.dump(observation._asdict(), f, indent=2)
-
-    def load(self, id: str) -> Observation:
-        path = self.root / f"{id}.json"
-        with open(path) as f:
-            return Observation(**json.load(f))
-
-    def all_ids(self) -> list[str]:
-        return [path.stem for path in self.root.glob("*.json")]
-
-
 @register_backend("pickle")
 class PickleBackend(Backend):
+    """
+    The default backend for storing results.
+
+    Each observation is stored in ``<root>/<id>.pkl``. The result and
+    configuration of each observation can be (almost) any python object,
+    provided it can be pickled.
+    """
+
     def record(self, observation: Observation) -> None:
         path = self.root / f"{observation.id}.pkl"
         with open(path, "wb") as f:
@@ -58,3 +69,27 @@ class PickleBackend(Backend):
 
     def all_ids(self) -> list[str]:
         return [path.stem for path in self.root.glob("*.pkl")]
+
+
+@register_backend("json")
+class JSONBackend(Backend):
+    """
+    Each observation is stored in ``<root>/<id>.json``. The result and
+    configuration of each observation must be JSON-serializable to
+    use this backend.
+
+    Select this backed using ``@experiment(backend="json")``.
+    """
+
+    def record(self, observation: Observation) -> None:
+        path = self.root / f"{observation.id}.json"
+        with open(path, "w") as f:
+            json.dump(observation._asdict(), f, indent=2)
+
+    def load(self, id: str) -> Observation:
+        path = self.root / f"{id}.json"
+        with open(path) as f:
+            return Observation(**json.load(f))
+
+    def all_ids(self) -> list[str]:
+        return [path.stem for path in self.root.glob("*.json")]

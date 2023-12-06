@@ -47,7 +47,7 @@ def my_experiment(a, b=2):
 3. Access the results of the experiment:
 
 ```python
->>> my_experiment.observations
+>>> my_experiment.observations()
 [Observation(<id1>, {'a': 2, 'b': 3} → 8}),
 Observation(<id2>, {'a': 4, 'b': 2} → 16})]
 ```
