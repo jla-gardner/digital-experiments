@@ -176,7 +176,7 @@ class Experiment:
             import pandas as pd
         except ImportError as e:
             raise ImportError(
-                "Please install pandas to use this function"
+                "Please install pandas to use this method."
             ) from e
 
         observations = self.observations(current_code_only)
