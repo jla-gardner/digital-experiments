@@ -29,9 +29,12 @@ extensions = [
 templates_path = ["_templates"]
 exclude_patterns = []
 
-intersphinx_mapping = {"python": ("http://docs.python.org/", None)}
+intersphinx_mapping = {
+    "python": ("http://docs.python.org/", None),
+    "pandas": ("https://pandas.pydata.org/docs/", None),
+}
 html_theme = "furo"
-html_static_path = ["_static"]
+# html_static_path = ["_static"]
 autodoc_member_order = "bysource"
 
 copybutton_prompt_text = (

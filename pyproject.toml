@@ -15,7 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 keywords = ["config", "experiments", "optimisation"]
-dependencies = ["ipython"]
+dependencies = []
 requires-python = ">=3.8"
 
 [project.optional-dependencies]
@@ -29,6 +29,7 @@ dev = [
     "sphinx-autobuild",
     "sphinxext-opengraph",
     "sphinx-copybutton",
+    "pandas",
 ]
 test = ["pytest", "pytest-cov"]
 publish = ["build", "twine"]
@@ -56,6 +57,7 @@ exclude_also = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
     "\\.\\.\\.",
+    "raise ImportError",
 ]
 
 

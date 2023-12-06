@@ -58,7 +58,18 @@ Under-the-hood, these results have been saved. You can access these results usin
       [Observation(<id1>, {'a': 2, 'b': 3} → 8}),
        Observation(<id2>, {'a': 3, 'b': 2} → 9})]
 
-For more information on how to use ``digital-experiments``, see :doc:`the usage page <usage>`.
+If you have :mod:`pandas` installed, you can also access the results as a :class:`pandas.DataFrame`:
+
+.. code-block:: python
+
+      >>> example.to_dataframe()
+            id config.a config.b  result
+      0  <id1>       2         3       8
+      1  <id2>       3         2       9
+
+For further information on how to use ``digital-experiments``, see :doc:`the usage page <usage>`.
+ 
+Complete documentation of the API is available :doc:`here <api>`.
 
 
 
