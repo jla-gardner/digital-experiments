@@ -54,6 +54,8 @@ def test_artefacts(tmp_path):
     def example():
         (current_dir() / "results.txt").write_text("hello world")
 
+    assert not example.artefacts("non-existent-id")
+
     example()
     id = example.observations()[-1].id
     artefacts = example.artefacts(id)
