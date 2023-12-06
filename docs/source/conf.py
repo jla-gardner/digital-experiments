@@ -1,23 +1,3 @@
-import os
-import shutil
-import sys
-from pathlib import Path
-
-SOURCE_DIR = Path(__file__).parent
-PROJECT_ROOT = SOURCE_DIR.parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-
-# Copy examples to source directory
-examples_source = PROJECT_ROOT / "examples"
-examples_dest = SOURCE_DIR / "examples"
-if examples_dest.exists():
-    shutil.rmtree(examples_dest)
-os.mkdir(examples_dest)
-
-for file in examples_source.glob("*.ipynb"):
-    shutil.copy(file, examples_dest / file.name)
-
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -29,7 +9,7 @@ for file in examples_source.glob("*.ipynb"):
 project = "digital-experiments"
 copyright = "2023, John Gardner"
 author = "John Gardner"
-release = "0.1.9"
+release = "1.2.8"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -39,24 +19,40 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "nbsphinx",
+    "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
+    "sphinxext.opengraph",
+    "sphinx_copybutton",
 ]
 
 templates_path = ["_templates"]
 exclude_patterns = []
 
-html_css_files = [
-    "css/linebreaks.css",
-]
-
-intersphinx_mapping = {
-    "python": ("http://docs.python.org/", None),
-    "pandas": ("http://pandas.pydata.org/pandas-docs/dev", None),
-}
-
-# -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
+intersphinx_mapping = {"python": ("http://docs.python.org/", None)}
 html_theme = "furo"
 html_static_path = ["_static"]
+autodoc_member_order = "bysource"
+
+copybutton_prompt_text = (
+    r">>> |\.\.\. |\$ |In \[\d*\]: | {2,5}\.\.\.: | {5,8}: "
+)
+copybutton_prompt_is_regexp = True
+nbsphinx_execute_arguments = [
+    "--InlineBackend.figure_formats={'svg'}",
+]
+copybutton_selector = "div.copy-button pre"
+
+logo_highlight_colour = "#3c78d8"
+code_color = "#00b398"
+html_theme_options = {
+    "sidebar_hide_name": True,
+    "light_css_variables": {
+        "color-problematic": code_color,
+        "color-brand-primary": logo_highlight_colour,
+        "color-brand-content": logo_highlight_colour,
+    },
+    "dark_css_variables": {
+        "color-problematic": code_color,
+    },
+}

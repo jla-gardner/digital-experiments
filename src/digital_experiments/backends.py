@@ -1,250 +1,95 @@
+from __future__ import annotations
+
+import json
 import pickle
-import shutil
-from abc import ABC, abstractmethod
-from dataclasses import asdict, dataclass
-from functools import partial
 from pathlib import Path
-from typing import Dict, List
 
-import pandas as pd
-import yaml
+from .core import Backend, Observation
 
-from .observation import Observation
-from .util import dict_equality, exclusive_file_access, flatten, generate_id, unflatten
-
-__BACKENDS: Dict[str, "Backend"] = {}
+# Global state is isolated here:
+_ALL_BACKENDS: dict[str, type[Backend]] = {}
 
 
-def register_backend(name: str, cls: "Backend"):
-    __BACKENDS[name] = cls
-    cls.name = name
-    return cls
+def register_backend(name: str):
+    """
+    Use this decorator (along with subclassing :class:`Backend`) to register
+    a new custom backend.
+
+    Example
+    -------
+    .. code-block:: python
+
+        from digital_experiments import register_backend, Backend
+
+        @register_backend("my-backend")
+        class MyBackend(Backend):
+            ...
+
+        @experiment(backend="my-backend")
+        def my_experiment():
+            ...
+    """
+
+    def decorator(cls: type[Backend]):
+        _ALL_BACKENDS[name] = cls
+        return cls
+
+    return decorator
 
 
-def this_is_a_backend(name: str):
-    return partial(register_backend, name)
-
-
-def backend_from_type(backend_type: str):
-    if backend_type not in __BACKENDS:
+def instantiate_backend(name: str, root: Path) -> Backend:
+    if name not in _ALL_BACKENDS:
         raise ValueError(
-            f"Unknown backend type {backend_type}. "
-            f"Available backends are: {list(__BACKENDS.keys())}. "
-            "Did you forget to register your backend using @this_is_a_backend?"
+            f"Unknown backend type {name}. "
+            f"Available backends are: {list(_ALL_BACKENDS.keys())}. "
+            "Did you forget to register your backend using @register_backend?"
         )
-    return __BACKENDS[backend_type]
+    return _ALL_BACKENDS[name](root)
 
 
-def available_backends():
-    return list(__BACKENDS.keys())
-
-
-class Backend(ABC):
-    """
-    Base class for a backend.
-
-    A backend is repsponsible for saving and loading observations to
-    a specific directory on disk.
-
-    To implement a new backend, subclass this class and decorate it with
-    @this_is_a_backend(<name>). You need to implement the following methods:
-    - save
-    - all_observations
-
-    Any additional setup you want to do when the file structure for this
-    backend is created, you can do by extending the create_new class method.
-
-    The default structure of the file system in a backend is as follows:
-    <home>
-    ├── .digital-experiment
-    ├── observations.<format>
-    └─── runs
-        ├── <run_id>
-        │   ├── <artefacts>
-        │   ├── <artefacts>
-        │   └── <artefacts>
-        └── ...
-
-    The .digital-experiment file labels this directory as containing a digital
-    experiment. It contains the name of the backend that is used to store
-    the experiment's data, and the code of the experiment.
-    """
-
-    name: str
-
-    def __init__(self, home: Path):
-        if not hasattr(self, "name"):
-            raise ValueError(
-                "Ooops! You must decorate your backend "
-                "class with @this_is_a_backend(<name>)"
-            )
-        self.home = home
-
-    @abstractmethod
-    def save(self, obs: Observation):
-        """
-        save an observation object to the backend
-        """
-
-    @abstractmethod
-    def all_observations(self) -> List[Observation]:
-        """
-        load all observations from the backend
-        """
-
-    @classmethod
-    def create_new(cls, location: Path, code: str):
-        """
-        Create a new backend at the given location.
-        """
-        assert not location.exists(), f"{location} already exists"
-        location.mkdir(parents=True)
-
-        # label this directory as a digital experiment
-        # and store various required metadata
-        HomeLabel.create_new(location, cls.name, code)
-
-        return cls(location)
-
-    def unique_run(self):
-        """
-        Create a new unique run.
-        """
-
-        id = generate_id()
-        directory = self.home / Files.RUNS / id
-        directory.mkdir(parents=True, exist_ok=False)
-
-        return id, directory
-
-    def clean_up(self, id):
-        """
-        clean up after the run with the given id has finished
-        """
-
-        directory = self.home / Files.RUNS / id
-        if not any(directory.iterdir()):
-            shutil.rmtree(directory)
-
-    @staticmethod
-    def from_existing(home: Path):
-        """
-        Load an existing backend from the given location.
-        """
-
-        label = HomeLabel.from_existing(home)
-        return backend_from_type(label.backend_name)(home)
-
-    def _observations_for_(self, config):
-        return [
-            obs for obs in self.all_observations() if dict_equality(obs.config, config)
-        ]
-
-
-@this_is_a_backend("yaml")
-class YAMLBackend(Backend):
-    @property
-    def yaml_file(self):
-        return self.home / "observations.yaml"
-
-    def save(self, obs: Observation):
-        # append to the yaml file
-        with exclusive_file_access(self.yaml_file, "a") as f:
-            yaml.dump([obs], f, indent=2)
-
-    def all_observations(self) -> List[Observation]:
-        if not self.yaml_file.exists():
-            return []
-        with exclusive_file_access(self.yaml_file) as f:
-            return yaml.load(f, Loader=yaml.Loader)
-
-
-@this_is_a_backend("csv")
-class CSVBackend(Backend):
-    SEPARATOR = "|"
-
-    @property
-    def csv_file(self):
-        return self.home / "observations.csv"
-
-    def save(self, obs: Observation):
-        existing_observations = self.all_observations()
-        existing_observations.append(obs)
-
-        df = pd.DataFrame(
-            [flatten(o.as_dict(), self.SEPARATOR) for o in existing_observations],
-        )
-        with exclusive_file_access(self.csv_file):
-            df.to_csv(self.csv_file, index=False)
-
-    def all_observations(self) -> List[Observation]:
-        if not self.csv_file.exists():
-            return []
-
-        with exclusive_file_access(self.csv_file):
-            df = pd.read_csv(self.csv_file, dtype={"id": str})
-
-        return [
-            Observation(**unflatten(row, self.SEPARATOR)) for _, row in df.iterrows()
-        ]
-
-
-@this_is_a_backend("pickle")
+@register_backend("pickle")
 class PickleBackend(Backend):
-    @property
-    def observations_dir(self):
-        return self.home / "observations"
-
-    def save(self, obs: Observation):
-        file = self.observations_dir / f"{obs.id}.pickle"
-        file.parent.mkdir(parents=True, exist_ok=True)
-
-        with exclusive_file_access(file, "wb") as f:
-            pickle.dump(obs, f)
-
-    def all_observations(self) -> List[Observation]:
-        files = sorted(self.observations_dir.glob("*.pickle"))
-        observations = []
-        for f in files:
-            with exclusive_file_access(f, "rb") as f:
-                observations.append(pickle.load(f))
-        return observations
-
-
-class Files:
-    LABEL = ".digital-experiment"
-    RUNS = "runs"
-
-
-@dataclass
-class HomeLabel:
     """
-    A class to label a directory as containing the results of a digital
-    experiment.
+    The default backend for storing results.
+
+    Each observation is stored in ``<root>/<id>.pkl``. The result and
+    configuration of each observation can be (almost) any python object,
+    provided it can be pickled.
     """
 
-    backend_name: str
-    code: str
+    def record(self, observation: Observation) -> None:
+        path = self.root / f"{observation.id}.pkl"
+        with open(path, "wb") as f:
+            pickle.dump(observation, f)
 
-    @classmethod
-    def file_path(cls, home: Path):
-        return home / Files.LABEL
+    def load(self, id: str) -> Observation:
+        path = self.root / f"{id}.pkl"
+        with open(path, "rb") as f:
+            return pickle.load(f)
 
-    def save_to(self, home: Path):
-        namespace = asdict(self)
+    def all_ids(self) -> list[str]:
+        return [path.stem for path in self.root.glob("*.pkl")]
 
-        with open(self.file_path(home), "w") as f:
-            yaml.dump(namespace, f, default_style="|")
 
-    @classmethod
-    def from_existing(cls, home: Path):
-        with open(cls.file_path(home)) as f:
-            namespace = yaml.safe_load(f)
+@register_backend("json")
+class JSONBackend(Backend):
+    """
+    Each observation is stored in ``<root>/<id>.json``. The result and
+    configuration of each observation must be JSON-serializable to
+    use this backend.
 
-        return cls(**namespace)
+    Select this backed using ``@experiment(backend="json")``.
+    """
 
-    @classmethod
-    def create_new(cls, home: Path, backend_name: str, code: str):
-        label = cls(backend_name, code)
-        label.save_to(home)
-        return label
+    def record(self, observation: Observation) -> None:
+        path = self.root / f"{observation.id}.json"
+        with open(path, "w") as f:
+            json.dump(observation._asdict(), f, indent=2)
+
+    def load(self, id: str) -> Observation:
+        path = self.root / f"{id}.json"
+        with open(path) as f:
+            return Observation(**json.load(f))
+
+    def all_ids(self) -> list[str]:
+        return [path.stem for path in self.root.glob("*.json")]

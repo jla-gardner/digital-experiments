@@ -1,23 +1,35 @@
+###
 API
-=====
+###
 
-Basic
-------
+Core
+====
 
-.. autofunction:: digital_experiments.experiment
-.. autofunction:: digital_experiments.dont_record
-.. autofunction:: digital_experiments.current_directory
-.. autofunction:: digital_experiments.results_for
-.. autofunction:: digital_experiments.get_artefacts
+Documentation of the core, user-facing functionality provided by digital-experiments.
 
-Experiments
-------------
+.. toctree::
+    :maxdepth: 4
 
-.. autoclass:: digital_experiments.experiment.Experiment
+    core-api
+
+Callbacks
+=========
+
+Callbacks allow custom code to be executed at various points during the experiment lifecycle.
+
+.. toctree::
+    :maxdepth: 4
+
+    callbacks-api
+
 
 Backends
---------
-.. autoclass:: digital_experiments.backends.Backend
-    :members: core_files, save, load_all_experiments
+========
 
-.. autofunction:: digital_experiments.backends.register_backend
+
+Backends are responsible for storing and retrieving data from the experiment database.
+
+.. toctree::
+    :maxdepth: 4
+
+    backends-api
