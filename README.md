@@ -1,13 +1,14 @@
 <div align="center">
-    <img src="docs/source/logo.svg" style="width: min(100%, 350px); height: auto;"/>
+    <img src="docs/source/logo.svg" style="width: 400px; height: auto;"/>
 </div>
 
----
 
 
-A lightweight python package for recording and analysing configurations and results of coding experiments.
+
 
 <div align="center">
+    
+A lightweight python package for recording and analysing configurations and results of coding experiments.
 
 [![PyPI](https://img.shields.io/pypi/v/digital-experiments)](https://pypi.org/project/digital-experiments/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/digital-experiments?color=green&label=installs&logo=Python&logoColor=white)](https://pypistats.org/packages/digital-experiments)
@@ -52,6 +53,6 @@ def my_experiment(a, b=2):
 Observation(<id2>, {'a': 4, 'b': 2} → 16})]
 ```
 
-<!-- ## Documentation
+## Documentation
 
-For more information, see the [documentation](https://digital-experiments.readthedocs.io/en/latest/). -->
+For more information, see the [documentation](https://jla-gardner.github.io/digital-experiments/).
