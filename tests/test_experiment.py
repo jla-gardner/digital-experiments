@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import pytest
-from digital_experiments import experiment
+from digital_experiments import current_dir, experiment
 from digital_experiments.backends import _ALL_BACKENDS
 
 
@@ -47,3 +47,17 @@ def test_root():
         return x**3
 
     assert cube.backend.root == Path("experiments/cube")
+
+
+def test_artefacts(tmp_path):
+    @experiment(root=tmp_path)
+    def example():
+        (current_dir() / "results.txt").write_text("hello world")
+
+    example()
+    id = example.observations()[-1].id
+    artefacts = example.artefacts(id)
+    assert len(artefacts) == 1
+    assert "hello world" in artefacts[0].read_text()
+
+    assert example.artefacts("non-existent-id") == []

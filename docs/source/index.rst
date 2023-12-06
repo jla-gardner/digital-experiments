@@ -56,7 +56,7 @@ Under-the-hood, these results have been saved. You can access these results usin
 
       >>> example.observations()
       [Observation(<id1>, {'a': 2, 'b': 3} → 8}),
-      Observation(<id2>, {'a': 3, 'b': 2} → 9})]
+       Observation(<id2>, {'a': 3, 'b': 2} → 9})]
 
 For more information on how to use ``digital-experiments``, see :doc:`the usage page <usage>`.
 

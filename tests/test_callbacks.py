@@ -108,7 +108,7 @@ def test_save_logs(tmp_path, capsys):
     for callback in callbacks:
         callback.start(id, {})
 
-    print("hello world")
+    print("hello world", flush=True)
 
     obs = Observation(id=id, config={}, result=1, metadata=metadata)
     for callback in reversed(callbacks):
