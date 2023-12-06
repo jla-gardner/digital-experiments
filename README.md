@@ -2,10 +2,6 @@
     <img src="docs/source/logo.svg" style="width: 400px; height: auto;"/>
 </div>
 
-
-
-
-
 <div align="center">
     
 A lightweight python package for recording and analysing configurations and results of coding experiments.
@@ -51,6 +47,15 @@ def my_experiment(a, b=2):
 >>> my_experiment.observations()
 [Observation(<id1>, {'a': 2, 'b': 3} → 8}),
 Observation(<id2>, {'a': 4, 'b': 2} → 16})]
+```
+
+If you have `pandas` installed, you can also access these results as a `DataFrame`:
+
+```python
+>>> my_experiment.to_dataframe()
+      id  config.a  config.b  result
+0  <id1>         2         3       8
+1  <id2>         4         2      16
 ```
 
 ## Documentation

@@ -63,3 +63,19 @@ def test_artefacts(tmp_path):
     assert "hello world" in artefacts[0].read_text()
 
     assert example.artefacts("non-existent-id") == []
+
+
+def test_to_dataframe(tmp_path):
+    @experiment(root=tmp_path)
+    def example(a, b=2):
+        return a + b
+
+    df = example.to_dataframe()
+    assert len(df) == 0
+
+    example(1)
+    df = example.to_dataframe()
+    assert len(df) == 1
+    assert df.iloc[0]["config.a"] == 1
+    assert df.iloc[0]["config.b"] == 2
+    assert df.iloc[0].result == 3

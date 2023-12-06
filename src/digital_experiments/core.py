@@ -126,6 +126,70 @@ class Experiment:
 
         return self.backend.artefacts(id)
 
+    def to_dataframe(
+        self,
+        current_code_only: bool = True,
+        include_metadata: bool = False,
+        normalising_sep: str = ".",
+    ):
+        """
+        Get a pandas DataFrame containing all observations of this experiment.
+
+        The resulting DataFrame is in "long" format, with one row per
+        observation, and "normalised" (see :func:`pandas.json_normalize`) so
+        that nested dict-like objects (including config, results and metadata)
+        are flattened and cast into multiple columns.
+
+        Parameters
+        ----------
+        current_code_only : bool
+            Whether to only return observations from the current
+            version of the code. Defaults to True.
+        include_metadata : bool
+            Whether to include metadata in the DataFrame. Defaults to False.
+        normalising_sep : str
+            The separator to use when normalising nested dictionaries.
+            Defaults to ".".
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing all observations of this experiment.
+            If pandas is not installed, this will raise an ImportError.
+
+        Example
+        -------
+        .. code-block:: python
+
+            >>> @experiment
+            ... def example(a, b=2):
+            ...    return a + b
+
+            >>> example(1)
+            3
+            >>> example.to_dataframe()
+               id  config.a  config.b  result
+            0   1         1         2       3
+        """
+
+        try:
+            import pandas as pd
+        except ImportError as e:
+            raise ImportError(
+                "Please install pandas to use this function"
+            ) from e
+
+        observations = self.observations(current_code_only)
+        if not observations:
+            return pd.DataFrame()
+
+        dicts = [obs._asdict() for obs in observations]
+        if not include_metadata:
+            for d in dicts:
+                d.pop("metadata")
+
+        return pd.json_normalize(dicts, sep=normalising_sep)
+
 
 class Observation(NamedTuple):
     """
