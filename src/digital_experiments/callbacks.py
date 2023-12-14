@@ -263,36 +263,33 @@ class SaveLogs(Callback):
         del self.tee
 
 
-def _in_git_repo() -> bool:
-    try:
-        return (
-            subprocess.run(
-                ["git", "rev-parse", "--is-inside-work-tree"],
-                capture_output=True,
-                check=True,
-            ).stdout
-            == b"true\n"
+def _command_output(command: str) -> str:
+    """Run a subprocess command and return the output as a string"""
+    return (
+        subprocess.run(
+            command.split(" "),
+            capture_output=True,
+            check=True,
         )
+        .stdout.decode("utf-8")
+        .strip()
+    )
+
+
+def _in_git_repo() -> bool:
+    """Check if the current directory is inside a git repo"""
+    try:
+        return _command_output("git rev-parse --is-inside-work-tree") == "true"
     except subprocess.CalledProcessError:
         return False
 
 
 def _git_information() -> dict[str, str]:
-    def _run(command: str) -> str:
-        return (
-            subprocess.run(
-                command.split(" "),
-                capture_output=True,
-                check=True,
-            )
-            .stdout.decode("utf-8")
-            .strip()
-        )
-
+    """Get information about the current git repo"""
     return {
-        "branch": _run("git rev-parse --abbrev-ref HEAD"),
-        "commit": _run("git rev-parse HEAD"),
-        "remote": _run("git config --get remote.origin.url"),
+        "branch": _command_output("git rev-parse --abbrev-ref HEAD"),
+        "commit": _command_output("git rev-parse HEAD"),
+        "remote": _command_output("git config --get remote.origin.url"),
     }
 
 
