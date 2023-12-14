@@ -3,14 +3,15 @@
 
 *.egg-info
 dist
-publish.sh
 
 docs/build
 docs/source/examples/
 **/experiments
 test-loc
+docs/source/some/other/path
 
 .vscode/
 .isort.cfg
 .coverage
 .ruff_cache
+TODO
