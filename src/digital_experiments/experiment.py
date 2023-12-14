@@ -8,6 +8,7 @@ from typing import Callable, overload
 from .backends import instantiate_backend
 from .callbacks import (
     CodeVersioning,
+    GitInfo,
     GlobalStateNotifier,
     Logging,
     Timing,
@@ -120,6 +121,7 @@ def experiment(
         Logging(verbose),
         CodeVersioning(),
         Timing(),
+        GitInfo(),
     ] + (callbacks or [])
     for callback in all_callbacks:
         callback.setup(function)

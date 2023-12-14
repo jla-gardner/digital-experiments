@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -260,3 +261,44 @@ class SaveLogs(Callback):
     def end(self, observation: Observation) -> None:
         sys.stdout = sys.__stdout__
         del self.tee
+
+
+def _in_git_repo() -> bool:
+    try:
+        return (
+            subprocess.run(
+                ["git", "rev-parse", "--is-inside-work-tree"],
+                capture_output=True,
+                check=True,
+            ).stdout
+            == b"true\n"
+        )
+    except subprocess.CalledProcessError:
+        return False
+
+
+def _git_information() -> dict[str, str]:
+    def _run(command: str) -> str:
+        return (
+            subprocess.run(
+                command.split(" "),
+                capture_output=True,
+                check=True,
+            )
+            .stdout.decode("utf-8")
+            .strip()
+        )
+
+    return {
+        "branch": _run("git rev-parse --abbrev-ref HEAD"),
+        "commit": _run("git rev-parse HEAD"),
+        "remote": _run("git config --get remote.origin.url"),
+    }
+
+
+class GitInfo(Callback):
+    """Responsible for recording git information about the experiment"""
+
+    def end(self, observation: Observation) -> None:
+        if _in_git_repo():
+            observation.metadata["git"] = _git_information()
