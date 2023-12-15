@@ -9,7 +9,7 @@
 project = "digital-experiments"
 copyright = "2023, John Gardner"
 author = "John Gardner"
-release = "2.0.0"
+release = "2.0.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
