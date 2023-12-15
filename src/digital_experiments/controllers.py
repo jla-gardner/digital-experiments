@@ -1,13 +1,21 @@
 from __future__ import annotations
 
-from typing import Any
+import random
+from itertools import product
+from typing import Any, Callable, Iterable, Protocol, Sequence, Union
 
 from .core import Controller, Experiment
 
 # TODO implement:
 # - an sklearn controller / bayeseopt controller
-# - a random controller (can be sklearn under the hood)
 # - an optuna controller
+
+
+class RVS(Protocol):
+    rvs: Callable[..., Any]
+
+
+RandomDimension = Union[Sequence, RVS]
 
 
 class RandomSearch(Controller):
@@ -16,48 +24,95 @@ class RandomSearch(Controller):
 
     Parameters
     ----------
-    param_grid : dict[str, list[Any]]
-        A dictionary mapping parameter names to collections or
-        distributions to randomly sample from.
+    dimensions : dict[str, RandomDimension]
+        A dictionary mapping parameter names to random dimensions. A random
+        dimension can be any of:
+            - a sequence of values
+            - a scipy.stats distribution
+            - any object with an rvs method
 
     Example
     -------
 
     .. code-block:: python
 
-        from digital_experiments import experiment, RandomSearch
+        from digital_experiments import experiment
+        from digital_experiments.controllers import RandomSearch
         from scipy.stats import uniform
 
         @experiment
         def example(a, b):
             return (2 * a - 1) * b
 
-        controller = RandomSearch(a=uniform(-1, 1), b=[1, 2, 3])
-        controller.control(example, n=10)
+        RandomSearch(a=uniform(-1, 1), b=[1, 2, 3]).control(example, n=10)
     """
 
-    def __init__(self, **param_grid):
-        self.param_grid = param_grid
+    def __init__(self, **dimensions: RandomDimension):
+        self.dimensions = dimensions
 
     def suggest(self, experiment: Experiment) -> dict[str, Any]:
-        from sklearn.model_selection import ParameterSampler
+        def choose(dim: RandomDimension) -> Any:
+            if isinstance(dim, Sequence):
+                return random.choice(dim)
+            elif hasattr(dim, "rvs"):
+                return dim.rvs()
+            else:
+                raise TypeError(
+                    f"Invalid dimension type: {type(dim)}. Expected a "
+                    "sequence, scipy.stats distribution, or any object "
+                    "with an rvs method."
+                )
 
-        return next(iter(ParameterSampler(self.param_grid, 1)))
+        return {name: choose(dim) for name, dim in self.dimensions.items()}
 
 
-# class GridSearch(Controller):
-#     """
-#     Controller that suggests experiments based on a random grid search
-#     """
+class GridSearch(Controller):
+    """
+    Controller that suggests experiments based on a grid search
 
-#     from sklearn.model_selection import ParameterGrid, ParameterSampler
+    Parameters
+    ----------
+    dimensions : dict[str, Iterable]
+        A dictionary mapping parameter names to sequences of values
 
-#     def __init__(self, random=False, **param_grid):
-#         self.random = random
-#         self.param_grid = param_grid
+    Example
+    -------
 
-#     def suggest(self, experiment: Experiment) -> dict[str, Any]:
-#         if self.random:
-#             return next(self.ParameterSampler(self.param_grid, 1))
-#         else:
-#             return next(self.ParameterGrid(self.param_grid))
+    .. code-block:: python
+
+        from digital_experiments import experiment
+        from digital_experiments.controllers import GridSearch
+
+        @experiment
+        def example(a, b):
+            return (2 * a - 1) * b
+
+        GridSearch(a=[0, 1], b=range(3)).control(example, n=6)
+    """
+
+    def __init__(self, **dimensions: Iterable):
+        # check that all dimensions are iterables
+        for dim in dimensions.values():
+            if not isinstance(dim, Iterable):
+                raise TypeError(
+                    f"Invalid dimension type: {type(dim)}. Expected an "
+                    "iterable."
+                )
+
+        self.dimensions = dimensions
+
+    def suggest(self, experiment: Experiment) -> dict[str, Any] | None:
+        # get existing configs
+        configs = [obs.config for obs in experiment.observations()]
+
+        # loop through grid and return first config that hasn't been tried
+        for config in self._grid_iter():
+            if config not in configs:
+                return config
+
+        # if all configs have been tried, return None
+        return None
+
+    def _grid_iter(self):
+        for config in product(*self.dimensions.values()):
+            yield dict(zip(self.dimensions.keys(), config))
