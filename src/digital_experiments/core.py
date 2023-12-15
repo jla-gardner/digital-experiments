@@ -299,3 +299,49 @@ class Backend(ABC):
         if not dir.exists():
             return []
         return list(dir.glob("*"))
+
+
+class Controller(ABC):
+    """
+    Abstract base class for experiment controllers.
+
+    A controller is responsible for:
+
+    - suggesting experiments to run next
+    - running them
+
+    Subclasses must override the :meth:`suggest` method.
+    """
+
+    @abstractmethod
+    def suggest(self, experiment: Experiment) -> dict[str, Any] | None:
+        """
+        Suggest a configuration for the next experiment to run.
+
+        Parameters
+        ----------
+        experiment : Experiment
+            The experiment to suggest a configuration for
+
+        Returns
+        -------
+        dict[str, Any] | None
+            The suggested configuration, or None if no further experiments
+            are required.
+        """
+
+    def control(self, experiment: Experiment, n: int = 1) -> None:
+        """
+        Run an experiment using this controller.
+
+        Parameters
+        ----------
+        experiment : Experiment
+            The experiment to run
+        """
+
+        for _ in range(n):
+            config = self.suggest(experiment)
+            if config is None:
+                break
+            experiment(**config)
