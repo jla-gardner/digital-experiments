@@ -7,6 +7,7 @@
 
    Home <self>
    usage
+   control
    api
 
 .. image:: logo.svg
@@ -34,11 +35,11 @@ The main entry point to ``digital-experiments`` is the :func:`@experiment <digit
 .. code-block:: python
    :class: copy-button
 
-      from digital_experiments import experiment
+   from digital_experiments import experiment
 
-      @experiment
-      def example(a, b):
-         return a ** b
+   @experiment
+   def example(a, b):
+      return a ** b
 
 This decorator leaves the apparent behaviour of the function unchanged:
 

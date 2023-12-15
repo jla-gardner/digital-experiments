@@ -330,7 +330,7 @@ class Controller(ABC):
             are required.
         """
 
-    def control(self, experiment: Experiment, n: int = 1) -> None:
+    def control(self, experiment: Experiment, n: int = 1, **overloads) -> None:
         """
         Run an experiment using this controller.
 
@@ -338,10 +338,16 @@ class Controller(ABC):
         ----------
         experiment : Experiment
             The experiment to run
+        n : int
+            The number of experiments to run. Defaults to 1.
+        overloads : dict[str, Any]
+            A dictionary of additional keyword arguments to pass to
+            each experiment.
         """
 
         for _ in range(n):
             config = self.suggest(experiment)
             if config is None:
                 break
+            config.update(overloads)
             experiment(**config)

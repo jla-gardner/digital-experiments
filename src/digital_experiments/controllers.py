@@ -10,12 +10,7 @@ from .core import Controller, Experiment
 # - an sklearn controller / bayeseopt controller
 # - an optuna controller
 
-
-class RVS(Protocol):
-    rvs: Callable[..., Any]
-
-
-RandomDimension = Union[Sequence, RVS]
+__all__ = ["RandomSearch", "GridSearch"]
 
 
 class RandomSearch(Controller):
@@ -24,12 +19,10 @@ class RandomSearch(Controller):
 
     Parameters
     ----------
-    dimensions : dict[str, RandomDimension]
-        A dictionary mapping parameter names to random dimensions. A random
-        dimension can be any of:
-            - a sequence of values
-            - a scipy.stats distribution
-            - any object with an rvs method
+    dimensions: dict[str, Sequence | RVS]
+        a mapping from parameter names to random dimensions. A random
+        dimension can be a sequence of values, a scipy.stats distribution or
+        any object with an rvs method
 
     Example
     -------
@@ -47,11 +40,21 @@ class RandomSearch(Controller):
         RandomSearch(a=uniform(-1, 1), b=[1, 2, 3]).control(example, n=10)
     """
 
-    def __init__(self, **dimensions: RandomDimension):
+    class RVS(Protocol):
+        """
+        A protocol for scipy.stats distributions, or any
+        object with an rvs method
+        """
+
+        rvs: Callable[..., Any]
+
+    RandomDimension = Union[Sequence, RVS]
+
+    def __init__(self, **dimensions: RandomSearch.RandomDimension):
         self.dimensions = dimensions
 
     def suggest(self, experiment: Experiment) -> dict[str, Any]:
-        def choose(dim: RandomDimension) -> Any:
+        def choose(dim: RandomSearch.RandomDimension) -> Any:
             if isinstance(dim, Sequence):
                 return random.choice(dim)
             elif hasattr(dim, "rvs"):
@@ -68,12 +71,12 @@ class RandomSearch(Controller):
 
 class GridSearch(Controller):
     """
-    Controller that suggests experiments based on a grid search
+    Controller that suggests experiments based on an exhaustive grid search
 
     Parameters
     ----------
     dimensions : dict[str, Iterable]
-        A dictionary mapping parameter names to sequences of values
+        a mapping from parameter names to sequences of values
 
     Example
     -------
