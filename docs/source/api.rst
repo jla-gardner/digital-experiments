@@ -26,10 +26,20 @@ Callbacks allow custom code to be executed at various points during the experime
 Backends
 ========
 
-
 Backends are responsible for storing and retrieving data from the experiment database.
 
 .. toctree::
     :maxdepth: 4
 
     backends-api
+
+
+Controllers
+===========
+
+Controllers are able to automatically run experiments.
+
+.. toctree::
+    :maxdepth: 4
+
+    controllers-api
