@@ -31,7 +31,7 @@ dev = [
     "sphinx-copybutton",
     "pandas",
 ]
-test = ["pytest", "pytest-cov", "pandas"]
+test = ["pytest", "pytest-cov", "pandas", "scikit-learn"]
 publish = ["build", "twine"]
 
 [project.urls]
