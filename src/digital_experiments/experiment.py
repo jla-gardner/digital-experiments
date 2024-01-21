@@ -124,8 +124,8 @@ def experiment(
         CodeVersioning(),
         Timing(),
         GitInfo(),
-        # PipFreeze(),
-        # SystemInfo(),
+        PipFreeze(),
+        SystemInfo(),
     ] + (callbacks or [])
     for callback in all_callbacks:
         callback.setup(function)
