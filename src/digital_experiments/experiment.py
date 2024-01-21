@@ -11,6 +11,8 @@ from .callbacks import (
     GitInfo,
     GlobalStateNotifier,
     Logging,
+    PipFreeze,
+    SystemInfo,
     Timing,
 )
 from .core import Callback, Experiment
@@ -122,6 +124,8 @@ def experiment(
         CodeVersioning(),
         Timing(),
         GitInfo(),
+        # PipFreeze(),
+        # SystemInfo(),
     ] + (callbacks or [])
     for callback in all_callbacks:
         callback.setup(function)

@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import contextlib
+import functools
+import os
+import platform
 import subprocess
 import sys
 from datetime import datetime
@@ -299,3 +302,30 @@ class GitInfo(Callback):
     def end(self, observation: Observation) -> None:
         if _in_git_repo():
             observation.metadata["git"] = _git_information()
+
+
+@functools.lru_cache
+def _pip_freeze() -> str:
+    """Get the pip freeze of the current python environment"""
+    return _command_output(f"{sys.executable} -m pip freeze")
+
+
+class PipFreeze(Callback):
+    """Responsible for recording the pip freeze of the experiment"""
+
+    def end(self, observation: Observation) -> None:
+        observation.metadata["pip_freeze"] = _pip_freeze()
+
+
+class SystemInfo(Callback):
+    """Responsible for recording system information about the experiment"""
+
+    def end(self, observation: Observation) -> None:
+        observation.metadata["system"] = dict(
+            platform=platform.platform(),
+            machine=platform.machine(),
+            processor=platform.processor(),
+            system=platform.system(),
+            python_version=platform.python_version(),
+            pwd=os.getcwd(),
+        )
