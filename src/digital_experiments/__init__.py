@@ -3,7 +3,7 @@ from .callbacks import Callback, current_dir, current_id, time_block
 from .core import Observation
 from .experiment import experiment
 
-__version__ = "2.0.1"
+__version__ = "2.0.2"
 __all__ = [
     "experiment",
     "register_backend",
