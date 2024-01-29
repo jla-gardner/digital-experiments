@@ -287,6 +287,7 @@ def _in_git_repo() -> bool:
         return False
 
 
+@functools.lru_cache
 def _git_information() -> dict[str, str]:
     """Get information about the current git repo"""
     return {

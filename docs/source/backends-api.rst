@@ -12,6 +12,7 @@ Available backends
 
 .. autoclass:: digital_experiments.backends.PickleBackend
 .. autoclass:: digital_experiments.backends.JSONBackend
+.. autoclass:: digital_experiments.backends.YAMLBackend
 
 
 Creating your own backend
