@@ -59,3 +59,7 @@ html_theme_options = {
         "color-problematic": code_color,
     },
 }
+
+html_logo = "logo-square.svg"
+html_title = "digital-experiments"
+autodoc_member_order = "bysource"

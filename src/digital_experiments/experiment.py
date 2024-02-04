@@ -21,6 +21,11 @@ ExperimentDecorator = Callable[[Callable], Experiment]
 
 
 @overload
+def experiment(function: Callable) -> Experiment:
+    ...
+
+
+@overload
 def experiment(
     *,
     root: Path | None = None,
@@ -29,19 +34,6 @@ def experiment(
     cache: bool = False,
     callbacks: list[Callback] | None = None,
 ) -> ExperimentDecorator:
-    ...
-
-
-@overload
-def experiment(
-    function: Callable,
-    *,
-    root: Path | None = None,
-    verbose: bool = False,
-    backend: str = "json",
-    cache: bool = False,
-    callbacks: list[Callback] | None = None,
-) -> Experiment:
     ...
 
 
@@ -61,25 +53,6 @@ def experiment(
     (args, kwargs and defaults) and the result are recorded for
     future analysis.
 
-    Parameters
-    ----------
-    function : Callable
-        The function to wrap
-    root : Path, optional
-        The root directory for storing results. If not specified, the
-        environment variable ``DE_ROOT`` is used, or the default
-        ``./experiments/<function_name>`` is used.
-    verbose : bool, optional
-        Whether to print progress to stdout
-    backend : str, optional
-        The type of backend to use for storing results. See
-        :doc:`the backends page <backends-api>` for more details.
-    cache : bool, optional
-        Whether to use cached results if available
-    callbacks : list[Callback], optional
-        A list of optional callbacks to use. See
-        :doc:`the callbacks page <callbacks-api>` for more details.
-
     Examples
     --------
     As a simple decorator, using all defaults:
@@ -98,6 +71,24 @@ def experiment(
         def add(a, b):
             return a + b
 
+    Parameters
+    ----------
+    function : Callable
+        The function to wrap
+    root : Path, optional
+        The root directory for storing results. If not specified, the
+        environment variable ``DE_ROOT`` is used, or the default
+        ``./experiments/<function_name>`` is used.
+    verbose : bool, optional
+        Whether to print progress to stdout
+    backend : str, optional
+        The type of backend to use for storing results. See
+        :doc:`the backends page <backends-api>` for more details.
+    cache : bool, optional
+        Whether to use cached results if available
+    callbacks : list[Callback], optional
+        A list of optional callbacks to use. See
+        :doc:`the callbacks page <callbacks-api>` for more details.
     """
 
     if function is None:
