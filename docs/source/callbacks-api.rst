@@ -2,6 +2,9 @@
 Callbacks
 #########
 
+Callbacks are a way to extend the functionality of an experiment.
+
+
 Avaliable callbacks
 ===================
 
@@ -10,9 +13,6 @@ Avaliable callbacks
 
 Implementing your own callbacks
 ===============================
-
-Callbacks are a way to extend the functionality of an experiment.
-
 
 .. autoclass:: digital_experiments.callbacks.Callback
     :members:

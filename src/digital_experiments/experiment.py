@@ -47,11 +47,7 @@ def experiment(
     callbacks: list[Callback] | None = None,
 ) -> Experiment | ExperimentDecorator:
     """
-    Decorator to record experiments.
-
-    Everytime the decorated function is called, the complete configuration
-    (args, kwargs and defaults) and the result are recorded for
-    future analysis.
+    Decorator to automate the recording of experiments.
 
     Examples
     --------
@@ -63,6 +59,13 @@ def experiment(
         def add(a, b):
             return a + b
 
+        add(1, 2)
+        # 3
+
+        add.observations() # returns a list of observations
+        # [Observation(<id1>, {'a': 1, 'b': 2} → 3})]
+
+
     As a decorator with some custom options specified:
 
     .. code-block:: python
@@ -73,20 +76,20 @@ def experiment(
 
     Parameters
     ----------
-    function : Callable
+    function
         The function to wrap
-    root : Path, optional
+    root
         The root directory for storing results. If not specified, the
         environment variable ``DE_ROOT`` is used, or the default
         ``./experiments/<function_name>`` is used.
-    verbose : bool, optional
+    verbose
         Whether to print progress to stdout
-    backend : str, optional
+    backend
         The type of backend to use for storing results. See
         :doc:`the backends page <backends-api>` for more details.
-    cache : bool, optional
+    cache
         Whether to use cached results if available
-    callbacks : list[Callback], optional
+    callbacks
         A list of optional callbacks to use. See
         :doc:`the callbacks page <callbacks-api>` for more details.
     """

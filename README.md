@@ -14,6 +14,24 @@ A lightweight python package for recording and analysing configurations and resu
 
 </div>
 
+---
+
+Keeping track of the results of coding experiments can be a pain. 
+Over time, code and dependencies can change, and without careful record-keeping, it becomes difficult to remember and reproduce optimal configurations and results.
+
+
+`digital-experiments` automates such tracking. To enable this automation, wrap your experiment's main function with the [`@experiment`](https://jla-gardner.github.io/digital-experiments/core-api.html#digital_experiments.experiment) decorator. Every time the function is called, the following information is saved to disk:
+- the inputs (`args`, `kwargs` and defaults)
+- the output/s (any, arbitrary object)
+- the code of the function
+- the current `git` information (if available)
+- timing information
+- python environment information
+
+This information is available for analysis in the same or different python sessions, via the [`observations` API](https://jla-gardner.github.io/digital-experiments/core-api.html#digital_experiments.core.Experiment.observations).
+
+To get started, see the basic use case below, or [our example notebook](https://jla-gardner.github.io/digital-experiments/usage.html).
+
 
 ## Installation
 

@@ -15,8 +15,22 @@
    :width: 450px
    :align: center
 
+**Keeping track of the results of coding experiments can be a pain.** 
+Over time, code and dependencies can change, and without careful record-keeping, it becomes difficult to remember and reproduce optimal configurations and results.
 
-Use the `💻 digital-experiments 🧪 <https://github.com/jla-gardner/digital-experiments>`_ python package to track the results of your coding experiments.
+
+:code:`digital-experiments` **tracks these things for you.**
+To enable this automation, wrap your experiment's main function with the :func:`@experiment <digital_experiments.experiment>` decorator.
+Every time your function is called, the following information is saved to disk:
+
+- the inputs (:code:`args`, :code:`kwargs` and defaults)
+- the output/s (any, arbitrary object)
+- the code of the function
+- the current :code:`git` information (if available)
+- timing information
+- python environment information
+
+.. Use the `💻 digital-experiments 🧪 <https://github.com/jla-gardner/digital-experiments>`_ python package to track the results of your coding experiments.
 
 Installation
 ------------
