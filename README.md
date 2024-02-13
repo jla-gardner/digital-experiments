@@ -8,8 +8,8 @@ A lightweight python package for recording and analysing configurations and resu
 
 [![PyPI](https://img.shields.io/pypi/v/digital-experiments)](https://pypi.org/project/digital-experiments/)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/digital-experiments?color=green&label=installs&logo=Python&logoColor=white)](https://pypistats.org/packages/digital-experiments)
-[![GitHub](https://img.shields.io/github/license/jla-gardner/local-cache)](LICENCE.md)
-[![](https://github.com/jla-gardner/load-atoms/actions/workflows/tests.yaml/badge.svg?branch=main)](https://github.com/jla-gardner/load-atoms/actions/workflows/tests.yaml)
+[![GitHub](https://img.shields.io/github/license/jla-gardner/digital-experiments)](LICENCE.md)
+[![](https://github.com/jla-gardner/digital-experiments/actions/workflows/tests.yaml/badge.svg?branch=master)](https://github.com/jla-gardner/digital-experiments/actions/workflows/tests.yaml)
 [![codecov](https://codecov.io/gh/jla-gardner/digital-experiments/branch/master/graph/badge.svg?token=VGSFM0GWF1)](https://codecov.io/gh/jla-gardner/digital-experiments)
 
 </div>
