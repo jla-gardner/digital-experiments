@@ -23,6 +23,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinxext.opengraph",
+    "sphinx_design",
+    "sphinx_codeautolink",
     "sphinx_copybutton",
 ]
 
@@ -47,7 +49,7 @@ nbsphinx_execute_arguments = [
 copybutton_selector = "div.copy-button pre"
 
 logo_highlight_colour = "#3c78d8"
-code_color = "#00b398"
+code_color = "#3c78d8"
 html_theme_options = {
     "sidebar_hide_name": True,
     "light_css_variables": {
@@ -62,4 +64,39 @@ html_theme_options = {
 
 html_logo = "logo-square.svg"
 html_title = "digital-experiments"
-autodoc_member_order = "bysource"
+
+
+# override the default css to match the furo theme
+nbsphinx_prolog = """
+.. raw:: html
+
+    <style>
+        .jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+        div.rendered_html tbody tr:nth-child(odd) {
+            background: var(--color-code-background);
+        }
+        .jp-RenderedHTMLCommon tr,
+        .jp-RenderedHTMLCommon th,
+        .jp-RenderedHTMLCommon td,
+        div.rendered_html tr,
+        div.rendered_html th,
+        div.rendered_html td {
+            color: var(--color-content-foreground);
+        }
+        .jp-RenderedHTMLCommon tbody tr:hover,
+        div.rendered_html tbody tr:hover {
+            background: #3c78d8aa;
+        }
+        div.nbinput.container div.input_area {
+            /* border radius of 10px, but no outline */
+            border-radius: 10px;
+            border-style: none;
+        }
+        div.nbinput.container div.input_area > div.highlight > pre {
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+    </style>
+"""
+nbsphinx_prompt_width = "0"

@@ -2,7 +2,10 @@
 Callbacks
 #########
 
+
 Callbacks are a way to extend the functionality of an experiment.
+Enabale them by passing them to the :func:`@experiment <digital_experiments.experiment>` decorator.
+
 
 
 Avaliable callbacks
@@ -48,52 +51,48 @@ of our own:
 Each callback to be used by an experiment is instantiated by the user and passed
 to the :func:`@experiment <digital_experiments.experiment>` decorator:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> callback = DummyCallback()
-    "I'm being initialized"
+    I'm being initialized
 
 When an experiment is first imported/defined, the :func:`setup <digital_experiments.callbacks.Callback.setup>`
 method is called:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> @experiment(callbacks=[callback])
     ... def my_experiment():
-            print("my_experiment is running")
-
-    "I'm being setup"
+    ...     print("my_experiment is running")
+    I'm being setup
 
 .. hint::
-    These two steps typically occur one after the other when the experiment is
-    decorated using compact syntax ``@experiment(callbacks=[DummyCallback()])``.
+    The ``__init__`` and ``setup`` steps typically occur one after the other when the experiment is
+    decorated using compact syntax: :code:`@experiment(callbacks=[DummyCallback()])`
+    
 
 Everytime the experiment is subsequently run, the :func:`start <digital_experiments.callbacks.Callback.start>`
 and :func:`end <digital_experiments.callbacks.Callback.end>` methods are called:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> my_experiment()
-    "Experiment 1 is starting"
-    "my_experiment is running"
-    "Experiment 1 has ended"
+    Experiment 1 is starting
+    my_experiment is running
+    Experiment 1 has ended
 
     >>> my_experiment()
-    "Experiment 2 is starting"
-    "my_experiment is running"
-    "Experiment 2 has ended"
+    Experiment 2 is starting
+    my_experiment is running
+    Experiment 2 has ended
 
-    >>> my_experiment()
-    "Experiment 3 is starting"
-    "my_experiment is running"
-    "Experiment 3 has ended"
 
 We can see that the :func:`end <digital_experiments.callbacks.Callback.end>` method has worked:
 
-.. code-block:: python
+.. code-block:: pycon
 
     >>> my_experiment.observations[0].metadata["dummy"]
-    "hello there"
+    hello there
 
 
 

@@ -29,6 +29,8 @@ dev = [
     "sphinx-autobuild",
     "sphinxext-opengraph",
     "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-codeautolink",
     "pandas",
 ]
 test = ["pytest", "pytest-cov", "pandas"]
