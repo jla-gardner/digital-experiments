@@ -86,12 +86,12 @@ def experiment(
         Whether to print progress to stdout
     backend
         The type of backend to use for storing results. See
-        :doc:`the backends page <backends-api>` for more details.
+        :doc:`the backends page <backends>` for more details.
     cache
         Whether to use cached results if available
     callbacks
         A list of optional callbacks to use. See
-        :doc:`the callbacks page <callbacks-api>` for more details.
+        :doc:`the callbacks page <callbacks>` for more details.
     """
 
     if function is None:
@@ -111,16 +111,21 @@ def experiment(
     # hence, the order of the list below is important
     # - GlobalStateNotifier is set to be first in and last out
     #     so that current_dir() etc. are available to other callbacks
+    # - Timing is LiFO so that the total time doesn't include the time
+    #     taken to run the other callbacks
 
-    all_callbacks: list[Callback] = [
-        GlobalStateNotifier(root),
-        Logging(verbose),
-        CodeVersioning(),
-        Timing(),
-        GitInfo(),
-        PipFreeze(),
-        SystemInfo(),
-    ] + (callbacks or [])
+    all_callbacks: list[Callback] = (
+        [
+            GlobalStateNotifier(root),
+            Logging(verbose),
+            CodeVersioning(),
+            GitInfo(),
+            PipFreeze(),
+            SystemInfo(),
+        ]
+        + (callbacks or [])
+        + [Timing()]
+    )
     for callback in all_callbacks:
         callback.setup(function)
 

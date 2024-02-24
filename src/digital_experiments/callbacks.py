@@ -152,11 +152,14 @@ class Timing(Callback):
         _TIMING_BLOCKS.append({})
 
     def end(self, observation: Observation):
-        end_time = datetime.now()
-        blocks = _TIMING_BLOCKS.pop()
-        blocks["total"] = _timing_block(self.start_time, end_time)
+        total_time = _timing_block(self.start_time, datetime.now())
 
-        observation.metadata["timing"] = blocks
+        blocks = _TIMING_BLOCKS.pop()
+        if len(blocks) == 0:
+            observation.metadata["timing"] = total_time
+        else:
+            blocks["total"] = total_time
+            observation.metadata["timing"] = blocks
 
 
 @contextlib.contextmanager
@@ -302,7 +305,9 @@ class GitInfo(Callback):
 
     def end(self, observation: Observation) -> None:
         if _in_git_repo():
-            observation.metadata["git"] = _git_information()
+            if "environment" not in observation.metadata:
+                observation.metadata["environment"] = {}
+            observation.metadata["environment"]["git"] = _git_information()
 
 
 @functools.lru_cache
@@ -315,14 +320,18 @@ class PipFreeze(Callback):
     """Responsible for recording the pip freeze of the experiment"""
 
     def end(self, observation: Observation) -> None:
-        observation.metadata["pip_freeze"] = _pip_freeze()
+        if "environment" not in observation.metadata:
+            observation.metadata["environment"] = {}
+        observation.metadata["environment"]["pip_freeze"] = _pip_freeze()
 
 
 class SystemInfo(Callback):
     """Responsible for recording system information about the experiment"""
 
     def end(self, observation: Observation) -> None:
-        observation.metadata["system"] = dict(
+        if "environment" not in observation.metadata:
+            observation.metadata["environment"] = {}
+        observation.metadata["environment"]["system"] = dict(
             platform=platform.platform(),
             machine=platform.machine(),
             processor=platform.processor(),
