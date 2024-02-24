@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="no-js" data-content_root="" lang="en">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="Quickstart" property="og:title"/>
+<meta content="website" property="og:type"/>
+<meta content="index.html" property="og:url"/>
+<meta content="digital-experiments" property="og:site_name"/>
+<meta content="digital-experiments logo digital-experiments is a lightweight tool for automatically tracking and analysing the configuration and results of coding experiments. Compared to other such tools, digita..." property="og:description"/>
+<meta content="digital-experiments logo digital-experiments is a lightweight tool for automatically tracking and analysing the configuration and results of coding experiments. Compared to other such tools, digita..." name="description"/>
+<link href="genindex.html" rel="index" title="Index"/><link href="search.html" rel="search" title="Search"/><link href="usage.html" rel="next" title="The Basics"/>
+<!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+<title>digital-experiments</title>
+<link href="_static/pygments.css?v=a746c00c" rel="stylesheet" type="text/css"/>
+<link href="_static/styles/furo.css?v=135e06be" rel="stylesheet" type="text/css"/>
+<link href="_static/sphinx-codeautolink.css?v=125d5c1c" rel="stylesheet" type="text/css"/>
+<link href="_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" rel="stylesheet" type="text/css"/>
+<link href="_static/styles/furo-extensions.css?v=36a5483c" rel="stylesheet" type="text/css"/>
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-problematic: #3c78d8;
+  --color-brand-primary: #3c78d8;
+  --color-brand-content: #3c78d8;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-problematic: #3c78d8;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-problematic: #3c78d8;
+  
+      }
+    }
+  }
+</style></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-half" viewbox="0 0 24 24">
+<title>Auto light/dark mode</title>
+<svg class="icon-tabler-shadow" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M13 12h5"></path>
+<path d="M13 15h4"></path>
+<path d="M13 18h1"></path>
+<path d="M13 9h4"></path>
+<path d="M13 6h1"></path>
+</svg>
+</symbol>
+</svg>
+<input class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation">
+<div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+<div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<div class="visually-hidden">Toggle site navigation sidebar</div>
+<i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+</label>
+</div>
+<div class="header-center">
+<a href="#"><div class="brand">digital-experiments</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="#">
+<div class="sidebar-logo-container">
+<img alt="Logo" class="sidebar-logo" src="_static/logo-square.svg"/>
+</div>
+</a><form action="search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="control.html">Controllers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/core.html">Core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/callbacks.html">Callbacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/controllers.html">Controllers</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="theme-toggle-container theme-toggle-content">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+<article role="main">
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<a class="reference external image-reference" href="."><img alt="digital-experiments logo" class="align-center" src="_images/logo.svg" width="450px"/></a>
+<p><a class="reference external" href=".">digital-experiments</a> is a lightweight tool for automatically
+tracking and analysing the configuration and results of coding experiments.</p>
+<p>Compared to other such tools, digital-experiments:</p>
+<ul class="simple">
+<li><p><strong>improves reproducibility</strong> by not only tracking the inputs and outputs of
+an experiment, but also the exact code and environment used at run-time.</p></li>
+<li><p><strong>improves interpretability</strong> by automatically associating results with the
+experiment that generated them. No more <code class="code docutils literal notranslate"><span class="pre">results-v2-final.csv</span></code> files.</p></li>
+</ul>
+<section id="quickstart">
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this heading">#</a></h1>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-2 sd-row-cols-lg-2 docutils">
+<div class="sd-col sd-d-flex-column docutils">
+<div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">1: definition: <code class="code docutils literal notranslate"><span class="pre">example.py</span></code></span><a class="headerlink" href="#id2" title="Permalink to this code">#</a></div>
+<div class="copy-button highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">digital_experiments</span> <span class="kn">import</span> <span class="p">(</span>
+      <a class="sphinx-codeautolink-a" href="api/core.html#digital_experiments.experiment" title="digital_experiments.experiment"><span class="n">experiment</span></a><span class="p">,</span>
+<span class="p">)</span>
+
+<a class="sphinx-codeautolink-a" href="api/core.html#digital_experiments.experiment" title="digital_experiments.experiment"><span class="nd">@experiment</span></a>
+<span class="k">def</span> <span class="nf">example</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#int" title="int"><span class="nb">int</span></a> <span class="o">=</span> <span class="mi">3</span><span class="p">):</span>
+      <span class="c1"># perform your experiment here:</span>
+      <span class="c1">#   - train a model</span>
+      <span class="c1">#   - run a simulation</span>
+      <span class="c1">#   - etc.</span>
+      <span class="c1"># and return the result</span>
+      <span class="c1"># (any arbitrary object/s)</span>
+      <span class="k">return</span> <span class="n">a</span> <span class="o">**</span> <span class="n">b</span>
+
+<span class="k">if</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/reference/import.html#name__" title="__name__"><span class="vm">__name__</span></a> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+      <span class="c1"># run the experiment</span>
+      <span class="c1"># like any other function</span>
+      <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="n">example</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+      <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="n">example</span><span class="p">(</span><span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">2: running</span><a class="headerlink" href="#id3" title="Permalink to this code">#</a></div>
+<div class="copy-button highlight-text notranslate"><div class="highlight"><pre><span></span>$ python example.py
+8
+9
+</pre></div>
+</div>
+</div>
+</div>
+<div class="sd-col sd-d-flex-column docutils">
+<div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">3: analysis</span><a class="headerlink" href="#id4" title="Permalink to this code">#</a></div>
+<div class="copy-button highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">example</span> <span class="kn">import</span> <span class="n">example</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">example</span><span class="o">.</span><span class="n">observations</span><span class="p">():</span>
+<span class="gp">... </span>    <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">"→"</span><span class="p">,</span> <span class="n">o</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+<span class="go">{'a': 2, 'b': 3} →  8</span>
+<span class="go">{'a': 3, 'b': 2} →  9</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"code"</span><span class="p">]</span>
+<span class="go">@experiment</span>
+<span class="go">def example(a, b):</span>
+<span class="go">    return a ** b</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"timing"</span><span class="p">]</span>
+<span class="go">{</span>
+<span class="go">  "start": "2024-02-24 10:10:01",</span>
+<span class="go">  "end": "2024-02-24 10:10:01",</span>
+<span class="go">  "duration": 0.000007</span>
+<span class="go">}</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">o</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"environment"</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">['system', 'pip_freeze', 'git']</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">example</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+<span class="go">      id config.a config.b  result</span>
+<span class="go">0  &lt;id1&gt;       2         3       8</span>
+<span class="go">1  &lt;id2&gt;       3         2       9</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>See a <a class="reference internal" href="api/core.html"><span class="doc">Kitchen Sink example</span></a> for a summary of all the functionality
+of digital-experiments, or <a class="reference internal" href="usage.html"><span class="doc">The Basics</span></a> for a step-by-step guide.</p>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">#</a></h1>
+<div class="copy-button highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pip<span class="w"> </span>install<span class="w"> </span>digital-experiments
+</pre></div>
+</div>
+</section>
+<section id="extending-digital-experiments">
+<h1>Extending <code class="code docutils literal notranslate"><span class="pre">digital-experiments</span></code><a class="headerlink" href="#extending-digital-experiments" title="Permalink to this heading">#</a></h1>
+<p><a class="reference external" href=".">digital-experiments</a> is designed to be easily extended and hacked
+to suit your needs.
+Three obvious ways this can be done are by implementing custom:</p>
+<ol class="arabic simple">
+<li><p><a class="reference internal" href="api/callbacks.html#digital_experiments.callbacks.Callback" title="digital_experiments.callbacks.Callback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callbacks</span></code></a> to trigger
+custom logic before and after each experiment is run.</p></li>
+<li><p><a class="reference internal" href="api/backends.html#digital_experiments.backends.Backend" title="digital_experiments.backends.Backend"><code class="xref py py-class docutils literal notranslate"><span class="pre">Backends</span></code></a> to allow you to
+save your <a class="reference internal" href="api/core.html#digital_experiments.core.Observation" title="digital_experiments.core.Observation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Observation</span></code></a> to disk in custom
+formats.</p></li>
+<li><p><a class="reference internal" href="api/controllers.html#digital_experiments.controllers.Controller" title="digital_experiments.controllers.Controller"><code class="xref py py-class docutils literal notranslate"><span class="pre">Controllers</span></code></a> to define
+automated workflows for your experiments.</p></li>
+</ol>
+</section>
+<section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading">#</a></h1>
+<p>Contributions are welcome! Head on over to the <a class="reference external" href="hhttps://github.com/jla-gardner/digital-experiments">GitHub repository</a> to get started.</p>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+<a class="next-page" href="usage.html">
+<div class="page-info">
+<div class="context">
+<span>Next</span>
+</div>
+<div class="title">The Basics</div>
+</div>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+</a>
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2023, John Gardner
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer no-toc">
+</aside>
+</div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=8fbcbc5c"></script>
+<script src="_static/doctools.js?v=888ff710"></script>
+<script src="_static/sphinx_highlight.js?v=4825356b"></script>
+<script src="_static/scripts/furo.js?v=32e29ea5"></script>
+<script src="_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="_static/copybutton.js?v=35fd3fb5"></script>
+<script src="_static/design-tabs.js?v=36754332"></script>
+<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+</body>
+</html>

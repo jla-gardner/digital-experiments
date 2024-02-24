@@ -1,0 +1,1592 @@
+{
+  "api/backends": [
+    {
+      "source": "from digital_experiments import register_backend, Backend\n\n@register_backend(\"my-backend\")\nclass MyBackend(Backend):\n    ...\n\n@experiment(backend=\"my-backend\")\ndef my_experiment():\n    ...",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "register_backend"
+          ],
+          "code_str": "register_backend",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.backends.register_backend"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Backend"
+          ],
+          "code_str": "Backend",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.core.Backend"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "register_backend"
+          ],
+          "code_str": "register_backend",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.backends.register_backend"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Backend"
+          ],
+          "code_str": "Backend",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "digital_experiments.core.Backend"
+        }
+      ],
+      "example": {
+        "document": "api/backends",
+        "ref_id": "creating-your-own-backend",
+        "headings": [
+          "Backends",
+          "Creating your own backend"
+        ]
+      },
+      "doc_lineno": 6
+    }
+  ],
+  "api/callbacks": [
+    {
+      "source": "from digital_experiments import experiment, SaveLogs\n\n@experiment(callbacks=[SaveLogs(\"my-logs\")])\ndef example():\n    print(\"hello world\")\n\nexample()\nid = example.observations()[-1].id\nartefacts = example.artefacts(id)\n# returns [Path(\"<some>/<path>/<id>/my-logs\")]\nartefacts[0].read_text()\n# returns 'hello world\\n'",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "api/callbacks",
+        "ref_id": "avaliable-callbacks",
+        "headings": [
+          "Callbacks",
+          "Avaliable callbacks"
+        ]
+      },
+      "doc_lineno": 8
+    },
+    {
+      "source": "from typing import Callable, Any\nfrom digital_experiments import Callback, Observation\n\n\nclass DummyCallback(Callback):\n    def __init__(self):\n        super().__init__()\n        print(\"I'm being initialized\")\n\n    def setup(self, function: Callable) -> None:\n        print(\"I'm being setup\")\n\n    def start(self, id: str, config: dict[str, Any]) -> None:\n        print(f\"Experiment {id} is starting\")\n\n    def end(self, observation: Observation) -> None:\n        print(f\"Experiment {observation.id} has ended\")\n        observation.metadata[\"dummy\"] = \"hello there\"",
+      "names": [
+        {
+          "import_components": [
+            "typing"
+          ],
+          "code_str": "typing",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_from",
+          "resolved_location": "typing"
+        },
+        {
+          "import_components": [
+            "typing",
+            "Callable"
+          ],
+          "code_str": "Callable",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "typing.Callable"
+        },
+        {
+          "import_components": [
+            "typing",
+            "Any"
+          ],
+          "code_str": "Any",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "typing.Any"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Callback"
+          ],
+          "code_str": "Callback",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.core.Callback"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Observation"
+          ],
+          "code_str": "Observation",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.core.Observation"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Callback"
+          ],
+          "code_str": "Callback",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.core.Callback"
+        },
+        {
+          "import_components": [
+            "super"
+          ],
+          "code_str": "super",
+          "lineno": 7,
+          "end_lineno": 7,
+          "context": "none",
+          "resolved_location": "super"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 8,
+          "end_lineno": 8,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "typing",
+            "Callable"
+          ],
+          "code_str": "Callable",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "typing.Callable"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 11,
+          "end_lineno": 11,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "str"
+          ],
+          "code_str": "str",
+          "lineno": 13,
+          "end_lineno": 13,
+          "context": "none",
+          "resolved_location": "str"
+        },
+        {
+          "import_components": [
+            "dict"
+          ],
+          "code_str": "dict",
+          "lineno": 13,
+          "end_lineno": 13,
+          "context": "none",
+          "resolved_location": "dict"
+        },
+        {
+          "import_components": [
+            "str"
+          ],
+          "code_str": "str",
+          "lineno": 13,
+          "end_lineno": 13,
+          "context": "none",
+          "resolved_location": "str"
+        },
+        {
+          "import_components": [
+            "typing",
+            "Any"
+          ],
+          "code_str": "Any",
+          "lineno": 13,
+          "end_lineno": 13,
+          "context": "none",
+          "resolved_location": "typing.Any"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 14,
+          "end_lineno": 14,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Observation"
+          ],
+          "code_str": "Observation",
+          "lineno": 16,
+          "end_lineno": 16,
+          "context": "none",
+          "resolved_location": "digital_experiments.core.Observation"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "Observation",
+            "()"
+          ],
+          "code_str": "observation",
+          "lineno": 16,
+          "end_lineno": 16,
+          "context": "none",
+          "resolved_location": "digital_experiments.core.Observation"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 17,
+          "end_lineno": 17,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "api/callbacks",
+        "ref_id": "the-callback-lifecycle",
+        "headings": [
+          "Callbacks",
+          "Implementing your own callbacks",
+          "The callback lifecycle"
+        ]
+      },
+      "doc_lineno": 30
+    },
+    {
+      "source": ">>> callback = DummyCallback()\nI'm being initialized",
+      "names": [],
+      "example": {
+        "document": "api/callbacks",
+        "ref_id": "the-callback-lifecycle",
+        "headings": [
+          "Callbacks",
+          "Implementing your own callbacks",
+          "The callback lifecycle"
+        ]
+      },
+      "doc_lineno": 54
+    },
+    {
+      "source": ">>> @experiment(callbacks=[callback])\n... def my_experiment():\n...     print(\"my_experiment is running\")\nI'm being setup",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "api/callbacks",
+        "ref_id": "the-callback-lifecycle",
+        "headings": [
+          "Callbacks",
+          "Implementing your own callbacks",
+          "The callback lifecycle"
+        ]
+      },
+      "doc_lineno": 62
+    },
+    {
+      "source": ">>> my_experiment()\nExperiment 1 is starting\nmy_experiment is running\nExperiment 1 has ended\n\n>>> my_experiment()\nExperiment 2 is starting\nmy_experiment is running\nExperiment 2 has ended",
+      "names": [],
+      "example": {
+        "document": "api/callbacks",
+        "ref_id": "the-callback-lifecycle",
+        "headings": [
+          "Callbacks",
+          "Implementing your own callbacks",
+          "The callback lifecycle"
+        ]
+      },
+      "doc_lineno": 77
+    },
+    {
+      "source": ">>> my_experiment.observations[0].metadata[\"dummy\"]\nhello there",
+      "names": [],
+      "example": {
+        "document": "api/callbacks",
+        "ref_id": "the-callback-lifecycle",
+        "headings": [
+          "Callbacks",
+          "Implementing your own callbacks",
+          "The callback lifecycle"
+        ]
+      },
+      "doc_lineno": 92
+    }
+  ],
+  "api/controllers": [
+    {
+      "source": "from digital_experiments import experiment\nfrom digital_experiments.controllers import GridSearch\n\n@experiment\ndef example(a, b):\n    return (2 * a - 1) * b\n\nGridSearch(a=[0, 1], b=range(3)).control(example, n=6)",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "GridSearch"
+          ],
+          "code_str": "GridSearch",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.controllers.GridSearch"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "range"
+          ],
+          "code_str": "range",
+          "lineno": 8,
+          "end_lineno": 8,
+          "context": "none",
+          "resolved_location": "range"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "GridSearch"
+          ],
+          "code_str": "GridSearch",
+          "lineno": 8,
+          "end_lineno": 8,
+          "context": "none",
+          "resolved_location": "digital_experiments.controllers.GridSearch"
+        }
+      ],
+      "example": {
+        "document": "api/controllers",
+        "ref_id": "controllers",
+        "headings": [
+          "Controllers"
+        ]
+      },
+      "doc_lineno": 8
+    },
+    {
+      "source": "from digital_experiments import experiment\nfrom digital_experiments.controllers import RandomSearch\nfrom scipy.stats import uniform\n\n@experiment\ndef example(a, b):\n    return (2 * a - 1) * b\n\nRandomSearch(a=uniform(-1, 1), b=[1, 2, 3]).control(example, n=10)",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "RandomSearch"
+          ],
+          "code_str": "RandomSearch",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.controllers.RandomSearch"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "RandomSearch"
+          ],
+          "code_str": "RandomSearch",
+          "lineno": 9,
+          "end_lineno": 9,
+          "context": "none",
+          "resolved_location": "digital_experiments.controllers.RandomSearch"
+        }
+      ],
+      "example": {
+        "document": "api/controllers",
+        "ref_id": "controllers",
+        "headings": [
+          "Controllers"
+        ]
+      },
+      "doc_lineno": 10
+    }
+  ],
+  "api/core": [
+    {
+      "source": "from pathlib import Path\nfrom time import sleep\n\nfrom digital_experiments import current_dir, current_id, experiment, time_block\nfrom digital_experiments.callbacks import SaveLogs\n\n\n@experiment(\n    backend=\"json\",\n    cache=True,\n    callbacks=[SaveLogs(\"my-logs.txt\")],\n    root=Path(\"results\"),\n    verbose=True,\n)\ndef my_experiment(a: int, b: int) -> int:\n    with time_block(\"add\"):\n        sleep(0.5)\n        c = a + b\n\n    with time_block(\"multiply\"):\n        sleep(0.5)\n        c = c * 2\n\n    print(\"this will appear in the logs\")\n    (current_dir() / \"output.txt\").write_text(f\"hello from {current_id()}\")\n    return c\n\n\n# new experiment:\nmy_experiment(1, 2)\n# \"this will appear in the logs\"\n# (returns 6)\n\n# don't record the experiment again due to cache=True\nmy_experiment(1, 2)\n# (returns 6)\n\n# get the observation\nobservation = my_experiment.observations()[-1]\n\nprint(my_experiment.artefacts(observation.id))\n# \"Path('results/storage/<id>/my-logs')\"\n\nfor a in range(10):\n    my_experiment(a, a)\n\n# access the results as a pandas dataframe\ndf = my_experiment.to_dataframe()\n",
+      "names": [
+        {
+          "import_components": [
+            "pathlib"
+          ],
+          "code_str": "pathlib",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_from",
+          "resolved_location": "pathlib"
+        },
+        {
+          "import_components": [
+            "pathlib",
+            "Path"
+          ],
+          "code_str": "Path",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "pathlib.Path"
+        },
+        {
+          "import_components": [
+            "time"
+          ],
+          "code_str": "time",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_from",
+          "resolved_location": "time"
+        },
+        {
+          "import_components": [
+            "time",
+            "sleep"
+          ],
+          "code_str": "sleep",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "time.sleep"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.current_dir"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_id"
+          ],
+          "code_str": "current_id",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.current_id"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "time_block"
+          ],
+          "code_str": "time_block",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.time_block"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "callbacks",
+            "SaveLogs"
+          ],
+          "code_str": "SaveLogs",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.callbacks.SaveLogs"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "callbacks",
+            "SaveLogs"
+          ],
+          "code_str": "SaveLogs",
+          "lineno": 11,
+          "end_lineno": 11,
+          "context": "none",
+          "resolved_location": "digital_experiments.callbacks.SaveLogs"
+        },
+        {
+          "import_components": [
+            "pathlib",
+            "Path"
+          ],
+          "code_str": "Path",
+          "lineno": 12,
+          "end_lineno": 12,
+          "context": "none",
+          "resolved_location": "pathlib.Path"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 8,
+          "end_lineno": 8,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "int"
+          ],
+          "code_str": "int",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "int"
+        },
+        {
+          "import_components": [
+            "int"
+          ],
+          "code_str": "int",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "int"
+        },
+        {
+          "import_components": [
+            "int"
+          ],
+          "code_str": "int",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "int"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "time_block"
+          ],
+          "code_str": "time_block",
+          "lineno": 16,
+          "end_lineno": 16,
+          "context": "none",
+          "resolved_location": "digital_experiments.time_block"
+        },
+        {
+          "import_components": [
+            "time",
+            "sleep"
+          ],
+          "code_str": "sleep",
+          "lineno": 17,
+          "end_lineno": 17,
+          "context": "none",
+          "resolved_location": "time.sleep"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "time_block"
+          ],
+          "code_str": "time_block",
+          "lineno": 20,
+          "end_lineno": 20,
+          "context": "none",
+          "resolved_location": "digital_experiments.time_block"
+        },
+        {
+          "import_components": [
+            "time",
+            "sleep"
+          ],
+          "code_str": "sleep",
+          "lineno": 21,
+          "end_lineno": 21,
+          "context": "none",
+          "resolved_location": "time.sleep"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 24,
+          "end_lineno": 24,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 25,
+          "end_lineno": 25,
+          "context": "none",
+          "resolved_location": "digital_experiments.current_dir"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_id"
+          ],
+          "code_str": "current_id",
+          "lineno": 25,
+          "end_lineno": 25,
+          "context": "none",
+          "resolved_location": "digital_experiments.current_id"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 41,
+          "end_lineno": 41,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "range"
+          ],
+          "code_str": "range",
+          "lineno": 44,
+          "end_lineno": 44,
+          "context": "none",
+          "resolved_location": "range"
+        }
+      ],
+      "example": {
+        "document": "api/core",
+        "ref_id": "kitchen-sink-example",
+        "headings": [
+          "Core",
+          "Kitchen Sink example"
+        ]
+      },
+      "doc_lineno": 27
+    },
+    {
+      "source": "@experiment\ndef add(a, b):\n    return a + b\n\nadd(1, 2)\n# 3\n\nadd.observations() # returns a list of observations\n# [Observation(<id1>, {'a': 1, 'b': 2} \u2192 3})]",
+      "names": [],
+      "example": {
+        "document": "api/core",
+        "ref_id": "available-functions",
+        "headings": [
+          "Core",
+          "Available functions"
+        ]
+      },
+      "doc_lineno": 7
+    },
+    {
+      "source": "@experiment(root=\"my-experiments\", verbose=True, backend=\"json\")\ndef add(a, b):\n    return a + b",
+      "names": [],
+      "example": {
+        "document": "api/core",
+        "ref_id": "available-functions",
+        "headings": [
+          "Core",
+          "Available functions"
+        ]
+      },
+      "doc_lineno": 21
+    },
+    {
+      "source": "from digital_experiments import experiment, current_id\n\n@experiment\ndef example():\n    print(current_id())\n\nexample() # prints something like \"2021-01-01_12:00:00.000000\"",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_id"
+          ],
+          "code_str": "current_id",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.current_id"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_id"
+          ],
+          "code_str": "current_id",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.current_id"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "api/core",
+        "ref_id": "available-functions",
+        "headings": [
+          "Core",
+          "Available functions"
+        ]
+      },
+      "doc_lineno": 5
+    },
+    {
+      "source": "from digital_experiments import experiment, current_dir\n\n@experiment\ndef example():\n    (current_dir() / \"results.txt\").write_text(\"hello world\")\n\nexample()\nid = example.observations()[-1].id\nexample.artefacts(id) # returns [Path(\"<some>/<path>/<id>/results.txt\")]",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.current_dir"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.current_dir"
+        }
+      ],
+      "example": {
+        "document": "api/core",
+        "ref_id": "available-functions",
+        "headings": [
+          "Core",
+          "Available functions"
+        ]
+      },
+      "doc_lineno": 10
+    },
+    {
+      "source": "import time\nfrom digital_experiments import experiment, time_block\n\n@experiment\ndef example():\n    with time_block(\"custom-block\"):\n        time.sleep(1)\n\nexample()\nexample.observations[-1].metadata[\"timing\"][\"custom-block\"]\n# returns something like:\n# {\n#     \"start\": \"2021-01-01 12:00:00\",\n#     \"end\": \"2021-01-01 12:00:01\",\n#     \"duration\": 1.0,\n# }",
+      "names": [
+        {
+          "import_components": [
+            "time"
+          ],
+          "code_str": "time",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "time"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "time_block"
+          ],
+          "code_str": "time_block",
+          "lineno": 2,
+          "end_lineno": 2,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.time_block"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "time_block"
+          ],
+          "code_str": "time_block",
+          "lineno": 6,
+          "end_lineno": 6,
+          "context": "none",
+          "resolved_location": "digital_experiments.time_block"
+        },
+        {
+          "import_components": [
+            "time",
+            "sleep"
+          ],
+          "code_str": "time.sleep",
+          "lineno": 7,
+          "end_lineno": 7,
+          "context": "none",
+          "resolved_location": "time.sleep"
+        }
+      ],
+      "example": {
+        "document": "api/core",
+        "ref_id": "available-functions",
+        "headings": [
+          "Core",
+          "Available functions"
+        ]
+      },
+      "doc_lineno": 11
+    },
+    {
+      "source": "@experiment\ndef example(a, b=2):\n   return a + b\n\nexample(1)  # returns 3\n\nexample.observations()\n# returns [Observation(<id>, {'a': 1, 'b': 2} \u2192 3)]",
+      "names": [],
+      "example": {
+        "document": "api/core",
+        "ref_id": "internal-classes",
+        "headings": [
+          "Core",
+          "Internal classes"
+        ]
+      },
+      "doc_lineno": 10
+    },
+    {
+      "source": "from digital_experiments import experiment, current_dir\n\n@experiment\ndef example():\n   (current_dir() / \"results.txt\").write_text(\"hello world\")\n\nexample()\nid = example.observations()[-1].id\nexample.artefacts(id)\n# returns [Path(\"<some>/<path>/<id>/results.txt\")]",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.current_dir"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.current_dir"
+        }
+      ],
+      "example": {
+        "document": "api/core",
+        "ref_id": "internal-classes",
+        "headings": [
+          "Core",
+          "Internal classes"
+        ]
+      },
+      "doc_lineno": 12
+    },
+    {
+      "source": ">>> @experiment\n... def example(a, b=2):\n...    return a + b\n\n>>> example(1)\n3\n>>> example.to_dataframe()\n   id  config.a  config.b  result\n0   1         1         2       3",
+      "names": [],
+      "example": {
+        "document": "api/core",
+        "ref_id": "internal-classes",
+        "headings": [
+          "Core",
+          "Internal classes"
+        ]
+      },
+      "doc_lineno": 23
+    }
+  ],
+  "control": [
+    {
+      "source": "from math import log\n\nfrom digital_experiments import experiment\nfrom digital_experiments.controllers import GridSearch\n\n\ndef himmelblau(x, y):\n    return (x**2 + y - 11)**2 + (x + y**2 -7)**2\n\n@experiment\ndef objective(x, y):\n    return log(himmelblau(x, y) + 10)\n\n# we want to over x and y in the range -5 to 5\ngrid = GridSearch(x=range(-5, 6), y=range(-5, 6))\n\n# automatically run the experiment\n# we have a total of 11*11=121 experiments\ngrid.control(objective, n=11**2)\nobservations = objective.observations()\nlen(observations)",
+      "names": [
+        {
+          "import_components": [
+            "math"
+          ],
+          "code_str": "math",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_from",
+          "resolved_location": "math"
+        },
+        {
+          "import_components": [
+            "math",
+            "log"
+          ],
+          "code_str": "log",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "math.log"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "GridSearch"
+          ],
+          "code_str": "GridSearch",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.controllers.GridSearch"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 10,
+          "end_lineno": 10,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "math",
+            "log"
+          ],
+          "code_str": "log",
+          "lineno": 12,
+          "end_lineno": 12,
+          "context": "none",
+          "resolved_location": "math.log"
+        },
+        {
+          "import_components": [
+            "range"
+          ],
+          "code_str": "range",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "range"
+        },
+        {
+          "import_components": [
+            "range"
+          ],
+          "code_str": "range",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "range"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "GridSearch"
+          ],
+          "code_str": "GridSearch",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "digital_experiments.controllers.GridSearch"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "controllers",
+            "GridSearch",
+            "()"
+          ],
+          "code_str": "grid",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "digital_experiments.controllers.GridSearch"
+        },
+        {
+          "import_components": [
+            "len"
+          ],
+          "code_str": "len",
+          "lineno": 21,
+          "end_lineno": 21,
+          "context": "none",
+          "resolved_location": "len"
+        }
+      ],
+      "example": {
+        "document": "control",
+        "ref_id": "Controllers",
+        "headings": [
+          "Controllers"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "import matplotlib.pyplot as plt\n\nplt.figure(figsize=(2.5, 2.5))\nplt.scatter(\n    [obs.config[\"x\"] for obs in observations],\n    [obs.config[\"y\"] for obs in observations],\n    c=[obs.result for obs in observations],\n    s=120,\n    cmap=\"plasma\",\n)\n\nplt.gca().set_facecolor(\"none\")\nplt.gcf().patch.set_facecolor(\"none\")\nplt.axis(\"off\");",
+      "names": [],
+      "example": {
+        "document": "control",
+        "ref_id": "Controllers",
+        "headings": [
+          "Controllers"
+        ]
+      },
+      "doc_lineno": null
+    }
+  ],
+  "index": [
+    {
+      "source": "from digital_experiments import (\n      experiment,\n)\n\n@experiment\ndef example(a: int, b: int = 3):\n      # perform your experiment here:\n      #   - train a model\n      #   - run a simulation\n      #   - etc.\n      # and return the result\n      # (any arbitrary object/s)\n      return a ** b\n\nif __name__ == \"__main__\":\n      # run the experiment\n      # like any other function\n      print(example(2))\n      print(example(b=2, a=3))",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 3,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "int"
+          ],
+          "code_str": "int",
+          "lineno": 6,
+          "end_lineno": 6,
+          "context": "none",
+          "resolved_location": "int"
+        },
+        {
+          "import_components": [
+            "int"
+          ],
+          "code_str": "int",
+          "lineno": 6,
+          "end_lineno": 6,
+          "context": "none",
+          "resolved_location": "int"
+        },
+        {
+          "import_components": [
+            "__name__"
+          ],
+          "code_str": "__name__",
+          "lineno": 15,
+          "end_lineno": 15,
+          "context": "none",
+          "resolved_location": "__name__"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 18,
+          "end_lineno": 18,
+          "context": "none",
+          "resolved_location": "print"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 19,
+          "end_lineno": 19,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "index",
+        "ref_id": "quickstart",
+        "headings": [
+          "Quickstart"
+        ]
+      },
+      "doc_lineno": 52
+    },
+    {
+      "source": ">>> from example import example\n\n>>> for o in example.observations():\n...     print(o.config, \"\u2192\", o.result)\n{'a': 2, 'b': 3} \u2192  8\n{'a': 3, 'b': 2} \u2192  9\n\n>>> o.metadata[\"code\"]\n@experiment\ndef example(a, b):\n    return a ** b\n\n>>> o.metadata[\"timing\"]\n{\n  \"start\": \"2024-02-24 10:10:01\",\n  \"end\": \"2024-02-24 10:10:01\",\n  \"duration\": 0.000007\n}\n\n>>> o.metadata[\"environment\"].keys()\n['system', 'pip_freeze', 'git']\n\n>>> example.to_dataframe()\n      id config.a config.b  result\n0  <id1>       2         3       8\n1  <id2>       3         2       9",
+      "names": [
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "index",
+        "ref_id": "quickstart",
+        "headings": [
+          "Quickstart"
+        ]
+      },
+      "doc_lineno": 88
+    }
+  ],
+  "usage": [
+    {
+      "source": "from digital_experiments import experiment\n\n@experiment\ndef square(x):\n    return x * x\n\n[square(i) for i in range(5)]",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "range"
+          ],
+          "code_str": "range",
+          "lineno": 7,
+          "end_lineno": 7,
+          "context": "none",
+          "resolved_location": "range"
+        }
+      ],
+      "example": {
+        "document": "usage",
+        "ref_id": "The-Basics",
+        "headings": [
+          "The Basics"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "square.observations()",
+      "names": [],
+      "example": {
+        "document": "usage",
+        "ref_id": "The-Basics",
+        "headings": [
+          "The Basics"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "square.to_dataframe()",
+      "names": [],
+      "example": {
+        "document": "usage",
+        "ref_id": "The-Basics",
+        "headings": [
+          "The Basics"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "import json\n\n_dict = square.observations()[0]._asdict()\nprint(json.dumps(_dict, indent=4))",
+      "names": [
+        {
+          "import_components": [
+            "json"
+          ],
+          "code_str": "json",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "json"
+        },
+        {
+          "import_components": [
+            "json",
+            "dumps"
+          ],
+          "code_str": "json.dumps",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "json.dumps"
+        },
+        {
+          "import_components": [
+            "print"
+          ],
+          "code_str": "print",
+          "lineno": 4,
+          "end_lineno": 4,
+          "context": "none",
+          "resolved_location": "print"
+        }
+      ],
+      "example": {
+        "document": "usage",
+        "ref_id": "Observations",
+        "headings": [
+          "The Basics",
+          "Observations"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "!ls ./experiments/square",
+      "names": [],
+      "example": {
+        "document": "usage",
+        "ref_id": "Backends",
+        "headings": [
+          "The Basics",
+          "Backends"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "from pathlib import Path\n\n@experiment(backend=\"json\", root=Path(\"some/other/path\"))\ndef cube(x):\n    return x ** 3\n\ncube(4)\n\n!ls ./some/other/path",
+      "names": [
+        {
+          "import_components": [
+            "pathlib"
+          ],
+          "code_str": "pathlib",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_from",
+          "resolved_location": "pathlib"
+        },
+        {
+          "import_components": [
+            "pathlib",
+            "Path"
+          ],
+          "code_str": "Path",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "pathlib.Path"
+        },
+        {
+          "import_components": [
+            "pathlib",
+            "Path"
+          ],
+          "code_str": "Path",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "pathlib.Path"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        }
+      ],
+      "example": {
+        "document": "usage",
+        "ref_id": "Backends",
+        "headings": [
+          "The Basics",
+          "Backends"
+        ]
+      },
+      "doc_lineno": null
+    },
+    {
+      "source": "from digital_experiments import current_dir\n\n@experiment\ndef saving_experiment():\n    (current_dir() / 'test.txt').write_text('hello world')\n\nsaving_experiment()\nid = saving_experiment.observations()[0].id\nsaving_experiment.artefacts(id)",
+      "names": [
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 1,
+          "end_lineno": 1,
+          "context": "import_target",
+          "resolved_location": "digital_experiments.current_dir"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "experiment"
+          ],
+          "code_str": "experiment",
+          "lineno": 3,
+          "end_lineno": 3,
+          "context": "none",
+          "resolved_location": "digital_experiments.experiment"
+        },
+        {
+          "import_components": [
+            "digital_experiments",
+            "current_dir"
+          ],
+          "code_str": "current_dir",
+          "lineno": 5,
+          "end_lineno": 5,
+          "context": "none",
+          "resolved_location": "digital_experiments.current_dir"
+        }
+      ],
+      "example": {
+        "document": "usage",
+        "ref_id": "Artefacts",
+        "headings": [
+          "The Basics",
+          "Artefacts"
+        ]
+      },
+      "doc_lineno": null
+    }
+  ]
+}

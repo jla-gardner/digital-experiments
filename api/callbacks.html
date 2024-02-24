@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+
+<html class="no-js" data-content_root="" lang="en">
+<head><meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="light dark" name="color-scheme"/><meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="Callbacks" property="og:title"/>
+<meta content="website" property="og:type"/>
+<meta content="api/callbacks.html" property="og:url"/>
+<meta content="digital-experiments" property="og:site_name"/>
+<meta content="Callbacks are a way to extend the functionality of an experiment. Enabale them by passing them to the@experiment decorator. Avaliable callbacks: Implementing your own callbacks: The callback lifecy..." property="og:description"/>
+<meta content="Callbacks are a way to extend the functionality of an experiment. Enabale them by passing them to the@experiment decorator. Avaliable callbacks: Implementing your own callbacks: The callback lifecy..." name="description"/>
+<link href="../genindex.html" rel="index" title="Index"/><link href="../search.html" rel="search" title="Search"/><link href="backends.html" rel="next" title="Backends"/><link href="core.html" rel="prev" title="Core"/>
+<!-- Generated with Sphinx 7.1.2 and Furo 2024.01.29 -->
+<title>Callbacks - digital-experiments</title>
+<link href="../_static/pygments.css?v=a746c00c" rel="stylesheet" type="text/css"/>
+<link href="../_static/styles/furo.css?v=135e06be" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx-codeautolink.css?v=125d5c1c" rel="stylesheet" type="text/css"/>
+<link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" rel="stylesheet" type="text/css"/>
+<link href="../_static/styles/furo-extensions.css?v=36a5483c" rel="stylesheet" type="text/css"/>
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-problematic: #3c78d8;
+  --color-brand-primary: #3c78d8;
+  --color-brand-content: #3c78d8;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-problematic: #3c78d8;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  --color-problematic: #3c78d8;
+  
+      }
+    }
+  }
+</style></meta></head>
+<body>
+<script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+<svg style="display: none;" xmlns="http://www.w3.org/2000/svg">
+<symbol id="svg-toc" viewbox="0 0 24 24">
+<title>Contents</title>
+<svg fill="currentColor" stroke="currentColor" stroke-width="0" viewbox="0 0 1024 1024">
+<path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"></path>
+</svg>
+</symbol>
+<symbol id="svg-menu" viewbox="0 0 24 24">
+<title>Menu</title>
+<svg class="feather-menu" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<line x1="3" x2="21" y1="12" y2="12"></line>
+<line x1="3" x2="21" y1="6" y2="6"></line>
+<line x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</symbol>
+<symbol id="svg-arrow-right" viewbox="0 0 24 24">
+<title>Expand</title>
+<svg class="feather-chevron-right" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="9 18 15 12 9 6"></polyline>
+</svg>
+</symbol>
+<symbol id="svg-sun" viewbox="0 0 24 24">
+<title>Light mode</title>
+<svg class="feather-sun" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="12" r="5"></circle>
+<line x1="12" x2="12" y1="1" y2="3"></line>
+<line x1="12" x2="12" y1="21" y2="23"></line>
+<line x1="4.22" x2="5.64" y1="4.22" y2="5.64"></line>
+<line x1="18.36" x2="19.78" y1="18.36" y2="19.78"></line>
+<line x1="1" x2="3" y1="12" y2="12"></line>
+<line x1="21" x2="23" y1="12" y2="12"></line>
+<line x1="4.22" x2="5.64" y1="19.78" y2="18.36"></line>
+<line x1="18.36" x2="19.78" y1="5.64" y2="4.22"></line>
+</svg>
+</symbol>
+<symbol id="svg-moon" viewbox="0 0 24 24">
+<title>Dark mode</title>
+<svg class="icon-tabler-moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>
+</svg>
+</symbol>
+<symbol id="svg-sun-half" viewbox="0 0 24 24">
+<title>Auto light/dark mode</title>
+<svg class="icon-tabler-shadow" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 0h24v24H0z" fill="none" stroke="none"></path>
+<circle cx="12" cy="12" r="9"></circle>
+<path d="M13 12h5"></path>
+<path d="M13 15h4"></path>
+<path d="M13 18h1"></path>
+<path d="M13 9h4"></path>
+<path d="M13 6h1"></path>
+</svg>
+</symbol>
+</svg>
+<input class="sidebar-toggle" id="__navigation" name="__navigation" type="checkbox"/>
+<input class="sidebar-toggle" id="__toc" name="__toc" type="checkbox"/>
+<label class="overlay sidebar-overlay" for="__navigation">
+<div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+<div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+<div class="page">
+<header class="mobile-header">
+<div class="header-left">
+<label class="nav-overlay-icon" for="__navigation">
+<div class="visually-hidden">Toggle site navigation sidebar</div>
+<i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+</label>
+</div>
+<div class="header-center">
+<a href="../index.html"><div class="brand">digital-experiments</div></a>
+</div>
+<div class="header-right">
+<div class="theme-toggle-container theme-toggle-header">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-header-icon" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+</header>
+<aside class="sidebar-drawer">
+<div class="sidebar-container">
+<div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+<div class="sidebar-logo-container">
+<img alt="Logo" class="sidebar-logo" src="../_static/logo-square.svg"/>
+</div>
+</a><form action="../search.html" class="sidebar-search-container" method="get" role="search">
+<input aria-label="Search" class="sidebar-search" name="q" placeholder="Search"/>
+<input name="check_keywords" type="hidden" value="yes"/>
+<input name="area" type="hidden" value="default"/>
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Usage:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">The Basics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../control.html">Controllers</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="core.html">Core</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Callbacks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="backends.html">Backends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controllers.html">Controllers</a></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<div class="main">
+<div class="content">
+<div class="article-container">
+<a class="back-to-top muted-link" href="#">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+</svg>
+<span>Back to top</span>
+</a>
+<div class="content-icon-container">
+<div class="theme-toggle-container theme-toggle-content">
+<button class="theme-toggle">
+<div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+<svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+<svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+<svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+</button>
+</div>
+<label class="toc-overlay-icon toc-content-icon" for="__toc">
+<div class="visually-hidden">Toggle table of contents sidebar</div>
+<i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+</label>
+</div>
+<article role="main">
+<section id="callbacks">
+<h1>Callbacks<a class="headerlink" href="#callbacks" title="Permalink to this heading">#</a></h1>
+<p>Callbacks are a way to extend the functionality of an experiment.
+Enabale them by passing them to the <a class="reference internal" href="core.html#digital_experiments.experiment" title="digital_experiments.experiment"><code class="xref py py-func docutils literal notranslate"><span class="pre">@experiment</span></code></a> decorator.</p>
+<section id="avaliable-callbacks">
+<h2>Avaliable callbacks<a class="headerlink" href="#avaliable-callbacks" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="digital_experiments.callbacks.SaveLogs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">digital_experiments.callbacks.</span></span><span class="sig-name descname"><span class="pre">SaveLogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'logs.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#digital_experiments.callbacks.SaveLogs" title="Permalink to this definition">#</a></dt>
+<dd><p>Responsible for saving logs to file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, </em><em>optional</em>) – The name of the file to save logs to. Defaults to <code class="docutils literal notranslate"><span class="pre">logs.txt</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">digital_experiments</span> <span class="kn">import</span> <a class="sphinx-codeautolink-a" href="../api/core.html#digital_experiments.experiment" title="digital_experiments.experiment"><span class="n">experiment</span></a><span class="p">,</span> <span class="n">SaveLogs</span>
+
+<a class="sphinx-codeautolink-a" href="../api/core.html#digital_experiments.experiment" title="digital_experiments.experiment"><span class="nd">@experiment</span></a><span class="p">(</span><span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">SaveLogs</span><span class="p">(</span><span class="s2">"my-logs"</span><span class="p">)])</span>
+<span class="k">def</span> <span class="nf">example</span><span class="p">():</span>
+    <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="s2">"hello world"</span><span class="p">)</span>
+
+<span class="n">example</span><span class="p">()</span>
+<span class="nb">id</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">observations</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+<span class="n">artefacts</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">artefacts</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+<span class="c1"># returns [Path("&lt;some&gt;/&lt;path&gt;/&lt;id&gt;/my-logs")]</span>
+<span class="n">artefacts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+<span class="c1"># returns 'hello world\n'</span>
+</pre></div>
+</div>
+</dd></dl>
+</section>
+<section id="implementing-your-own-callbacks">
+<h2>Implementing your own callbacks<a class="headerlink" href="#implementing-your-own-callbacks" title="Permalink to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="digital_experiments.callbacks.Callback">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">digital_experiments.callbacks.</span></span><span class="sig-name descname"><span class="pre">Callback</span></span><a class="headerlink" href="#digital_experiments.callbacks.Callback" title="Permalink to this definition">#</a></dt>
+<dd><p>Abstract base class for callbacks</p>
+<p>Subclass this class and override any of the hook methods
+to implement relevant, custom behaviour.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="digital_experiments.callbacks.Callback.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.12)"><span class="pre">Callable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#digital_experiments.callbacks.Callback.setup" title="Permalink to this definition">#</a></dt>
+<dd><p>Called when an experiment is first created.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="digital_experiments.callbacks.Callback.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.12)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#digital_experiments.callbacks.Callback.start" title="Permalink to this definition">#</a></dt>
+<dd><p>Called at the start of each run of an experiment.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="digital_experiments.callbacks.Callback.end">
+<span class="sig-name descname"><span class="pre">end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">observation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="core.html#digital_experiments.core.Observation" title="digital_experiments.core.Observation"><span class="pre">Observation</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#digital_experiments.callbacks.Callback.end" title="Permalink to this definition">#</a></dt>
+<dd><p>Called at the end of each run of an experiment. Callbacks typically
+modify <code class="docutils literal notranslate"><span class="pre">observation.metadata</span></code> to record additional information.</p>
+</dd></dl>
+</dd></dl>
+<section id="the-callback-lifecycle">
+<h3>The callback lifecycle<a class="headerlink" href="#the-callback-lifecycle" title="Permalink to this heading">#</a></h3>
+<p>We can learn about the lifecycle of a callback by implementing a simple callback
+of our own:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/typing.html#module-typing" title="typing"><span class="nn">typing</span></a> <span class="kn">import</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="typing.Callable"><span class="n">Callable</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/typing.html#typing.Any" title="typing.Any"><span class="n">Any</span></a>
+<span class="kn">from</span> <span class="nn">digital_experiments</span> <span class="kn">import</span> <a class="sphinx-codeautolink-a" href="../api/callbacks.html#digital_experiments.callbacks.Callback" title="digital_experiments.core.Callback"><span class="n">Callback</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../api/core.html#digital_experiments.core.Observation" title="digital_experiments.core.Observation"><span class="n">Observation</span></a>
+
+
+<span class="k">class</span> <span class="nc">DummyCallback</span><span class="p">(</span><a class="sphinx-codeautolink-a" href="../api/callbacks.html#digital_experiments.callbacks.Callback" title="digital_experiments.core.Callback"><span class="n">Callback</span></a><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#super" title="super"><span class="nb">super</span></a><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="s2">"I'm being initialized"</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="typing.Callable"><span class="n">Callable</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="s2">"I'm being setup"</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#str" title="str"><span class="nb">str</span></a><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#dict" title="dict"><span class="nb">dict</span></a><span class="p">[</span><a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/stdtypes.html#str" title="str"><span class="nb">str</span></a><span class="p">,</span> <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/typing.html#typing.Any" title="typing.Any"><span class="n">Any</span></a><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Experiment </span><span class="si">{</span><span class="nb">id</span><span class="si">}</span><span class="s2"> is starting"</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <a class="sphinx-codeautolink-a" href="../api/core.html#digital_experiments.core.Observation" title="digital_experiments.core.Observation"><span class="n">observation</span></a><span class="p">:</span> <a class="sphinx-codeautolink-a" href="../api/core.html#digital_experiments.core.Observation" title="digital_experiments.core.Observation"><span class="n">Observation</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="sa">f</span><span class="s2">"Experiment </span><span class="si">{</span><span class="n">observation</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> has ended"</span><span class="p">)</span>
+        <span class="n">observation</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"dummy"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"hello there"</span>
+</pre></div>
+</div>
+<p>Each callback to be used by an experiment is instantiated by the user and passed
+to the <a class="reference internal" href="core.html#digital_experiments.experiment" title="digital_experiments.experiment"><code class="xref py py-func docutils literal notranslate"><span class="pre">@experiment</span></code></a> decorator:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">callback</span> <span class="o">=</span> <span class="n">DummyCallback</span><span class="p">()</span>
+<span class="go">I'm being initialized</span>
+</pre></div>
+</div>
+<p>When an experiment is first imported/defined, the <a class="reference internal" href="#digital_experiments.callbacks.Callback.setup" title="digital_experiments.callbacks.Callback.setup"><code class="xref py py-func docutils literal notranslate"><span class="pre">setup</span></code></a>
+method is called:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@experiment</span><span class="p">(</span><span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="n">callback</span><span class="p">])</span>
+<span class="gp">... </span><span class="k">def</span> <span class="nf">my_experiment</span><span class="p">():</span>
+<span class="gp">... </span>    <a class="sphinx-codeautolink-a" href="https://docs.python.org/3/library/functions.html#print" title="print"><span class="nb">print</span></a><span class="p">(</span><span class="s2">"my_experiment is running"</span><span class="p">)</span>
+<span class="go">I'm being setup</span>
+</pre></div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">__init__</span></code> and <code class="docutils literal notranslate"><span class="pre">setup</span></code> steps typically occur one after the other when the experiment is
+decorated using compact syntax: <code class="code docutils literal notranslate"><span class="pre">@experiment(callbacks=[DummyCallback()])</span></code></p>
+</div>
+<p>Everytime the experiment is subsequently run, the <a class="reference internal" href="#digital_experiments.callbacks.Callback.start" title="digital_experiments.callbacks.Callback.start"><code class="xref py py-func docutils literal notranslate"><span class="pre">start</span></code></a>
+and <a class="reference internal" href="#digital_experiments.callbacks.Callback.end" title="digital_experiments.callbacks.Callback.end"><code class="xref py py-func docutils literal notranslate"><span class="pre">end</span></code></a> methods are called:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">my_experiment</span><span class="p">()</span>
+<span class="go">Experiment 1 is starting</span>
+<span class="go">my_experiment is running</span>
+<span class="go">Experiment 1 has ended</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_experiment</span><span class="p">()</span>
+<span class="go">Experiment 2 is starting</span>
+<span class="go">my_experiment is running</span>
+<span class="go">Experiment 2 has ended</span>
+</pre></div>
+</div>
+<p>We can see that the <a class="reference internal" href="#digital_experiments.callbacks.Callback.end" title="digital_experiments.callbacks.Callback.end"><code class="xref py py-func docutils literal notranslate"><span class="pre">end</span></code></a> method has worked:</p>
+<div class="highlight-pycon notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">my_experiment</span><span class="o">.</span><span class="n">observations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">"dummy"</span><span class="p">]</span>
+<span class="go">hello there</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</article>
+</div>
+<footer>
+<div class="related-pages">
+<a class="next-page" href="backends.html">
+<div class="page-info">
+<div class="context">
+<span>Next</span>
+</div>
+<div class="title">Backends</div>
+</div>
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+</a>
+<a class="prev-page" href="core.html">
+<svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+<div class="page-info">
+<div class="context">
+<span>Previous</span>
+</div>
+<div class="title">Core</div>
+</div>
+</a>
+</div>
+<div class="bottom-of-page">
+<div class="left-details">
+<div class="copyright">
+                Copyright © 2023, John Gardner
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+</div>
+<div class="right-details">
+</div>
+</div>
+</footer>
+</div>
+<aside class="toc-drawer">
+<div class="toc-sticky toc-scroll">
+<div class="toc-title-container">
+<span class="toc-title">
+            On this page
+          </span>
+</div>
+<div class="toc-tree-container">
+<div class="toc-tree">
+<ul>
+<li><a class="reference internal" href="#">Callbacks</a><ul>
+<li><a class="reference internal" href="#avaliable-callbacks">Avaliable callbacks</a><ul>
+<li><a class="reference internal" href="#digital_experiments.callbacks.SaveLogs"><code class="docutils literal notranslate"><span class="pre">SaveLogs</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#implementing-your-own-callbacks">Implementing your own callbacks</a><ul>
+<li><a class="reference internal" href="#digital_experiments.callbacks.Callback"><code class="docutils literal notranslate"><span class="pre">Callback</span></code></a><ul>
+<li><a class="reference internal" href="#digital_experiments.callbacks.Callback.setup"><code class="docutils literal notranslate"><span class="pre">Callback.setup()</span></code></a></li>
+<li><a class="reference internal" href="#digital_experiments.callbacks.Callback.start"><code class="docutils literal notranslate"><span class="pre">Callback.start()</span></code></a></li>
+<li><a class="reference internal" href="#digital_experiments.callbacks.Callback.end"><code class="docutils literal notranslate"><span class="pre">Callback.end()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#the-callback-lifecycle">The callback lifecycle</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js?v=8fbcbc5c"></script>
+<script src="../_static/doctools.js?v=888ff710"></script>
+<script src="../_static/sphinx_highlight.js?v=4825356b"></script>
+<script src="../_static/scripts/furo.js?v=32e29ea5"></script>
+<script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="../_static/copybutton.js?v=35fd3fb5"></script>
+<script src="../_static/design-tabs.js?v=36754332"></script>
+<script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+</body>
+</html>
